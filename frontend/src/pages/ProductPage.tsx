@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 import { AppShell } from '@/components/layout/AppShell';
 import { Badge } from '@/components/ui/Badge';
 import { PageState } from '@/components/ui/PageState';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { useIncrementProductViewMutation, useProductDetailQuery } from '@/hooks/useProducts';
+import { useToggleWishlistMutation } from '@/hooks/useUsers';
+import { useCartStore } from '@/store/cartStore';
 import { formatNLE } from '@/utils/formatNLE';
 
 export function ProductPage() {
@@ -21,6 +24,8 @@ export function ProductPage() {
   }, [slug, incrementViewMutation]);
 
   const product = productQuery.data?.product;
+  const addItem = useCartStore((state) => state.addItem);
+  const wishlistMutation = useToggleWishlistMutation();
 
   return (
     <AppShell>
@@ -69,8 +74,28 @@ export function ProductPage() {
                   </div>
                 </div>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <button type="button" className="nova-button-primary">Add to cart</button>
-                  <button type="button" className="nova-button-secondary">Save to wishlist</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addItem(product);
+                      toast.success(`${product.name} added to cart`);
+                    }}
+                    className="nova-button-primary"
+                  >
+                    Add to cart
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      wishlistMutation.mutate(product.id, {
+                        onSuccess: (result) => toast.success(result.wished ? 'Saved to wishlist' : 'Removed from wishlist'),
+                        onError: () => toast.error('Sign in to use your wishlist'),
+                      });
+                    }}
+                    className="nova-button-secondary"
+                  >
+                    {wishlistMutation.isPending ? 'Saving...' : 'Save to wishlist'}
+                  </button>
                 </div>
               </div>
 
