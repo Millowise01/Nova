@@ -1,0 +1,10 @@
+{
+  "name": "nova-backend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node -e \"console.log('Backend scaffold reserved for the next pass')\"",
+    "build": "node -e \"console.log('Backend scaffold reserved for the next pass')\""
+  }
+}
