@@ -30,9 +30,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           {...props}
         >
           {options.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
+            <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
         </select>
         {error && <p className="text-xs text-error">{error}</p>}
@@ -40,5 +38,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
     );
   },
 );
-
 Select.displayName = "Select";

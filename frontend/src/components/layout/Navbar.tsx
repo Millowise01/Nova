@@ -6,6 +6,7 @@ import { Menu, Moon, Search, ShoppingCart, Sun, User, X } from "lucide-react";
 import { useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { useUiStore } from "@/store/ui-store";
+import { formatSll } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const publicLinks = [
@@ -153,8 +154,6 @@ export function Navbar() {
 function CartDrawer() {
   const { cartDrawerOpen, setCartDrawerOpen } = useUiStore();
   const { items, updateQuantity, removeItem, subtotal } = useCartStore();
-  const { formatSll } = require("@/lib/format") as typeof import("@/lib/format");
-
   return (
     <div className={cn("fixed inset-0 z-[110]", cartDrawerOpen ? "pointer-events-auto" : "pointer-events-none")}>
       <div
