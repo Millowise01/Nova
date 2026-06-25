@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { fetchAdminAnalytics, fetchAdminDashboard, fetchAdminOrders, fetchSellers, fetchUsers } from '@/api/admin';
+import { ecoCertifySeller, fetchAdminAnalytics, fetchAdminDashboard, fetchAdminOrders, fetchSellers, fetchUsers, toggleUserBan, verifySeller } from '@/api/admin';
 
 export function useAdminDashboardQuery() {
   return useQuery({ queryKey: ['admin', 'dashboard'], queryFn: fetchAdminDashboard });
@@ -20,4 +20,40 @@ export function useAdminSellersQuery() {
 
 export function useAdminOrdersQuery() {
   return useQuery({ queryKey: ['admin', 'orders'], queryFn: fetchAdminOrders });
+}
+
+export function useToggleUserBanMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: toggleUserBan,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
+    },
+  });
+}
+
+export function useVerifySellerMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: verifySeller,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'sellers'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
+    },
+  });
+}
+
+export function useEcoCertifySellerMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ecoCertifySeller,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'sellers'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] });
+    },
+  });
 }

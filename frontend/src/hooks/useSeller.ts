@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { fetchSellerAnalytics, fetchSellerDashboard, fetchSellerOrders, fetchSellerProducts, fetchSellerProfile } from '@/api/seller';
+import { fetchSellerAnalytics, fetchSellerDashboard, fetchSellerOrders, fetchSellerProducts, fetchSellerProfile, updateSellerProfile } from '@/api/seller';
 
 export function useSellerProfileQuery() {
   return useQuery({ queryKey: ['seller', 'profile'], queryFn: fetchSellerProfile });
@@ -20,4 +20,16 @@ export function useSellerProductsQuery(page = 1, limit = 12) {
 
 export function useSellerOrdersQuery(status?: string) {
   return useQuery({ queryKey: ['seller', 'orders', status ?? 'all'], queryFn: () => fetchSellerOrders(status) });
+}
+
+export function useUpdateSellerProfileMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateSellerProfile,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['seller', 'profile'] });
+      void queryClient.invalidateQueries({ queryKey: ['seller', 'dashboard'] });
+    },
+  });
 }
