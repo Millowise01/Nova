@@ -1,0 +1,8 @@
+{
+  "/page": "app/page.js",
+  "/(public)/eco-products/page": "app/(public)/eco-products/page.js",
+  "/(seller)/seller/register/page": "app/(seller)/seller/register/page.js",
+  "/(public)/catalog/page": "app/(public)/catalog/page.js",
+  "/(auth)/auth/login/page": "app/(auth)/auth/login/page.js",
+  "/(public)/home/page": "app/(public)/home/page.js"
+}
