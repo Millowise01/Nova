@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+}
+
+.dark {
+  --background: 223 47% 8%;
+  --foreground: 210 40% 98%;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+body {
+  font-family: "Work Sans", system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+}
+
+::selection {
+  background: #0e7a45;
+  color: #ffffff;
+}
+
+.surface-gradient {
+  background: linear-gradient(135deg, #f6fbf7 0%, #e9f8ef 40%, #fffae8 100%);
+}
+
+.dark .surface-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #082718 45%, #2b2304 100%);
+}

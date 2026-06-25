@@ -1,56 +1,25 @@
-export type User = {
+export type UserRole = "guest" | "customer" | "seller" | "admin";
+
+export interface Product {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  role: 'CUSTOMER' | 'SELLER' | 'ADMIN';
-  avatarUrl?: string | null;
-  isVerified: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
+  slug: string;
+  priceSll: number;
+  ecoScore: number;
+  image: string;
+  brand: string;
+  category: string;
+}
 
-export type Address = {
+export interface Order {
   id: string;
-  userId: string;
+  status: "pending" | "processing" | "in_transit" | "delivered";
+  totalSll: number;
+  createdAt: string;
+}
+
+export interface DashboardMetric {
   label: string;
-  line1: string;
-  line2?: string | null;
-  city: string;
-  country: string;
-  phone: string;
-  what3words?: string | null;
-  isDefault?: boolean;
-};
-
-export type OrderItem = {
-  id: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  product?: {
-    id: string;
-    name: string;
-    slug: string;
-    images: Array<{ id: string; url: string; alt?: string | null }>;
-  };
-};
-
-export type Order = {
-  id: string;
-  customerId: string;
-  sellerId: string;
-  status: 'PLACED' | 'CONFIRMED' | 'PACKED' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'CANCELLED';
-  subtotal: number;
-  deliveryFee: number;
-  total: number;
-  paymentMethod: 'ORANGE_MONEY' | 'AFRICELL_MONEY' | 'CARD';
-  paymentStatus: 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
-  paymentRef?: string | null;
-  addressId: string;
-  notes?: string | null;
-  what3words?: string | null;
-  placedAt: string;
-  updatedAt: string;
-  items: OrderItem[];
-};
+  value: string;
+  delta: string;
+}

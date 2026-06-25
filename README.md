@@ -12,4 +12,3 @@ The repo is being scaffolded in two phases so the frontend can move first withou
 ```text
 frontend/   React + Vite + TypeScript app
 backend/    Node.js API scaffold
-```
