@@ -1,0 +1,50 @@
+export const themes = {
+  light: {
+    background: "#ffffff",
+    surface: "#f8fafc",
+    elevated: "#ffffff",
+    text: "#0f172a",
+    mutedText: "#475569",
+    border: "#e2e8f0",
+    primary: "#126b4f",
+    primaryForeground: "#ffffff",
+    secondary: "#e2efe9",
+    secondaryForeground: "#0f172a",
+    success: "#0f8a5f",
+    warning: "#b7791f",
+    danger: "#dc2626",
+    info: "#2563eb"
+  },
+  dark: {
+    background: "#020617",
+    surface: "#0f172a",
+    elevated: "#111827",
+    text: "#f8fafc",
+    mutedText: "#cbd5e1",
+    border: "#334155",
+    primary: "#34d399",
+    primaryForeground: "#020617",
+    secondary: "#1e293b",
+    secondaryForeground: "#f8fafc",
+    success: "#4ade80",
+    warning: "#fbbf24",
+    danger: "#f87171",
+    info: "#60a5fa"
+  },
+  highContrast: {
+    background: "#000000",
+    surface: "#000000",
+    elevated: "#000000",
+    text: "#ffffff",
+    mutedText: "#ffffff",
+    border: "#ffffff",
+    primary: "#ffffff",
+    primaryForeground: "#000000",
+    secondary: "#ffffff",
+    secondaryForeground: "#000000",
+    success: "#ffffff",
+    warning: "#ffffff",
+    danger: "#ffffff",
+    info: "#ffffff"
+  }
+} as const;

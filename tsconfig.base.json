@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "useUnknownInCatchVariables": false,
+    "baseUrl": ".",
+    "paths": {
+      "@nova/analytics": ["packages/analytics/src/index.ts"],
+      "@nova/api-client": ["packages/api-client/src/index.ts"],
+      "@nova/auth": ["packages/auth/src/index.ts"],
+      "@nova/config": ["packages/config/src/index.ts"],
+      "@nova/constants": ["packages/constants/src/index.ts"],
+      "@nova/design-system": ["packages/design-system/src/index.ts"],
+      "@nova/feature-flags": ["packages/feature-flags/src/index.ts"],
+      "@nova/hooks": ["packages/hooks/src/index.ts"],
+      "@nova/i18n": ["packages/i18n/src/index.ts"],
+      "@nova/icons": ["packages/icons/src/index.ts"],
+      "@nova/notifications": ["packages/notifications/src/index.ts"],
+      "@nova/permissions": ["packages/permissions/src/index.ts"],
+      "@nova/storage": ["packages/storage/src/index.ts"],
+      "@nova/types": ["packages/types/src/index.ts"],
+      "@nova/ui": ["packages/ui/src/index.ts"],
+      "@nova/utils": ["packages/utils/src/index.ts"],
+      "@nova/validation": ["packages/validation/src/index.ts"]
+    }
+  }
+}

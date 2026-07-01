@@ -1,0 +1,16 @@
+{
+  "name": "@nova/design-system",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@nova/utils": "workspace:*",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.542.0",
+    "react": "^19.0.0",
+    "tailwind-merge": "^2.5.2"
+  }
+}

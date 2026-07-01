@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true
+  },
+  "include": ["src", ".storybook", "*.ts", "*.tsx"],
+  "references": [
+    { "path": "../design-system" },
+    { "path": "../utils" }
+  ]
+}

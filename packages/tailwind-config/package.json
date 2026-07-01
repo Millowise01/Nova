@@ -1,0 +1,9 @@
+{
+  "name": "@nova/tailwind-config",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./tailwind.config.ts"
+  }
+}

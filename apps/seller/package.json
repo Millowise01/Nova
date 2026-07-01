@@ -1,0 +1,33 @@
+{
+  "name": "@nova/seller",
+  "private": true,
+  "version": "0.0.0",
+  "dependencies": {
+    "@nova/tailwind-config": "workspace:*",
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@nova/ui": "workspace:*",
+    "@nova/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "@types/node": "^22.15.29",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "eslint": "^9.31.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rimraf .next coverage"
+  }
+}

@@ -1,6 +1,12 @@
 node_modules
 dist
 coverage
+.turbo
+.next
+storybook-static
+playwright-report
+test-results
+.storybook-out
 .env
 .env.local
 frontend/node_modules

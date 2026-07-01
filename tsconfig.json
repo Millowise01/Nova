@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": [],
+  "references": [
+    { "path": "packages/tsconfig/tsconfig.json" },
+    { "path": "packages/ui/tsconfig.json" },
+    { "path": "packages/design-system/tsconfig.json" },
+    { "path": "packages/auth/tsconfig.json" },
+    { "path": "packages/api-client/tsconfig.json" },
+    { "path": "packages/validation/tsconfig.json" },
+    { "path": "packages/hooks/tsconfig.json" },
+    { "path": "packages/types/tsconfig.json" },
+    { "path": "packages/utils/tsconfig.json" },
+    { "path": "packages/config/tsconfig.json" },
+    { "path": "packages/constants/tsconfig.json" },
+    { "path": "packages/icons/tsconfig.json" },
+    { "path": "packages/analytics/tsconfig.json" },
+    { "path": "packages/notifications/tsconfig.json" },
+    { "path": "packages/permissions/tsconfig.json" },
+    { "path": "packages/feature-flags/tsconfig.json" },
+    { "path": "packages/storage/tsconfig.json" },
+    { "path": "packages/i18n/tsconfig.json" },
+    { "path": "apps/web/tsconfig.json" },
+    { "path": "apps/seller/tsconfig.json" },
+    { "path": "apps/admin/tsconfig.json" },
+    { "path": "apps/docs/tsconfig.json" }
+  ]
+}

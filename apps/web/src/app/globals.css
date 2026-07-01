@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 0 0% 100%;
+  --fg: 222.2 84% 4.9%;
+  --font-sans: "Inter";
+  --font-mono: "IBM Plex Mono";
+}
+
+body {
+  margin: 0;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
