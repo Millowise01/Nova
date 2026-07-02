@@ -273,18 +273,42 @@ importers:
 
   apps/web:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^3.9.0
+        version: 3.10.0(react-hook-form@7.80.0(react@19.2.7))
+      '@nova/api-client':
+        specifier: workspace:*
+        version: link:../../packages/api-client
+      '@nova/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
+      '@nova/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@nova/constants':
         specifier: workspace:*
         version: link:../../packages/constants
       '@nova/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
+      '@nova/feature-flags':
+        specifier: workspace:*
+        version: link:../../packages/feature-flags
       '@nova/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
+      '@nova/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@nova/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@nova/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
+      '@tanstack/react-query':
+        specifier: ^5.85.0
+        version: 5.101.2(react@19.2.7)
       next:
         specifier: ^15.0.0
         version: 15.5.19(@babel/core@7.29.7)(@playwright/test@1.61.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -294,6 +318,12 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      react-hook-form:
+        specifier: ^7.53.0
+        version: 7.80.0(react@19.2.7)
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@playwright/test':
         specifier: ^1.55.0
@@ -351,7 +381,26 @@ importers:
 
   packages/constants: {}
 
-  packages/design-system: {}
+  packages/design-system:
+    dependencies:
+      '@nova/utils':
+        specifier: workspace:*
+        version: link:../utils
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.542.0
+        version: 0.542.0(react@19.2.7)
+      react:
+        specifier: ^19.0.0
+        version: 19.2.7
+      tailwind-merge:
+        specifier: ^2.5.2
+        version: 2.6.1
 
   packages/eslint-config: {}
 
@@ -385,15 +434,12 @@ importers:
 
   packages/ui:
     dependencies:
+      '@nova/design-system':
+        specifier: workspace:*
+        version: link:../design-system
       '@nova/utils':
         specifier: workspace:*
         version: link:../utils
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       react:
         specifier: ^19.0.0
         version: 19.2.7

@@ -3,9 +3,10 @@ import { cn } from "@nova/utils";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
+  errorId?: string;
 }
 
-export function Input({ className, error, ...props }: InputProps) {
+export function Input({ className, error, errorId, ...props }: InputProps) {
   return (
     <input
       className={cn(
@@ -15,6 +16,7 @@ export function Input({ className, error, ...props }: InputProps) {
         className
       )}
       aria-invalid={error || undefined}
+      aria-describedby={error && errorId ? errorId : undefined}
       {...props}
     />
   );

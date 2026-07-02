@@ -3,13 +3,22 @@
   "private": true,
   "version": "0.0.0",
   "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@nova/api-client": "workspace:*",
+    "@nova/auth": "workspace:*",
+    "@nova/config": "workspace:*",
     "@nova/constants": "workspace:*",
     "@nova/design-system": "workspace:*",
+    "@nova/feature-flags": "workspace:*",
     "@nova/tailwind-config": "workspace:*",
+    "@nova/types": "workspace:*",
     "@nova/ui": "workspace:*",
+    "@nova/validation": "workspace:*",
+    "@tanstack/react-query": "^5.85.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.53.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
@@ -20,7 +29,6 @@
     "eslint": "^9.31.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "storybook": "^8.6.14",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
@@ -31,8 +39,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "storybook": "storybook dev -p 6006",
-    "storybook:build": "storybook build",
-    "clean": "rimraf .next coverage"
+    "clean": "rimraf .next coverage",
+    "test:e2e": "playwright test"
   }
 }

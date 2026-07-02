@@ -1,6 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@nova/utils";
+import { Spinner } from "./spinner";
 
 const buttonVariants = cva(
   [
@@ -55,7 +56,7 @@ export function Button({ className, variant, size, fullWidth, loading, icon, chi
 
   return (
     <button className={cn(buttonVariants({ variant, size, fullWidth, loading }), className)} disabled={isDisabled} {...props}>
-      {loading ? <span aria-hidden="true">•</span> : icon}
+      {loading ? <Spinner className="h-4 w-4" /> : icon}
       <span>{children}</span>
     </button>
   );

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { tokens } from "@nova/design-system";
+import { cn } from "./index";
 
-describe("ui facade", () => {
-  it("re-exports the design-system foundation", () => {
-    expect(tokens.radius.pill).toBe("9999px");
+describe("@nova/ui facade", () => {
+  it("re-exports cn from @nova/utils", () => {
+    expect(cn("a", "b")).toBe("a b");
   });
 });

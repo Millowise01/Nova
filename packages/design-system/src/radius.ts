@@ -1,3 +1,1 @@
-import { tokens } from "./tokens";
-
-export const radius = tokens.radius;
+// radius is exported via tokens — import { tokens } from "@nova/design-system"

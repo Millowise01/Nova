@@ -5,38 +5,31 @@
     "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     },
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ]
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "next-env.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx",
+    "next.config.ts",
+    "tailwind.config.ts",
+    "middleware.ts",
     ".next/types/**/*.ts"
   ],
   "references": [
-    {
-      "path": "../../packages/constants"
-    },
-    {
-      "path": "../../packages/design-system"
-    },
-    {
-      "path": "../../packages/ui"
-    },
-    {
-      "path": "../../packages/utils"
-    }
+    { "path": "../../packages/types" },
+    { "path": "../../packages/utils" },
+    { "path": "../../packages/constants" },
+    { "path": "../../packages/config" },
+    { "path": "../../packages/validation" },
+    { "path": "../../packages/auth" },
+    { "path": "../../packages/api-client" },
+    { "path": "../../packages/feature-flags" },
+    { "path": "../../packages/design-system" },
+    { "path": "../../packages/ui" }
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

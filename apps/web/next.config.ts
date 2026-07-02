@@ -3,9 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  typedRoutes: true,
   transpilePackages: ["@nova/ui", "@nova/design-system", "@nova/utils", "@nova/constants"],
-  experimental: {
-    typedRoutes: true
+  images: {
+    formats: ["image/avif", "image/webp"]
   }
 };
 

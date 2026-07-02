@@ -1,3 +1,1 @@
-import { tokens } from "./tokens";
-
-export const elevation = tokens.elevation;
+// elevation is exported via tokens — import { tokens } from "@nova/design-system"

@@ -1,4 +1,5 @@
 export {
+	Accordion,
 	Alert,
 	Avatar,
 	Badge,
@@ -31,7 +32,7 @@ export {
 	Tabs,
 	Textarea,
 	Toast,
-	Tooltip
+	Tooltip,
 } from "@nova/design-system";
 
 export { cn } from "@nova/utils";

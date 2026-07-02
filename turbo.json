@@ -4,7 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**", "storybook-static/**", "coverage/**"]
+      "outputs": [".next/**", "dist/**", "storybook-static/**"]
     },
     "dev": {
       "cache": false,
@@ -31,7 +31,7 @@
       "outputs": ["playwright-report/**", "test-results/**"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["^build"],
       "outputs": []
     },
     "clean": {

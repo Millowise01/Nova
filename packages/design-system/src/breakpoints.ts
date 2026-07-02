@@ -1,3 +1,1 @@
-import { tokens } from "./tokens";
-
-export const breakpoints = tokens.breakpoints;
+// breakpoints is exported via tokens — import { tokens } from "@nova/design-system"
