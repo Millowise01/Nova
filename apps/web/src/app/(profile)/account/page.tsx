@@ -6,7 +6,10 @@ export default function AccountPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/account", label: "Account" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/account", label: "Account" },
+        ]}
         cards={moduleMap.dashboard}
         subtitle="Customer dashboard modules for orders, rewards, notifications, and account management."
         title="Customer Dashboard"

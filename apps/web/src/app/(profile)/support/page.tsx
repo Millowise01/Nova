@@ -6,7 +6,10 @@ export default function SupportPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/support", label: "Support" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/support", label: "Support" },
+        ]}
         cards={moduleMap.support}
         subtitle="Customer support stack includes FAQs, live chat placeholders, tickets, and dispute management."
         title="Customer Support"

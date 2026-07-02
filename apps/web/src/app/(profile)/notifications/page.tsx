@@ -6,7 +6,10 @@ export default function NotificationsPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/notifications", label: "Notifications" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/notifications", label: "Notifications" },
+        ]}
         cards={moduleMap.notifications}
         subtitle="Notification center supports channel preferences, unread badges, and segmentation."
         title="Notifications"

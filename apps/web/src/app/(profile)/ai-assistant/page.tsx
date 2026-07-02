@@ -6,7 +6,10 @@ export default function AiAssistantPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/ai-assistant", label: "AI Assistant" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/ai-assistant", label: "AI Assistant" },
+        ]}
         cards={moduleMap.ai}
         subtitle="AI interfaces are architected for future endpoint integration without redesigning UX shells."
         title="AI Shopping Assistant"

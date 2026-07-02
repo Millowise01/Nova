@@ -6,7 +6,10 @@ export default function OrdersPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/orders", label: "Orders" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/orders", label: "Orders" },
+        ]}
         cards={moduleMap.orders}
         subtitle="Order lifecycle coverage includes invoice, tracking, cancellation, returns, and reorder actions."
         title="Order Management"

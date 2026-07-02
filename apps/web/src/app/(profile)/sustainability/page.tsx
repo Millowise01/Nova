@@ -6,7 +6,10 @@ export default function SustainabilityPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/sustainability", label: "Sustainability" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/sustainability", label: "Sustainability" },
+        ]}
         cards={moduleMap.sustainability}
         subtitle="Environmental impact modules track savings, rewards, and community contributions."
         title="Sustainability"

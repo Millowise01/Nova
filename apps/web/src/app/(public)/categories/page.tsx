@@ -6,7 +6,10 @@ export default function CategoriesPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/categories", label: "Categories" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/categories", label: "Categories" },
+        ]}
         cards={moduleMap.catalog}
         subtitle="Composable catalog pages with filters, sorting, pagination, and campaign support."
         title="Product Catalog"

@@ -6,7 +6,10 @@ export default function CartPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/cart", label: "Cart" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/cart", label: "Cart" },
+        ]}
         cards={moduleMap.cart}
         subtitle="Cart workflows support guest persistence, coupons, gift cards, and recommendations."
         title="Shopping Cart"

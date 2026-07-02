@@ -6,7 +6,10 @@ export default function SearchPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/search", label: "Search" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/search", label: "Search" },
+        ]}
         cards={moduleMap.search}
         subtitle="Enterprise search with instant suggestions, history, trends, and category-aware discovery."
         title="Search Experience"

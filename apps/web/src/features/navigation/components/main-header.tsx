@@ -5,7 +5,7 @@ const topLinks = [
   { href: "/categories", label: "Categories" },
   { href: "/brands", label: "Brands" },
   { href: "/deals", label: "Deals" },
-  { href: "/seller-store", label: "Seller Store" }
+  { href: "/seller-store", label: "Seller Store" },
 ];
 
 export function MainHeader() {
@@ -21,7 +21,11 @@ export function MainHeader() {
         <Link className="text-xl font-semibold text-[color:var(--ds-text)]" href="/">
           Nova
         </Link>
-        <Input aria-label="Search products" placeholder="Search products, sellers, categories" type="search" />
+        <Input
+          aria-label="Search products"
+          placeholder="Search products, sellers, categories"
+          type="search"
+        />
         <div className="flex items-center gap-2">
           <Button size="sm" variant="ghost">
             Account
@@ -31,7 +35,11 @@ export function MainHeader() {
       </div>
       <nav className="mx-auto hidden w-full max-w-7xl items-center gap-6 px-4 pb-3 text-sm md:flex md:px-6 lg:px-8">
         {topLinks.map((item) => (
-          <Link className="font-medium text-slate-700 hover:text-[color:var(--ds-primary)]" href={item.href} key={item.href}>
+          <Link
+            className="font-medium text-slate-700 hover:text-[color:var(--ds-primary)]"
+            href={item.href}
+            key={item.href}
+          >
             {item.label}
           </Link>
         ))}

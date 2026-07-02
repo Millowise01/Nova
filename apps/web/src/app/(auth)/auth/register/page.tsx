@@ -6,7 +6,10 @@ export default function RegisterPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/auth/register", label: "Register" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/auth/register", label: "Register" },
+        ]}
         cards={moduleMap.auth}
         subtitle="Registration module covers onboarding, verification, activation, and guest fallback paths."
         title="Create Account"

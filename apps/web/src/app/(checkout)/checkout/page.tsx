@@ -6,7 +6,10 @@ export default function CheckoutPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/checkout", label: "Checkout" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/checkout", label: "Checkout" },
+        ]}
         cards={moduleMap.checkout}
         subtitle="Five-step checkout architecture with guest support, saved data, and payment placeholders."
         title="Checkout Flow"

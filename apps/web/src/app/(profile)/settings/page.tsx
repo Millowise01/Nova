@@ -6,7 +6,10 @@ export default function SettingsPage() {
   return (
     <MainLayout>
       <ModuleScreen
-        breadcrumb={[{ href: "/", label: "Home" }, { href: "/settings", label: "Settings" }]}
+        breadcrumb={[
+          { href: "/", label: "Home" },
+          { href: "/settings", label: "Settings" },
+        ]}
         cards={moduleMap.settings}
         subtitle="Settings architecture covers profile, privacy, notifications, localization, and account deletion flows."
         title="Settings"
