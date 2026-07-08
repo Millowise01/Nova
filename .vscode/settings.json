@@ -1,3 +1,4 @@
 {
-    "serverpulse.ai.optInShown": true
+    "serverpulse.ai.optInShown": true,
+    "snyk.advanced.autoSelectOrganization": true
 }

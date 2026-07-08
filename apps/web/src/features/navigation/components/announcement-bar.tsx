@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 
 export function AnnouncementBar() {
@@ -9,4 +11,3 @@ export function AnnouncementBar() {
     </div>
   );
 }
-

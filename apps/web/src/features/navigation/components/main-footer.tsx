@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -10,25 +12,25 @@ export function MainFooter() {
       links: [
         { href: "/categories", label: t("categories") },
         { href: "/deals", label: t("dailyDeals") },
-        { href: "/new-arrivals", label: t("newArrivals") }
-      ]
+        { href: "/new-arrivals", label: t("newArrivals") },
+      ],
     },
     {
       title: t("account"),
       links: [
         { href: "/account", label: t("dashboard") },
         { href: "/orders", label: t("orders") },
-        { href: "/wallet", label: t("wallet") }
-      ]
+        { href: "/wallet", label: t("wallet") },
+      ],
     },
     {
       title: t("support"),
       links: [
         { href: "/support/help-center", label: t("helpCenter") },
         { href: "/support/faqs", label: t("faqs") },
-        { href: "/support/contact", label: t("contact") }
-      ]
-    }
+        { href: "/support/contact", label: t("contact") },
+      ],
+    },
   ];
 
   return (
@@ -61,4 +63,3 @@ export function MainFooter() {
     </footer>
   );
 }
-

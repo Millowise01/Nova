@@ -1,5 +1,12 @@
-import type { PropsWithChildren } from "react";
+import type { HTMLAttributes, PropsWithChildren } from "react";
+import { cn } from "@nova/utils";
 
-export function Sidebar({ children }: PropsWithChildren) {
-  return <aside>{children}</aside>;
+export interface SidebarProps extends HTMLAttributes<HTMLElement> {}
+
+export function Sidebar({ children, className, ...props }: PropsWithChildren<SidebarProps>) {
+  return (
+    <aside className={cn(className)} {...props}>
+      {children}
+    </aside>
+  );
 }

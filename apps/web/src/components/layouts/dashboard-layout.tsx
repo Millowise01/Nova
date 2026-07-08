@@ -1,3 +1,5 @@
+"use client";
+
 import type { PropsWithChildren } from "react";
 import { useTranslations } from "next-intl";
 import { Sidebar } from "@nova/ui";

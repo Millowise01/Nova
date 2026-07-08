@@ -2,6 +2,7 @@
 
 import { QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { QUERY_STALE_TIME } from "@/config/app";
 
 export function useQueryClientInstance() {
   const [client] = useState(
@@ -9,12 +10,12 @@ export function useQueryClientInstance() {
       new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 30_000,
+            staleTime: QUERY_STALE_TIME.short,
             retry: 1,
-            refetchOnWindowFocus: false
-          }
-        }
-      })
+            refetchOnWindowFocus: false,
+          },
+        },
+      }),
   );
 
   return client;

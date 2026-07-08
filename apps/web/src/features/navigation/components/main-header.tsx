@@ -1,9 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button, Input } from "@nova/ui";
 
 export function MainHeader() {
   const t = useTranslations("navigation");
+  const tCommon = useTranslations("common");
 
   const topLinks = [
     { href: "/categories", label: t("categories") },
@@ -22,7 +25,7 @@ export function MainHeader() {
       </a>
       <div className="mx-auto grid w-full max-w-7xl gap-3 px-4 py-3 md:grid-cols-[12rem_minmax(0,1fr)_auto] md:items-center md:px-6 lg:px-8">
         <Link className="text-xl font-semibold text-[color:var(--ds-text)]" href="/">
-          {t("appName") || "Nova"}
+          {tCommon("appName")}
         </Link>
         <Input
           aria-label={t("searchAriaLabel")}
@@ -50,4 +53,3 @@ export function MainHeader() {
     </header>
   );
 }
-

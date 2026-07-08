@@ -3,18 +3,20 @@
 @tailwind utilities;
 
 :root {
-  --bg: 0 0% 100%;
-  --fg: 222.2 84% 4.9%;
   --ds-background: #ffffff;
   --ds-surface: #f8fafc;
+  --ds-elevated: #ffffff;
   --ds-text: #0f172a;
+  --ds-muted-text: #475569;
   --ds-border: #e2e8f0;
   --ds-primary: #126b4f;
   --ds-primary-foreground: #ffffff;
   --ds-secondary: #e2efe9;
   --ds-secondary-foreground: #0f172a;
   --ds-success: #0f8a5f;
+  --ds-warning: #b7791f;
   --ds-danger: #dc2626;
+  --ds-info: #2563eb;
   --ds-focus: #1ca374;
   --font-sans: "Inter";
   --font-mono: "IBM Plex Mono";
@@ -23,14 +25,18 @@
 .dark {
   --ds-background: #020617;
   --ds-surface: #0f172a;
+  --ds-elevated: #111827;
   --ds-text: #f8fafc;
+  --ds-muted-text: #cbd5e1;
   --ds-border: #334155;
   --ds-primary: #34d399;
   --ds-primary-foreground: #020617;
   --ds-secondary: #1e293b;
   --ds-secondary-foreground: #f8fafc;
   --ds-success: #4ade80;
+  --ds-warning: #fbbf24;
   --ds-danger: #f87171;
+  --ds-info: #60a5fa;
   --ds-focus: #86efac;
 }
 
@@ -40,8 +46,8 @@
 
 body {
   margin: 0;
-  background: hsl(var(--bg));
-  color: hsl(var(--fg));
+  background: var(--ds-background);
+  color: var(--ds-text);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 

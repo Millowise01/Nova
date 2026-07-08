@@ -2,34 +2,32 @@ import type { Config } from "tailwindcss";
 
 export const novaTheme = {
   colors: {
-    bg: "hsl(var(--bg))",
-    fg: "hsl(var(--fg))",
     brand: {
-      50: "#eefbf7",
-      100: "#d7f7ec",
-      200: "#afeed9",
-      300: "#7fdfbf",
-      400: "#4fc99d",
-      500: "#22a67a",
-      600: "#18855f",
-      700: "#13674c",
-      800: "#104f3d",
-      900: "#0e4233"
-    }
+      50: "#edfdf7",
+      100: "#d2f8ea",
+      200: "#a8efd5",
+      300: "#75e1ba",
+      400: "#41ca94",
+      500: "#1ca374",
+      600: "#157e5c",
+      700: "#10614a",
+      800: "#0d4d3c",
+      900: "#0b4132",
+    },
   },
   fontFamily: {
     sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
-    mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular"]
-  }
+    mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular"],
+  },
 } satisfies Config["theme"];
 
 const config: Config = {
   darkMode: ["class"],
   content: [],
   theme: {
-    extend: novaTheme
+    extend: novaTheme,
   },
-  plugins: []
+  plugins: [],
 };
 
 export default config;

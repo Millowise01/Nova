@@ -51,7 +51,8 @@ export type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 export type ButtonSize = VariantProps<typeof buttonVariants>["size"];
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   icon?: ReactNode;
 }
 
@@ -66,15 +67,17 @@ export function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const isDisabled = disabled || loading;
+  const isLoading = loading === true;
+  const isDisabled = disabled || isLoading;
 
   return (
     <button
-      className={cn(buttonVariants({ variant, size, fullWidth, loading }), className)}
+      className={cn(buttonVariants({ variant, size, fullWidth, loading: isLoading }), className)}
       disabled={isDisabled}
+      aria-busy={isLoading || undefined}
       {...props}
     >
-      {loading ? <Spinner className="h-4 w-4" /> : icon}
+      {isLoading ? <Spinner className="h-4 w-4" /> : icon}
       <span>{children}</span>
     </button>
   );

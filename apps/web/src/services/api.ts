@@ -1,11 +1,11 @@
+import type { AxiosError } from "axios";
 import { createApiClient } from "@nova/api-client";
 import { getEnvironment } from "@nova/config";
 
 type ApiClient = ReturnType<typeof createApiClient>;
 
 declare global {
-  // eslint-disable-next-line no-var
-  var __novaApiClient: ApiClient | undefined;
+  var __novaApiClient: ApiClient | undefined; // eslint-disable-line no-var
 }
 
 export function getApiClient(): ApiClient {
@@ -13,7 +13,6 @@ export function getApiClient(): ApiClient {
     const env = getEnvironment();
     const client = createApiClient(env.NEXT_PUBLIC_API_BASE_URL);
 
-    // Request Interceptor: Forward authorization cookies/headers during SSR or Server actions
     client.interceptors.request.use(
       async (config) => {
         if (typeof window === "undefined") {
@@ -26,33 +25,30 @@ export function getApiClient(): ApiClient {
               config.headers.Authorization = `Bearer ${session}`;
             }
           } catch {
-            // Safe fallback if invoked outside Next.js request contexts
+            // Safe fallback outside Next.js request context
           }
         }
         return config;
       },
-      (error) => Promise.reject(error)
+      (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
     );
 
-    // Response Interceptor: Normalize all API error responses for Query states
     client.interceptors.response.use(
       (response) => response,
-      (error) => {
-        const normalizedError = {
-          message:
-            error.response?.data?.message ||
-            error.message ||
-            "An unexpected error occurred",
+      (error: AxiosError<{ message?: string; code?: string; details?: unknown }>) => {
+        const normalizedError = new Error(
+          error.response?.data?.message ?? error.message ?? "An unexpected error occurred",
+        );
+        Object.assign(normalizedError, {
           status: error.response?.status,
-          code: error.response?.data?.code || error.code,
-          details: error.response?.data?.details || null
-        };
+          code: error.response?.data?.code ?? error.code,
+          details: error.response?.data?.details ?? null,
+        });
         return Promise.reject(normalizedError);
-      }
+      },
     );
 
     globalThis.__novaApiClient = client;
   }
   return globalThis.__novaApiClient;
 }
-

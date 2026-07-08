@@ -9,14 +9,14 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (session: Session) => void;
-  logout: () => Promise<void>;
+  logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({
   children,
-  initialSession = null
+  initialSession = null,
 }: {
   children: React.ReactNode;
   initialSession: Session | null;
@@ -31,9 +31,7 @@ export function AuthProvider({
     try {
       const parsed = sessionSchema.parse(newSession);
       setSession(parsed);
-      // Save session in cookie for middleware & SSR
       document.cookie = `nova_session=${encodeURIComponent(JSON.stringify(parsed))}; path=/; max-age=86400; SameSite=Lax`;
-      
       startTransition(() => {
         router.refresh();
       });
@@ -44,36 +42,30 @@ export function AuthProvider({
     }
   };
 
-  const logout = async () => {
+  const logout = () => {
     setIsLoading(true);
-    try {
-      setSession(null);
-      // Clear cookie
-      document.cookie = "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-      
-      startTransition(() => {
-        router.refresh();
-        router.push("/");
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    setSession(null);
+    document.cookie = "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+    startTransition(() => {
+      router.refresh();
+      router.push("/");
+    });
+    setIsLoading(false);
   };
 
   useEffect(() => {
     const getCookie = (name: string) => {
       const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-      if (match) return decodeURIComponent(match[2]);
+      if (match) return decodeURIComponent(match[2] ?? "");
       return null;
     };
 
     const rawSession = getCookie("nova_session");
     if (rawSession) {
       try {
-        const parsed = JSON.parse(rawSession);
+        const parsed: unknown = JSON.parse(rawSession);
         setSession(sessionSchema.parse(parsed));
       } catch {
-        // Clear corrupt session
         document.cookie = "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
       }
     }
@@ -86,7 +78,7 @@ export function AuthProvider({
         isAuthenticated: !!session,
         isLoading: isLoading || isPending,
         login,
-        logout
+        logout,
       }}
     >
       {children}

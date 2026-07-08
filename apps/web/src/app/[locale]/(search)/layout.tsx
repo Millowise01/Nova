@@ -1,6 +1,6 @@
 import type { PropsWithChildren } from "react";
-import { SearchLayout } from "@/components/layouts";
+import { MainLayout } from "@/components/layouts";
 
 export default function SearchGroupLayout({ children }: PropsWithChildren) {
-  return <SearchLayout>{children}</SearchLayout>;
+  return <MainLayout>{children}</MainLayout>;
 }

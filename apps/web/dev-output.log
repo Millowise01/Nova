@@ -1,0 +1,12 @@
+
+> @nova/web@0.0.0 dev C:\Nova\apps\web
+> next dev --port 3000
+
+   ▲ Next.js 15.5.19
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.102:3000
+
+ ✓ Starting...
+ ✓ Ready in 8.2s
+
+c:\Nova\apps\web>
