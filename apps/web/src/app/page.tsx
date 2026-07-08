@@ -1,10 +1,5 @@
-import { MainLayout } from "@/components/layouts";
-import { HomeScreen } from "@/features/home/components/home-screen";
+import { redirect } from "next/navigation";
 
-export default function HomePage() {
-  return (
-    <MainLayout>
-      <HomeScreen />
-    </MainLayout>
-  );
-}
+export default function RootPage() {
+  redirect("/en");
+}

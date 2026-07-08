@@ -1,0 +1,45 @@
+{
+  "common": {
+    "appName": "Nova",
+    "loading": "Chargement...",
+    "retry": "Réessayer",
+    "goHome": "Retour à la page d'accueil"
+  },
+  "navigation": {
+    "announcement": "Livraison gratuite le jour même à Freetown pour les commandes supérieures à SLL 2 500.",
+    "searchPlaceholder": "Rechercher des produits, vendeurs, catégories",
+    "searchAriaLabel": "Rechercher des produits",
+    "categories": "Catégories",
+    "brands": "Marques",
+    "deals": "Offres",
+    "sellerStore": "Boutique Vendeur",
+    "account": "Compte",
+    "cart": "Panier",
+    "skipToContent": "Passer au contenu"
+  },
+  "footer": {
+    "tagline": "L'écosystème de commerce numérique de Sierra Leone pour des achats de confiance.",
+    "shop": "Boutique",
+    "account": "Compte",
+    "support": "Support",
+    "dailyDeals": "Offres quotidiennes",
+    "newArrivals": "Nouveautés",
+    "dashboard": "Tableau de bord",
+    "orders": "Commandes",
+    "wallet": "Portefeuille",
+    "helpCenter": "Centre d'aide",
+    "faqs": "FAQ",
+    "contact": "Contact"
+  },
+  "dashboard": {
+    "title": "Tableau de bord client"
+  },
+  "errors": {
+    "somethingWentWrong": "Quelque chose s'est mal passé",
+    "actionFailedRetry": "Nous n'avons pas pu terminer cette action. Veuillez réessayer.",
+    "pageNotFound": "Page non trouvée",
+    "pageNotFoundDesc": "La page que vous recherchez n'existe plus ou a été déplacée.",
+    "forbidden": "Accès interdit",
+    "forbiddenDesc": "Vous n'avez pas les autorisations nécessaires pour afficher cette page ou votre rôle en restreint l'accès."
+  }
+}

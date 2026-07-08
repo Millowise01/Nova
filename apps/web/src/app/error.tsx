@@ -1,17 +1,13 @@
 "use client";
 
-import { Button, ErrorState } from "@nova/ui";
-
-export default function Error({ reset }: { error: Error; reset: () => void }) {
+export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-16 md:px-6">
-      <ErrorState>
-        <h1 className="text-xl font-semibold">Something went wrong</h1>
-        <p className="mt-2 text-sm text-rose-900/80">We could not complete this action. Please retry.</p>
-        <Button className="mt-4" onClick={reset}>
-          Retry
-        </Button>
-      </ErrorState>
-    </main>
+    <div className="p-6 text-center">
+      <h2>Something went wrong!</h2>
+      <button className="mt-4 px-4 py-2 bg-slate-800 text-white rounded" onClick={reset}>
+        Retry
+      </button>
+    </div>
   );
 }
+

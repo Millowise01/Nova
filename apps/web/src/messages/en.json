@@ -1,0 +1,45 @@
+{
+  "common": {
+    "appName": "Nova",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "goHome": "Go to Homepage"
+  },
+  "navigation": {
+    "announcement": "Free same-day Freetown delivery on orders above SLL 2,500.",
+    "searchPlaceholder": "Search products, sellers, categories",
+    "searchAriaLabel": "Search products",
+    "categories": "Categories",
+    "brands": "Brands",
+    "deals": "Deals",
+    "sellerStore": "Seller Store",
+    "account": "Account",
+    "cart": "Cart",
+    "skipToContent": "Skip to content"
+  },
+  "footer": {
+    "tagline": "Sierra Leone's digital commerce ecosystem for trusted shopping.",
+    "shop": "Shop",
+    "account": "Account",
+    "support": "Support",
+    "dailyDeals": "Daily Deals",
+    "newArrivals": "New Arrivals",
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "wallet": "Wallet",
+    "helpCenter": "Help Center",
+    "faqs": "FAQs",
+    "contact": "Contact"
+  },
+  "dashboard": {
+    "title": "Customer Dashboard"
+  },
+  "errors": {
+    "somethingWentWrong": "Something went wrong",
+    "actionFailedRetry": "We could not complete this action. Please retry.",
+    "pageNotFound": "Page not found",
+    "pageNotFoundDesc": "The page you are looking for no longer exists or was moved.",
+    "forbidden": "Access Forbidden",
+    "forbiddenDesc": "You do not have the required permissions to view this page or your role restricts access."
+  }
+}
