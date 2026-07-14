@@ -1,11 +1,21 @@
 {
   "extends": "../tsconfig/base.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "composite": true,
     "noEmit": false,
     "declaration": true,
+    "declarationMap": true,
+    "rootDir": "./src",
     "emitDeclarationOnly": true
+  
   },
-  "include": ["src"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.d.ts",
+    "*.ts",  // <--- Add this! This catches files like empty.ts and test.ts at the package root
+    "exclude", ["node_modules", "dist"]
+  ],
   "references": []
 }
