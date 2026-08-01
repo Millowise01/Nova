@@ -5,55 +5,51 @@ import { Spinner } from "./spinner";
 
 const buttonVariants = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[color:var(--ds-focus)]",
-    "disabled:pointer-events-none disabled:opacity-50",
+    "inline-flex items-center justify-center gap-2 font-semibold transition-colors duration-100",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-border-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--color-background)]",
+    "disabled:pointer-events-none disabled:opacity-50 select-none",
   ],
   {
     variants: {
       variant: {
         primary:
-          "bg-[color:var(--ds-primary)] text-[color:var(--ds-primary-foreground)] hover:opacity-95",
+          "bg-[color:var(--color-primary)] text-[color:var(--color-primary-foreground)] hover:bg-[color:var(--color-primary-hover)] active:bg-[color:var(--color-primary-active)]",
         secondary:
-          "bg-[color:var(--ds-secondary)] text-[color:var(--ds-secondary-foreground)] hover:opacity-95",
+          "bg-[color:var(--color-secondary)] text-[color:var(--color-secondary-foreground)] border border-[color:var(--color-secondary-border)] hover:bg-[color:var(--color-secondary-hover)] active:bg-[color:var(--color-secondary-active)]",
+        accent:
+          "bg-[color:var(--color-accent)] text-[color:var(--color-accent-foreground)] hover:bg-[color:var(--color-accent-hover)] active:bg-[color:var(--color-accent-active)]",
         outline:
-          "border border-[color:var(--ds-border)] bg-transparent text-[color:var(--ds-text)] hover:bg-[color:var(--ds-surface)]",
-        ghost: "bg-transparent text-[color:var(--ds-text)] hover:bg-[color:var(--ds-surface)]",
-        link: "bg-transparent px-0 text-[color:var(--ds-primary)] underline-offset-4 hover:underline",
-        danger: "bg-[color:var(--ds-danger)] text-white hover:opacity-95",
-        success: "bg-[color:var(--ds-success)] text-white hover:opacity-95",
+          "border border-[color:var(--color-border)] bg-transparent text-[color:var(--color-foreground)] hover:bg-[color:var(--color-muted)] active:bg-[color:var(--color-muted)]",
+        ghost:
+          "bg-transparent text-[color:var(--color-foreground)] hover:bg-[color:var(--color-muted)] active:bg-[color:var(--color-muted)]",
+        link: "bg-transparent px-0 text-[color:var(--color-primary)] underline-offset-4 hover:underline h-auto",
+        danger:
+          "bg-[color:var(--color-error)] text-[color:var(--color-error-foreground)] hover:bg-[color:var(--color-error-hover)] active:bg-[color:var(--color-error-active)]",
+        success:
+          "bg-[color:var(--color-success)] text-[color:var(--color-success-foreground)] hover:bg-[color:var(--color-success-hover)] active:bg-[color:var(--color-success-active)]",
       },
       size: {
-        sm: "h-9 px-3 text-sm",
-        md: "h-11 px-4 text-sm",
-        lg: "h-12 px-5 text-base",
-        xl: "h-14 px-6 text-base",
+        xs: "h-7 px-2.5 text-xs rounded-md",
+        sm: "h-9 px-3 text-sm rounded-md",
+        md: "h-10 px-4 text-sm rounded-md",
+        lg: "h-11 px-5 text-base rounded-lg",
+        xl: "h-12 px-6 text-base rounded-lg",
+        icon: "h-10 w-10 rounded-md",
       },
-      fullWidth: {
-        true: "w-full",
-        false: "w-auto",
-      },
-      loading: {
-        true: "cursor-wait",
-        false: "",
-      },
+      fullWidth: { true: "w-full", false: "w-auto" },
     },
-    defaultVariants: {
-      variant: "primary",
-      size: "md",
-      fullWidth: false,
-      loading: false,
-    },
+    defaultVariants: { variant: "primary", size: "md", fullWidth: false },
   },
 );
 
-export type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
-export type ButtonSize = VariantProps<typeof buttonVariants>["size"];
+export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
+export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
 
 export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  extends ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  loading?: boolean;
   icon?: ReactNode;
+  iconPosition?: "left" | "right";
 }
 
 export function Button({
@@ -61,24 +57,32 @@ export function Button({
   variant,
   size,
   fullWidth,
-  loading,
+  loading = false,
   icon,
+  iconPosition = "left",
   children,
   disabled,
   ...props
 }: ButtonProps) {
-  const isLoading = loading === true;
-  const isDisabled = disabled || isLoading;
+  const isDisabled = disabled || loading;
 
   return (
     <button
-      className={cn(buttonVariants({ variant, size, fullWidth, loading: isLoading }), className)}
+      className={cn(buttonVariants({ variant, size, fullWidth }), className)}
       disabled={isDisabled}
-      aria-busy={isLoading || undefined}
+      aria-busy={loading || undefined}
+      aria-disabled={isDisabled || undefined}
       {...props}
     >
-      {isLoading ? <Spinner className="h-4 w-4" /> : icon}
-      <span>{children}</span>
+      {loading && (
+        <Spinner
+          size="sm"
+          tone={variant === "outline" || variant === "ghost" ? "primary" : "white"}
+        />
+      )}
+      {!loading && icon && iconPosition === "left" && <span aria-hidden="true">{icon}</span>}
+      {children && <span>{children}</span>}
+      {!loading && icon && iconPosition === "right" && <span aria-hidden="true">{icon}</span>}
     </button>
   );
 }
