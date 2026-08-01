@@ -6,8 +6,18 @@
     "composite": true,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "declarationMap": true
   },
-  "include": ["src", ".storybook", "*.ts", "*.tsx"],
-  "references": [{ "path": "../design-system" }, { "path": "../utils" }]
+  "include": ["src"],
+  "references": [
+    {
+      "path": "../design-system"
+    },
+    {
+      "path": "../utils"
+    }
+  ],
+  "exclude": ["node_modules", "dist"]
 }

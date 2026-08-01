@@ -4,8 +4,11 @@
     "composite": true,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "declarationMap": true
   },
   "include": ["tailwind.config.ts"],
-  "references": []
+  "references": [],
+  "exclude": ["node_modules", "dist"]
 }

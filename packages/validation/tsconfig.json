@@ -4,8 +4,12 @@
     "composite": true,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declarationMap": true
   },
   "include": ["src"],
-  "references": []
+  "references": [],
+  "exclude": ["node_modules", "dist"]
 }

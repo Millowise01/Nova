@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, ReactNode } from "react";
+import { createContext, useContext, useEffect } from "react";
+import type { ReactNode } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { trackEvent } from "@nova/analytics";
 
@@ -24,13 +25,11 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     track("page_view", {
       path: pathname,
-      search: searchParams?.toString() || ""
+      search: searchParams?.toString() || "",
     });
   }, [pathname, searchParams]);
 
-  return (
-    <AnalyticsContext.Provider value={{ track }}>{children}</AnalyticsContext.Provider>
-  );
+  return <AnalyticsContext.Provider value={{ track }}>{children}</AnalyticsContext.Provider>;
 }
 
 export function useAnalytics() {

@@ -1,17 +1,22 @@
 import { getRequestConfig } from "next-intl/server";
 
+const locales = ["en", "fr", "ar"] as const;
+
+type Locale = (typeof locales)[number];
+
 export default getRequestConfig(async ({ requestLocale }) => {
-  // Retrieve the requested locale, resolving it if it is a Promise
   let locale = await requestLocale;
 
-  // Validate locale or fall back to default
-  const locales = ["en", "fr", "ar"];
-  if (!locale || !locales.includes(locale)) {
+  if (!locale || !locales.includes(locale as Locale)) {
     locale = "en";
   }
 
+  const messagesModule = (await import(`../messages/${locale}.json`)) as {
+    default: Record<string, string>;
+  };
+
   return {
     locale,
-    messages: (await import(`../messages/${locale}.json`)).default
+    messages: messagesModule.default,
   };
 });

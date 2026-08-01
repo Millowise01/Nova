@@ -1,4 +1,5 @@
 import type { Viewport } from "next";
+import { sessionSchema, type Session } from "@nova/auth";
 import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
@@ -43,12 +44,13 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const rawSession = cookieStore.get(COOKIE_KEYS.session)?.value;
   const rawTheme = cookieStore.get(COOKIE_KEYS.theme)?.value as Theme | undefined;
 
-  let initialSession = null;
+  let initialSession: Session | null = null;
+
   if (rawSession) {
     try {
-      initialSession = JSON.parse(decodeURIComponent(rawSession));
+      initialSession = sessionSchema.parse(JSON.parse(decodeURIComponent(rawSession)));
     } catch {
-      // Ignore corrupt session cookie
+      initialSession = null;
     }
   }
 
@@ -62,7 +64,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       suppressHydrationWarning
     >
       <body
-        className={`${inter.variable} ${mono.variable} font-sans antialiased bg-[color:var(--ds-background)] text-[color:var(--ds-text)] min-h-screen`}
+        className={`${inter.variable} ${mono.variable} min-h-screen bg-[color:var(--ds-background)] font-sans text-[color:var(--ds-text)] antialiased`}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
           <AppProviders initialSession={initialSession} initialTheme={rawTheme}>

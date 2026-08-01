@@ -9,12 +9,11 @@ export default [
   // 2. Global Ignores (This will stop ESLint from parsing your loose files)
   {
     ignores: [
-      "**/.next/**", 
-      "**/coverage/**", 
-      "**/dist/**", 
+      "**/.next/**",
+      "**/coverage/**",
+      "**/dist/**",
       "**/storybook-static/**",
-      "**/empty.ts",
-      "**/test.ts"
+      "**/next-env.d.ts",
     ],
   },
 
@@ -30,7 +29,7 @@ export default [
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: true, // Relaxes parser on untracked files
+          allowDefaultProject: ["*.config.ts", "*.config.mts", "*.config.cts", ".storybook/*.ts"],
         },
         tsconfigRootDir: import.meta.dirname,
       },

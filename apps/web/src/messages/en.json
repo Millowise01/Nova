@@ -20,6 +20,7 @@
   "footer": {
     "tagline": "Sierra Leone's digital commerce ecosystem for trusted shopping.",
     "shop": "Shop",
+    "categories": "Categories",
     "account": "Account",
     "support": "Support",
     "dailyDeals": "Daily Deals",
@@ -40,6 +41,7 @@
     "pageNotFound": "Page not found",
     "pageNotFoundDesc": "The page you are looking for no longer exists or was moved.",
     "forbidden": "Access Forbidden",
-    "forbiddenDesc": "You do not have the required permissions to view this page or your role restricts access."
+    "forbiddenDesc": "You do not have the required permissions to view this page or your role restricts access.",
+    "goHome": "Go to Homepage"
   }
 }

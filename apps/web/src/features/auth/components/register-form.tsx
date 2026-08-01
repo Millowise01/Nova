@@ -16,27 +16,54 @@ export function RegisterForm() {
       email: "",
       phone: "",
       password: "",
-      confirmPassword: ""
-    }
+      confirmPassword: "",
+    },
   });
 
+  const onSubmit = (data: RegisterFormValues) => {
+    // TODO: Implement registration
+    console.log(data);
+  };
+
   return (
-    <AuthFormShell subtitle="Create your Nova customer account to access wallet, rewards, and order tracking." title="Create your account">
-      <form className="space-y-3" onSubmit={form.handleSubmit(() => undefined)}>
+    <AuthFormShell
+      subtitle="Create your Nova customer account to access wallet, rewards, and order tracking."
+      title="Create your account"
+    >
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          void form.handleSubmit(onSubmit)(event);
+        }}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <Input placeholder="First name" {...form.register("firstName")} />
+
           <Input placeholder="Last name" {...form.register("lastName")} />
         </div>
+
         <Input placeholder="you@example.com" type="email" {...form.register("email")} />
+
         <Input placeholder="+232" {...form.register("phone")} />
+
         <Input placeholder="Password" type="password" {...form.register("password")} />
-        <Input placeholder="Confirm password" type="password" {...form.register("confirmPassword")} />
+
+        <Input
+          placeholder="Confirm password"
+          type="password"
+          {...form.register("confirmPassword")}
+        />
+
         <Button className="w-full" type="submit">
           Register
         </Button>
       </form>
+
       <p className="text-sm text-slate-600">
-        Already have an account? <Link className="font-semibold text-[color:var(--ds-primary)]" href="/auth/login">Login</Link>
+        Already have an account?{" "}
+        <Link className="font-semibold text-[color:var(--ds-primary)]" href="/auth/login">
+          Login
+        </Link>
       </p>
     </AuthFormShell>
   );

@@ -9,14 +9,33 @@ import { AuthFormShell } from "./auth-form-shell";
 export function ResetPasswordForm() {
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
-    defaultValues: { password: "", confirmPassword: "" }
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
   });
+
+  const onSubmit = (data: ResetPasswordFormValues) => {
+    // TODO: Implement password reset
+    console.log(data);
+  };
 
   return (
     <AuthFormShell subtitle="Set a strong password to secure your account." title="Reset password">
-      <form className="space-y-3" onSubmit={form.handleSubmit(() => undefined)}>
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          void form.handleSubmit(onSubmit)(event);
+        }}
+      >
         <Input placeholder="New password" type="password" {...form.register("password")} />
-        <Input placeholder="Confirm password" type="password" {...form.register("confirmPassword")} />
+
+        <Input
+          placeholder="Confirm password"
+          type="password"
+          {...form.register("confirmPassword")}
+        />
+
         <Button className="w-full" type="submit">
           Update password
         </Button>
