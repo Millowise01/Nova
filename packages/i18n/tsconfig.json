@@ -4,10 +4,16 @@
     "composite": true,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declarationMap": true
   },
   "include": ["src"],
   "references": [
-    { "path": "../constants" }
-  ]
+    {
+      "path": "../constants"
+    }
+  ],
+  "exclude": ["node_modules", "dist"]
 }

@@ -46,7 +46,7 @@ packages/
 
 ## Notes
 
-The legacy `frontend/` and `backend/` folders are left in place for reference, but the new workspace lives at the root and is the source of truth going forward.
+The legacy `backend/` folder is left in place as a placeholder for the API server work that follows the storefront pass. The new workspace lives at the root and is the source of truth going forward.
 
 ## Next Phase: Public Storefront
 

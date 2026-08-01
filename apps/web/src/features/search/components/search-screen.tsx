@@ -10,17 +10,20 @@ const searchModules = [
   { title: "Recent Searches", description: "Personalized search memory for quick repeat queries." },
   { title: "Trending Searches", description: "Trending intent signals and campaign phrases." },
   { title: "Voice Search", description: "Voice entry placeholder with future API integration." },
-  { title: "Search History", description: "Search timeline and quick restore actions." }
+  { title: "Search History", description: "Search timeline and quick restore actions." },
 ];
 
 export function SearchScreen() {
   const query = useQuery({
     queryKey: ["search", "trending"],
-    queryFn: async () => ["smartphone", "air fryer", "solar lamp", "running shoes"]
+    queryFn: () => ["smartphone", "air fryer", "solar lamp", "running shoes"],
   });
 
   return (
-    <ModuleShell subtitle="Enterprise search architecture with extensible AI-ready touchpoints." title="Search Experience">
+    <ModuleShell
+      subtitle="Enterprise search architecture with extensible AI-ready touchpoints."
+      title="Search Experience"
+    >
       <Input placeholder="Search products, sellers, categories" type="search" />
       {query.isLoading ? (
         <div className="flex items-center gap-2 text-sm text-slate-600">

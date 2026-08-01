@@ -9,7 +9,6 @@ test-results
 .storybook-out
 .env
 .env.local
-frontend/node_modules
-frontend/dist
 backend/node_modules
 backend/dist
+*.tsbuildinfo

@@ -5,7 +5,7 @@ import { getEnvironment } from "@nova/config";
 type ApiClient = ReturnType<typeof createApiClient>;
 
 declare global {
-  var __novaApiClient: ApiClient | undefined; // eslint-disable-line no-var
+  var __novaApiClient: ApiClient | undefined;
 }
 
 export function getApiClient(): ApiClient {

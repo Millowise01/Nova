@@ -9,13 +9,26 @@ import { AuthFormShell } from "./auth-form-shell";
 export function ForgotPasswordForm() {
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
-    defaultValues: { email: "" }
+    defaultValues: { email: "" },
   });
 
+  const onSubmit = (_data: ForgotPasswordFormValues) => {
+    // TODO: implement forgot password
+  };
+
   return (
-    <AuthFormShell subtitle="We'll send you a reset link and OTP code." title="Recover your password">
-      <form className="space-y-3" onSubmit={form.handleSubmit(() => undefined)}>
+    <AuthFormShell
+      subtitle="We'll send you a reset link and OTP code."
+      title="Recover your password"
+    >
+      <form
+        className="space-y-3"
+        onSubmit={(event) => {
+          void form.handleSubmit(onSubmit)(event);
+        }}
+      >
         <Input placeholder="you@example.com" type="email" {...form.register("email")} />
+
         <Button className="w-full" type="submit">
           Send reset link
         </Button>
