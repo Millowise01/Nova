@@ -1,4 +1,5 @@
 export const fontFamilies = {
-  sans: ["Inter", "system-ui", "sans-serif"],
-  mono: ["IBM Plex Mono", "ui-monospace", "monospace"]
+  sans:    ["Inter", "system-ui", "sans-serif"],
+  display: ["Cal Sans", "Inter", "system-ui", "sans-serif"],
+  mono:    ["IBM Plex Mono", "ui-monospace", "monospace"],
 } as const;

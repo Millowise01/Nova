@@ -1,28 +1,12 @@
-@layer utilities {
-  .animate-fade-in {
-    animation: fadeIn 180ms cubic-bezier(0.2, 0, 0, 1) both;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-
-  .animate-slide-down {
-    animation: slideDown 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/*
+ * Animation utilities are now defined in @nova/design-system/css/tokens.css
+ * and wired as Tailwind classes via @nova/tailwind-config:
+ *
+ *   animate-fade-in
+ *   animate-slide-up
+ *   animate-slide-down
+ *   animate-scale-in
+ *   animate-nova-spin
+ *
+ * This file is intentionally empty — kept to avoid breaking any existing imports.
+ */
