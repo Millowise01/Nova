@@ -9,12 +9,15 @@ const settingsModules = [
   { title: "Security", description: "Password, MFA, and session controls." },
   { title: "Notification Preferences", description: "Message channel preference routing." },
   { title: "Connected Devices", description: "Active device session management." },
-  { title: "Delete Account", description: "Account deletion and data portability flow." }
+  { title: "Delete Account", description: "Account deletion and data portability flow." },
 ];
 
 export function SettingsScreen() {
   return (
-    <ModuleShell subtitle="Customer account settings and privacy/security control center." title="Settings">
+    <ModuleShell
+      subtitle="Customer account settings and privacy/security control center."
+      title="Settings"
+    >
       <FeatureGrid items={settingsModules} />
     </ModuleShell>
   );

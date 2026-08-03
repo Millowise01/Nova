@@ -1,6 +1,8 @@
-import type { HTMLAttributes, PropsWithChildren } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes, PropsWithChildren } from "react";
+
 import { cn } from "@nova/utils";
+
 import { Skeleton } from "./skeleton";
 
 const cardVariants = cva(

@@ -1,4 +1,5 @@
 import { forwardRef, type InputHTMLAttributes, useId } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"> {

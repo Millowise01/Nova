@@ -1,7 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
+
 import { sessionSchema } from "@nova/auth";
+
 import { LOCALES, DEFAULT_LOCALE, COOKIE_KEYS, RTL_LOCALES } from "@/config/app";
 import { PROTECTED_ROUTES, ROUTES } from "@/config/routes";
 

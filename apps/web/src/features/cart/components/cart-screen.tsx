@@ -6,12 +6,15 @@ const cartModules = [
   { title: "Saved for Later", description: "Deferred purchase queue with quick restore." },
   { title: "Coupons & Gift Cards", description: "Promotion and voucher application framework." },
   { title: "Shipping Estimates", description: "Live shipping quote placeholders and thresholds." },
-  { title: "Recommended Products", description: "Cross-sell suggestions based on cart context." }
+  { title: "Recommended Products", description: "Cross-sell suggestions based on cart context." },
 ];
 
 export function CartScreen() {
   return (
-    <ModuleShell subtitle="Cart architecture built for conversion and retention." title="Shopping Cart">
+    <ModuleShell
+      subtitle="Cart architecture built for conversion and retention."
+      title="Shopping Cart"
+    >
       <FeatureGrid items={cartModules} />
     </ModuleShell>
   );

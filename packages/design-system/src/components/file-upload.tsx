@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState, type InputHTMLAttributes } from "react";
-import { cn } from "@nova/utils";
 import { Upload, X, File } from "lucide-react";
+import { useRef, useState, type InputHTMLAttributes } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface FileUploadProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: string;

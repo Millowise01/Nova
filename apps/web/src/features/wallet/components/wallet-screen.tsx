@@ -8,12 +8,15 @@ const walletModules = [
   { title: "Rewards", description: "Loyalty reward pool and conversion options." },
   { title: "Cashback", description: "Earned and pending cashback visibility." },
   { title: "Coupons", description: "Stored coupon inventory." },
-  { title: "History", description: "Extended wallet timeline and exports." }
+  { title: "History", description: "Extended wallet timeline and exports." },
 ];
 
 export function WalletScreen() {
   return (
-    <ModuleShell subtitle="Wallet capabilities powering Nova payments and incentives." title="Nova Wallet">
+    <ModuleShell
+      subtitle="Wallet capabilities powering Nova payments and incentives."
+      title="Nova Wallet"
+    >
       <FeatureGrid items={walletModules} />
     </ModuleShell>
   );

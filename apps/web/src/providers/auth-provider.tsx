@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { createContext, useContext, useEffect, useState, useTransition } from "react";
+
 import { type Session, sessionSchema } from "@nova/auth";
 
 type AuthContextType = {
@@ -66,7 +67,8 @@ export function AuthProvider({
         const parsed: unknown = JSON.parse(rawSession);
         setSession(sessionSchema.parse(parsed));
       } catch {
-        document.cookie = "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
+        document.cookie =
+          "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
       }
     }
   }, []);

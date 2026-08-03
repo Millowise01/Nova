@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import {
   useState,
   useRef,
@@ -11,8 +12,8 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
+
 import { cn } from "@nova/utils";
-import { Check } from "lucide-react";
 
 interface DropdownContextValue {
   open: boolean;

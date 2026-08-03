@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { DataTable } from "./DataTable";
+
 import { Badge } from "@nova/design-system";
+
+import { DataTable } from "./DataTable";
 
 const meta = {
   title: "Dashboard/DataTable",
@@ -17,6 +19,7 @@ interface Order {
   status: string;
   amount: number;
   date: string;
+  [key: string]: unknown;
 }
 
 const data: Order[] = Array.from({ length: 20 }, (_, i) => ({
@@ -35,6 +38,7 @@ const statusTone: Record<string, "success" | "warning" | "neutral" | "error"> = 
 };
 
 export const Default: Story = {
+  args: { columns: [], data: [], keyField: "id" },
   render: () => (
     <DataTable<Order>
       keyField="id"
@@ -65,6 +69,7 @@ export const Default: Story = {
 };
 
 export const WithSearchAndPagination: Story = {
+  args: { columns: [], data: [], keyField: "id" },
   render: () => (
     <DataTable<Order>
       keyField="id"
@@ -98,6 +103,7 @@ export const WithSearchAndPagination: Story = {
 };
 
 export const Loading: Story = {
+  args: { columns: [], data: [], keyField: "id" },
   render: () => (
     <DataTable<Order>
       keyField="id"

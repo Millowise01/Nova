@@ -1,9 +1,10 @@
 import { z } from "zod";
+
 import { emailSchema, phoneSchema } from "@nova/validation";
 
 export const loginSchema = z.object({
   email: emailSchema,
-  password: z.string().min(8, "Password must be at least 8 characters")
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export const registerSchema = z
@@ -13,29 +14,29 @@ export const registerSchema = z
     email: emailSchema,
     phone: phoneSchema,
     password: z.string().min(8),
-    confirmPassword: z.string().min(8)
+    confirmPassword: z.string().min(8),
   })
   .refine((value) => value.password === value.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"]
+    path: ["confirmPassword"],
   });
 
 export const otpSchema = z.object({
-  code: z.string().length(6)
+  code: z.string().length(6),
 });
 
 export const forgotPasswordSchema = z.object({
-  email: emailSchema
+  email: emailSchema,
 });
 
 export const resetPasswordSchema = z
   .object({
     password: z.string().min(8),
-    confirmPassword: z.string().min(8)
+    confirmPassword: z.string().min(8),
   })
   .refine((value) => value.password === value.confirmPassword, {
     message: "Passwords do not match",
-    path: ["confirmPassword"]
+    path: ["confirmPassword"],
   });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;

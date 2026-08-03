@@ -2,8 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+
 import { Button, Input } from "@nova/ui";
+
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from "../auth.schemas";
+
 import { AuthFormShell } from "./auth-form-shell";
 
 export function ForgotPasswordForm() {

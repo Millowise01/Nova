@@ -1,3 +1,3 @@
 # Types Package
 
-Shared domain and utility types.
+The platform's core shared-types package — the single source of truth for cross-cutting types that every app and package builds against, so nothing gets redefined per-surface. Public API: `Brand<K, T>` (nominal-typing helper) and its `ID`/`ISODateString` instances; `CurrencyCode` (currencies supported at launch); and `Money` (`{ amount: string; currency: CurrencyCode }`) — the canonical money representation used everywhere a monetary value appears, deliberately a decimal string rather than a number/float so precision is never lost in serialization or arithmetic. Consumers should extend or compose these types rather than redeclaring equivalents locally.

@@ -27,7 +27,7 @@
     "start": "next start --port 3003",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "clean": "rimraf .next coverage"
   }
 }

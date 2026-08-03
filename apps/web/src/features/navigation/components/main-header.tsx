@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+
 import { Button, Input } from "@nova/ui";
 
 export function MainHeader() {

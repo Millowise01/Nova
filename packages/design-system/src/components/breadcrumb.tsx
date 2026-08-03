@@ -1,5 +1,5 @@
-import type { HTMLAttributes, ReactNode } from "react";
 import { ChevronRight, Home } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 export interface BreadcrumbItem {
   label: string;

@@ -1,5 +1,6 @@
-import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 const badgeVariants = cva("inline-flex items-center gap-1 font-semibold leading-none", {

@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { Card, Spinner } from "@nova/ui";
+
 import type { Product } from "@/types/domain";
 
 function getAiRecommendations(products: Product[]) {
@@ -11,14 +13,16 @@ function getAiRecommendations(products: Product[]) {
 export function RecommendationsSection({ products }: { products: Product[] }) {
   const query = useQuery({
     queryKey: ["home", "ai-recommendations"],
-    queryFn: () => getAiRecommendations(products)
+    queryFn: () => getAiRecommendations(products),
   });
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-4 px-4 md:px-6 lg:px-8">
       <div>
         <h2 className="text-2xl font-semibold">AI Recommendations</h2>
-        <p className="text-sm text-slate-600">Personalized product suggestions based on your browsing profile.</p>
+        <p className="text-sm text-slate-600">
+          Personalized product suggestions based on your browsing profile.
+        </p>
       </div>
       {query.isLoading ? (
         <div className="flex items-center gap-3 text-sm text-slate-600">

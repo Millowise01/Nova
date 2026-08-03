@@ -2,7 +2,9 @@
   "name": "@nova/tsconfig",
   "private": true,
   "version": "0.0.0",
-  "files": ["*.json"],
+  "files": [
+    "*.json"
+  ],
   "exports": {
     "./base": "./base.json",
     "./nextjs": "./nextjs.json",

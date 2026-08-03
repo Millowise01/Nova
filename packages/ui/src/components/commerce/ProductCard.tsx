@@ -1,6 +1,8 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@nova/utils";
+
 import { Badge } from "@nova/design-system";
+import { cn } from "@nova/utils";
+
 import { PriceDisplay } from "./PriceDisplay";
 import { RatingStars } from "./RatingStars";
 

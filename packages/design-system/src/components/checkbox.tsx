@@ -1,6 +1,7 @@
-import { forwardRef, type InputHTMLAttributes, useId } from "react";
-import { cn } from "@nova/utils";
 import { Check, Minus } from "lucide-react";
+import { forwardRef, type InputHTMLAttributes, useId } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: string;

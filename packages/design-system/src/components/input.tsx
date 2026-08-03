@@ -1,7 +1,8 @@
 import { forwardRef, type InputHTMLAttributes, type ReactNode, useId } from "react";
+
 import { cn } from "@nova/utils";
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "prefix"> {
   label?: string;
   helperText?: string;
   error?: string;

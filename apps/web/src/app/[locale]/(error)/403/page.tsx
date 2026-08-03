@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+
 import { Button, EmptyState } from "@nova/ui";
 
 export default function ForbiddenPage() {
@@ -7,11 +8,9 @@ export default function ForbiddenPage() {
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-16 md:px-6">
-      <EmptyState>
-        <h1 className="text-xl font-semibold">{t("forbidden")}</h1>
-        <p className="mt-2 text-sm text-[color:var(--ds-muted-text)]">{t("forbiddenDesc")}</p>
+      <EmptyState title={t("forbidden")} description={t("forbiddenDesc")}>
         <Link href="/">
-          <Button className="mt-4">{t("goHome")}</Button>
+          <Button>{t("goHome")}</Button>
         </Link>
       </EmptyState>
     </main>

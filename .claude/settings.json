@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm exec *)",
+      "Bash(git checkout *)",
+      "Bash(git stash *)",
+      "Bash(grep -rl *)",
+      "Bash(git stash show stash@{0} --stat --name-only 2>&1 | sort > /tmp/stash_files.txt *)",
+      "Bash(timeout 25 pnpm --filter @nova/web dev)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(netstat -ano)",
+      "Bash(rm -rf .turbo packages/*/.turbo apps/*/.turbo 2>&1 *)",
+      "Bash(rm -f web-build-debug.log)",
+      "Bash(rm -f tsconfig.tsbuildinfo)",
+      "Bash(npx tsc *)",
+      "Bash(pwd *)",
+      "Bash(sed -i '$ d' /c/Nova/apps/web/src/types/domain.ts)",
+      "Bash(rm -f /c/Nova/web-build-debug.log)",
+      "Bash(git status --porcelain=v1 | grep -v \"^ M\\\\|^D \\\\|^?? \" | head -5 *)",
+      "Bash(rm -f web-build-debug.log dev-test.log lint-full*.log *)",
+      "Bash(git add *)",
+      "Bash(npx lint-staged *)",
+      "Bash(git add . *)"
+    ],
+    "additionalDirectories": [
+      "\\tmp",
+      "C:\\Nova\\packages\\*",
+      "C:\\Nova\\apps\\web\\src\\types",
+      "c:\\Nova"
+    ]
+  }
+}

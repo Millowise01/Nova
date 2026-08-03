@@ -1,6 +1,7 @@
 import type { HTMLAttributes } from "react";
-import { cn } from "@nova/utils";
+
 import { Badge } from "@nova/design-system";
+import { cn } from "@nova/utils";
 
 export interface MetricBadgeProps extends HTMLAttributes<HTMLSpanElement> {
   value: number | string;

@@ -1,6 +1,7 @@
 import type { PropsWithChildren } from "react";
-import { DashboardLayout } from "@/components/layouts";
+
 import { AuthGuard } from "@/components/auth-guard";
+import { DashboardLayout } from "@/components/layouts";
 
 export default function DashboardGroupLayout({ children }: PropsWithChildren) {
   return (

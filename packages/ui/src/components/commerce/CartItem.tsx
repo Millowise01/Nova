@@ -1,6 +1,8 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@nova/utils";
 import { X } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
+
+import { cn } from "@nova/utils";
+
 import { PriceDisplay } from "./PriceDisplay";
 import { QuantityInput } from "./QuantityInput";
 

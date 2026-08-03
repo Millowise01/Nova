@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { StatCard } from "./StatCard";
 import { ShoppingCart, Users, DollarSign, TrendingUp } from "lucide-react";
+
+import { StatCard } from "./StatCard";
 
 const meta = {
   title: "Dashboard/StatCard",
@@ -26,6 +27,7 @@ export const Loading: Story = {
 };
 
 export const Grid: Story = {
+  args: { title: "Stat", value: 0 },
   render: () => (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <StatCard

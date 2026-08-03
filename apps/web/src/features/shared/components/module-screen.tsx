@@ -1,14 +1,15 @@
 import type { ReactNode } from "react";
-import type { ModuleCard } from "@/types/domain";
-import { FeatureGrid, ModuleShell } from "@/features/shared/components";
+
 import { BreadcrumbNav } from "@/features/navigation/components";
+import { FeatureGrid, ModuleShell } from "@/features/shared/components";
+import type { ModuleCard } from "@/types/domain";
 
 export function ModuleScreen({
   title,
   subtitle,
   cards,
   breadcrumb,
-  actions
+  actions,
 }: {
   title: string;
   subtitle: string;

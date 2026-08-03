@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 export function VisuallyHidden({ children, className, ...props }: HTMLAttributes<HTMLSpanElement>) {

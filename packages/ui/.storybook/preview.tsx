@@ -22,7 +22,7 @@ const preview: Preview = {
   },
   decorators: [
     (Story, context) => {
-      const theme = context.globals["theme"] ?? "light";
+      const theme = (context.globals["theme"] as string | undefined) ?? "light";
       document.documentElement.className = theme === "light" ? "" : theme;
       return <Story />;
     },

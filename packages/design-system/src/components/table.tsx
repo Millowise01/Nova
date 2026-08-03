@@ -1,4 +1,5 @@
 import type { HTMLAttributes, TdHTMLAttributes, ThHTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {

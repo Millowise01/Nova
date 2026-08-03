@@ -1,7 +1,8 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@nova/utils";
-import { Skeleton } from "@nova/design-system";
 import { TrendingUp, TrendingDown } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
+
+import { Skeleton } from "@nova/design-system";
+import { cn } from "@nova/utils";
 
 export interface StatCardProps extends HTMLAttributes<HTMLDivElement> {
   title: string;

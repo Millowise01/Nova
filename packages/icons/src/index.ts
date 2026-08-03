@@ -10,23 +10,23 @@ import type { LucideProps } from "lucide-react";
 
 // ── Size & stroke constants ────────────────────────────────────────
 export const iconSizes = {
-  xs:   12,
-  sm:   16,
-  md:   20,  // default
-  lg:   24,
-  xl:   32,
+  xs: 12,
+  sm: 16,
+  md: 20, // default
+  lg: 24,
+  xl: 32,
   "2xl": 48,
 } as const;
 
 export const iconStrokes = {
-  thin:    1,
-  regular: 1.5,  // default
-  bold:    2,
+  thin: 1,
+  regular: 1.5, // default
+  bold: 2,
 } as const;
 
-export type IconSize   = keyof typeof iconSizes;
+export type IconSize = keyof typeof iconSizes;
 export type IconStroke = keyof typeof iconStrokes;
-export type IconProps  = LucideProps;
+export type IconProps = LucideProps;
 
 // ── Navigation ────────────────────────────────────────────────────
 export {

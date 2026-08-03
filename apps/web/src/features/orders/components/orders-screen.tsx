@@ -9,12 +9,15 @@ const orderModules = [
   { title: "Return Request", description: "RMA initiation and item-level reasons." },
   { title: "Refund Status", description: "Refund lifecycle and payout status." },
   { title: "Review Purchase", description: "Post-purchase ratings and review flow." },
-  { title: "Reorder", description: "One-click reorder from past purchases." }
+  { title: "Reorder", description: "One-click reorder from past purchases." },
 ];
 
 export function OrdersScreen() {
   return (
-    <ModuleShell subtitle="Order lifecycle management from placement to return." title="Order Management">
+    <ModuleShell
+      subtitle="Order lifecycle management from placement to return."
+      title="Order Management"
+    >
       <FeatureGrid items={orderModules} />
     </ModuleShell>
   );

@@ -3,16 +3,16 @@ import { Card } from "@nova/ui";
 const testimonials = [
   {
     quote: "Nova helped us reduce checkout friction and discover trusted local sellers.",
-    author: "Mariama K., Freetown"
+    author: "Mariama K., Freetown",
   },
   {
     quote: "The wallet and rewards ecosystem makes repeat orders seamless.",
-    author: "Ibrahim S., Bo"
+    author: "Ibrahim S., Bo",
   },
   {
     quote: "I now compare products with AI suggestions before every purchase.",
-    author: "Hawa J., Kenema"
-  }
+    author: "Hawa J., Kenema",
+  },
 ];
 
 export function TestimonialsSection() {
@@ -23,7 +23,9 @@ export function TestimonialsSection() {
         {testimonials.map((item) => (
           <Card key={item.author}>
             <p className="text-sm text-slate-700">"{item.quote}"</p>
-            <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">{item.author}</p>
+            <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              {item.author}
+            </p>
           </Card>
         ))}
       </div>

@@ -14,7 +14,7 @@ export const COOKIE_KEYS = {
 } as const;
 
 export const QUERY_STALE_TIME = {
-  short: 30_000,       // 30s — volatile data (cart, notifications)
-  medium: 5 * 60_000,  // 5m  — catalog listings
-  long: 30 * 60_000,   // 30m — static content (categories, brands)
+  short: 30_000, // 30s — volatile data (cart, notifications)
+  medium: 5 * 60_000, // 5m  — catalog listings
+  long: 30 * 60_000, // 30m — static content (categories, brands)
 } as const;

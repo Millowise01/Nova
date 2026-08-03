@@ -1,5 +1,6 @@
 "use client";
 
+import { cva } from "class-variance-authority";
 import {
   createContext,
   useContext,
@@ -8,7 +9,7 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
-import { cva } from "class-variance-authority";
+
 import { cn } from "@nova/utils";
 
 interface TabsContextValue {

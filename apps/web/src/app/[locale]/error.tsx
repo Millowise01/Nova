@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+
 import { Button, ErrorState } from "@nova/ui";
 
 export default function Error({ reset }: { error: Error; reset: () => void }) {

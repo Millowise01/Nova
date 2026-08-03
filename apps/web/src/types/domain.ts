@@ -1,13 +1,11 @@
-import type { ID, ISODateString } from "@nova/types";
+import type { ID, ISODateString, Money } from "@nova/types";
 
 export interface CommerceImage {
   url: string;
   alt: string;
 }
 
-export interface Price {
-  amount: number;
-  currency: "SLL" | "USD";
+export interface Price extends Money {
   formatted: string;
   discountPercentage?: number;
 }

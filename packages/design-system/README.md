@@ -21,15 +21,16 @@ import "@nova/design-system/css/variables.css";
 
 ### Brand Colors
 
-| Name | Hex | Role |
-|---|---|---|
-| Nova Navy | `#002A63` | Trust, navigation, headers, primary actions |
-| Nova Orange | `#FF6A00` | CTAs, promotions, shopping actions |
-| Light Peach | `#FFC8A3` | Soft surfaces, promotional backgrounds |
-| Accent Blue | `#1A56DB` | Links, info states, interactive elements |
-| Neutral Dark | `#111827` | Body text, dark surfaces, footer |
+| Name         | Hex       | Role                                        |
+| ------------ | --------- | ------------------------------------------- |
+| Nova Navy    | `#002A63` | Trust, navigation, headers, primary actions |
+| Nova Orange  | `#FF6A00` | CTAs, promotions, shopping actions          |
+| Light Peach  | `#FFC8A3` | Soft surfaces, promotional backgrounds      |
+| Accent Blue  | `#1A56DB` | Links, info states, interactive elements    |
+| Neutral Dark | `#111827` | Body text, dark surfaces, footer            |
 
 ### Rules
+
 - Never use raw hex values in component code. Always use semantic tokens.
 - `primary` = Nova Navy. `accent` = Nova Orange. Never swap them.
 - Orange is for **action** (buy, add to cart, CTA). Navy is for **trust** (nav, headers, brand).
@@ -87,27 +88,27 @@ bg-info                Informational, links
 
 ### Font Stack
 
-| Role | Fonts |
-|---|---|
-| `--font-sans` | Inter, system-ui, sans-serif |
-| `--font-display` | Cal Sans, Inter, system-ui |
-| `--font-mono` | IBM Plex Mono, ui-monospace |
+| Role             | Fonts                        |
+| ---------------- | ---------------------------- |
+| `--font-sans`    | Inter, system-ui, sans-serif |
+| `--font-display` | Cal Sans, Inter, system-ui   |
+| `--font-mono`    | IBM Plex Mono, ui-monospace  |
 
 ### Type Scale
 
-| Role | Size | Weight | Use |
-|---|---|---|---|
-| `display` | 60px | 900 | Hero banners, marketing splash |
-| `h1` | 48px | 800 | Page titles |
-| `h2` | 36px | 700 | Section headings |
-| `h3` | 28px | 700 | Sub-section headings |
-| `h4` | 22px | 600 | Card / panel headings |
-| `bodyLarge` | 18px | 400 | Lead paragraphs |
-| `body` | 16px | 400 | Default body copy |
-| `bodySmall` | 14px | 400 | Secondary body, helper text |
-| `caption` | 12px | 400 | Timestamps, metadata |
-| `label` | 14px | 600 | Form labels, table headers |
-| `overline` | 11px | 700 | Category eyebrow text (uppercase) |
+| Role        | Size | Weight | Use                               |
+| ----------- | ---- | ------ | --------------------------------- |
+| `display`   | 60px | 900    | Hero banners, marketing splash    |
+| `h1`        | 48px | 800    | Page titles                       |
+| `h2`        | 36px | 700    | Section headings                  |
+| `h3`        | 28px | 700    | Sub-section headings              |
+| `h4`        | 22px | 600    | Card / panel headings             |
+| `bodyLarge` | 18px | 400    | Lead paragraphs                   |
+| `body`      | 16px | 400    | Default body copy                 |
+| `bodySmall` | 14px | 400    | Secondary body, helper text       |
+| `caption`   | 12px | 400    | Timestamps, metadata              |
+| `label`     | 14px | 600    | Form labels, table headers        |
+| `overline`  | 11px | 700    | Category eyebrow text (uppercase) |
 
 ### Tailwind Usage
 
@@ -123,19 +124,19 @@ bg-info                Informational, links
 
 8px base grid. Use semantic aliases in components — never raw pixel values.
 
-| Alias | Value | px |
-|---|---|---|
-| `space.none` | `0rem` | 0 |
-| `space.xs` | `0.5rem` | 8 |
-| `space.sm` | `0.75rem` | 12 |
-| `space.md` | `1rem` | 16 |
-| `space.lg` | `1.5rem` | 24 |
-| `space.xl` | `2rem` | 32 |
-| `space.2xl` | `2.5rem` | 40 |
-| `space.3xl` | `3rem` | 48 |
-| `space.4xl` | `4rem` | 64 |
-| `space.5xl` | `5rem` | 80 |
-| `space.6xl` | `6rem` | 96 |
+| Alias        | Value     | px  |
+| ------------ | --------- | --- |
+| `space.none` | `0rem`    | 0   |
+| `space.xs`   | `0.5rem`  | 8   |
+| `space.sm`   | `0.75rem` | 12  |
+| `space.md`   | `1rem`    | 16  |
+| `space.lg`   | `1.5rem`  | 24  |
+| `space.xl`   | `2rem`    | 32  |
+| `space.2xl`  | `2.5rem`  | 40  |
+| `space.3xl`  | `3rem`    | 48  |
+| `space.4xl`  | `4rem`    | 64  |
+| `space.5xl`  | `5rem`    | 80  |
+| `space.6xl`  | `6rem`    | 96  |
 
 ```tsx
 // Tailwind spacing maps directly to the scale
@@ -147,29 +148,29 @@ bg-info                Informational, links
 
 ## Border Radius
 
-| Token | Value | Use |
-|---|---|---|
-| `rounded-none` | 0 | Sharp corners |
-| `rounded-sm` | 4px | Tags, badges |
-| `rounded-md` | 8px | Inputs, buttons |
-| `rounded-lg` | 12px | Cards |
-| `rounded-xl` | 16px | Modals, panels |
-| `rounded-2xl` | 24px | Large cards, sheets |
+| Token          | Value  | Use                     |
+| -------------- | ------ | ----------------------- |
+| `rounded-none` | 0      | Sharp corners           |
+| `rounded-sm`   | 4px    | Tags, badges            |
+| `rounded-md`   | 8px    | Inputs, buttons         |
+| `rounded-lg`   | 12px   | Cards                   |
+| `rounded-xl`   | 16px   | Modals, panels          |
+| `rounded-2xl`  | 24px   | Large cards, sheets     |
 | `rounded-full` | 9999px | Avatars, chips, toggles |
 
 ---
 
 ## Shadows / Elevation
 
-| Token | Use |
-|---|---|
-| `shadow-xs` | Subtle lift — table rows, list items |
-| `shadow-sm` | Cards, focused inputs |
-| `shadow-md` | Dropdowns, popovers |
-| `shadow-lg` | Modals, drawers |
-| `shadow-xl` | Floating buttons, sticky headers |
-| `shadow-2xl` | Full-page overlays, command palette |
-| `shadow-inner` | Inset — pressed states, wells |
+| Token          | Use                                  |
+| -------------- | ------------------------------------ |
+| `shadow-xs`    | Subtle lift — table rows, list items |
+| `shadow-sm`    | Cards, focused inputs                |
+| `shadow-md`    | Dropdowns, popovers                  |
+| `shadow-lg`    | Modals, drawers                      |
+| `shadow-xl`    | Floating buttons, sticky headers     |
+| `shadow-2xl`   | Full-page overlays, command palette  |
+| `shadow-inner` | Inset — pressed states, wells        |
 
 Dark mode shadows are automatically applied via `.dark` CSS class — no extra work needed.
 
@@ -179,25 +180,25 @@ Dark mode shadows are automatically applied via `.dark` CSS class — no extra w
 
 ### Durations
 
-| Token | Value | Use |
-|---|---|---|
-| `duration-75` | 75ms | Instant feedback, tooltips |
-| `duration-100` | 100ms | Hover states |
-| `duration-200` | 200ms | Standard transitions |
-| `duration-300` | 300ms | Modals, drawers |
-| `duration-500` | 500ms | Page transitions |
-| `duration-700` | 700ms | Loading spinners |
-| `duration-1000` | 1000ms | Skeleton shimmer |
+| Token           | Value  | Use                        |
+| --------------- | ------ | -------------------------- |
+| `duration-75`   | 75ms   | Instant feedback, tooltips |
+| `duration-100`  | 100ms  | Hover states               |
+| `duration-200`  | 200ms  | Standard transitions       |
+| `duration-300`  | 300ms  | Modals, drawers            |
+| `duration-500`  | 500ms  | Page transitions           |
+| `duration-700`  | 700ms  | Loading spinners           |
+| `duration-1000` | 1000ms | Skeleton shimmer           |
 
 ### Easings
 
-| Token | Value | Use |
-|---|---|---|
-| `ease` | `ease` | General |
-| `ease-in` | `ease-in` | Exits |
-| `ease-out` | `ease-out` | Entrances |
-| `ease-in-out` | `ease-in-out` | Toggles |
-| `spring` | `cubic-bezier(0.16, 1, 0.3, 1)` | Energetic entrances, modals |
+| Token         | Value                           | Use                         |
+| ------------- | ------------------------------- | --------------------------- |
+| `ease`        | `ease`                          | General                     |
+| `ease-in`     | `ease-in`                       | Exits                       |
+| `ease-out`    | `ease-out`                      | Entrances                   |
+| `ease-in-out` | `ease-in-out`                   | Toggles                     |
+| `spring`      | `cubic-bezier(0.16, 1, 0.3, 1)` | Energetic entrances, modals |
 
 ```tsx
 // Tailwind
@@ -213,12 +214,12 @@ import { motion } from "@nova/design-system";
 ## Responsive System
 
 | Breakpoint | Min-width | Container |
-|---|---|---|
-| `sm` | 640px | 640px |
-| `md` | 768px | 768px |
-| `lg` | 1024px | 1024px |
-| `xl` | 1280px | 1280px |
-| `2xl` | 1536px | 1536px |
+| ---------- | --------- | --------- |
+| `sm`       | 640px     | 640px     |
+| `md`       | 768px     | 768px     |
+| `lg`       | 1024px    | 1024px    |
+| `xl`       | 1280px    | 1280px    |
+| `2xl`      | 1536px    | 1536px    |
 
 ```tsx
 <div className="px-4 sm:px-6 lg:px-8">          {/* responsive padding */}
@@ -272,7 +273,7 @@ import { iconSizes, iconStrokes } from "@nova/icons";
 ### Input
 
 ```tsx
-<input className="w-full bg-background border border-border-input rounded-md px-3 py-2 text-foreground placeholder:text-foreground-subtle focus:outline-none focus:ring-2 focus:ring-border-focus focus:border-border-focus transition-colors duration-100" />
+<input className="bg-background border-border-input text-foreground placeholder:text-foreground-subtle focus:ring-border-focus focus:border-border-focus w-full rounded-md border px-3 py-2 transition-colors duration-100 focus:outline-none focus:ring-2" />
 ```
 
 ### Navigation
@@ -319,7 +320,7 @@ import { ThemeProvider } from "@nova/design-system";
 
 <ThemeProvider defaultTheme="light">
   <App />
-</ThemeProvider>
+</ThemeProvider>;
 
 // Toggle
 const { setTheme } = useTheme();
@@ -332,14 +333,14 @@ setTheme("dark");
 import { createTheme, ThemeProvider } from "@nova/design-system";
 
 const ramadanTheme = createTheme({
-  primary:      "#7c3aed",
+  primary: "#7c3aed",
   primaryHover: "#6d28d9",
-  accent:       "#f59e0b",
+  accent: "#f59e0b",
 });
 
 <ThemeProvider defaultTheme="light" overrides={ramadanTheme}>
   <SellerStorefront />
-</ThemeProvider>
+</ThemeProvider>;
 ```
 
 ### CSS Variable Override (no React)
@@ -347,11 +348,11 @@ const ramadanTheme = createTheme({
 ```css
 /* Seller brand override */
 [data-seller="acme"] {
-  --color-primary:       #7c3aed;
+  --color-primary: #7c3aed;
   --color-primary-hover: #6d28d9;
-  --color-accent:        #f59e0b;
-  --nova-primary:        var(--color-primary);
-  --nova-orange:         var(--color-accent);
+  --color-accent: #f59e0b;
+  --nova-primary: var(--color-primary);
+  --nova-orange: var(--color-accent);
 }
 ```
 
@@ -402,31 +403,54 @@ style={{ boxShadow: cssVars.shadow.md }}  // → "var(--shadow-md)"
 // @nova/design-system
 export {
   // Tokens
-  colors, typography, spacing, space,
-  radius, shadows, shadowsDark,
-  motion, breakpoints, containerWidths,
-  containerPadding, grid, sectionSpacing,
+  colors,
+  typography,
+  spacing,
+  space,
+  radius,
+  shadows,
+  shadowsDark,
+  motion,
+  breakpoints,
+  containerWidths,
+  containerPadding,
+  grid,
+  sectionSpacing,
   zIndex,
 
   // Themes
-  themes, lightTheme, darkTheme,
-  createTheme, ThemeProvider, useTheme,
+  themes,
+  lightTheme,
+  darkTheme,
+  createTheme,
+  ThemeProvider,
+  useTheme,
 
   // CSS vars reference
   cssVars,
 
   // Accessibility
-  focusRing, focusRingClass, focusRingOnDarkClass,
-  contrastRatio, meetsAA, meetsAALarge,
-  Keys, isActivationKey, trapFocus,
-  prefersReducedMotion, safeMotion,
-  srOnly, srOnlyFocusable, ariaHidden,
-  iconButton, liveRegion,
-}
+  focusRing,
+  focusRingClass,
+  focusRingOnDarkClass,
+  contrastRatio,
+  meetsAA,
+  meetsAALarge,
+  Keys,
+  isActivationKey,
+  trapFocus,
+  prefersReducedMotion,
+  safeMotion,
+  srOnly,
+  srOnlyFocusable,
+  ariaHidden,
+  iconButton,
+  liveRegion,
+};
 
 // @nova/icons
-export { /* all Lucide icons */ iconSizes, iconStrokes }
+export { /* all Lucide icons */ iconSizes, iconStrokes };
 
 // @nova/tailwind-config
-export default config  // extends with all Nova tokens
+export default config; // extends with all Nova tokens
 ```

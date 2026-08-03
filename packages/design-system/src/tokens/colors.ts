@@ -6,7 +6,7 @@
 export const colors = {
   /** Nova Navy #002A63 — trust, navigation, headers, brand identity */
   navy: {
-    50:  "#e6edf7",
+    50: "#e6edf7",
     100: "#ccdaef",
     200: "#99b5df",
     300: "#6690cf",
@@ -20,7 +20,7 @@ export const colors = {
   },
   /** Nova Orange #FF6A00 — CTAs, promotions, shopping actions */
   orange: {
-    50:  "#fff4ec",
+    50: "#fff4ec",
     100: "#ffe8d9",
     200: "#ffd1b3",
     300: "#ffba8d",
@@ -34,7 +34,7 @@ export const colors = {
   },
   /** Light Orange #FFC8A3 — soft surfaces, promotional backgrounds */
   peach: {
-    50:  "#fff9f5",
+    50: "#fff9f5",
     100: "#fff3eb",
     200: "#ffe7d6",
     300: "#ffdbc2",
@@ -47,7 +47,7 @@ export const colors = {
   },
   /** Accent Blue #1A56DB — links, info states, interactive elements */
   blue: {
-    50:  "#eef3fd",
+    50: "#eef3fd",
     100: "#dde7fb",
     200: "#bbcff7",
     300: "#99b7f3",
@@ -61,8 +61,8 @@ export const colors = {
   },
   /** Neutral Dark #111827 — text, dark surfaces, footer */
   neutral: {
-    0:   "#ffffff",
-    50:  "#f9fafb",
+    0: "#ffffff",
+    50: "#f9fafb",
     100: "#f3f4f6",
     200: "#e5e7eb",
     300: "#d1d5db",
@@ -76,7 +76,7 @@ export const colors = {
   },
   /** Success — Green */
   green: {
-    50:  "#f0fdf4",
+    50: "#f0fdf4",
     100: "#dcfce7",
     200: "#bbf7d0",
     300: "#86efac",
@@ -89,7 +89,7 @@ export const colors = {
   },
   /** Warning — Amber */
   amber: {
-    50:  "#fffbeb",
+    50: "#fffbeb",
     100: "#fef3c7",
     200: "#fde68a",
     300: "#fcd34d",
@@ -102,7 +102,7 @@ export const colors = {
   },
   /** Error — Red */
   red: {
-    50:  "#fef2f2",
+    50: "#fef2f2",
     100: "#fee2e2",
     200: "#fecaca",
     300: "#fca5a5",
@@ -116,4 +116,4 @@ export const colors = {
 } as const;
 
 export type ColorScale = typeof colors;
-export type ColorName  = keyof ColorScale;
+export type ColorName = keyof ColorScale;

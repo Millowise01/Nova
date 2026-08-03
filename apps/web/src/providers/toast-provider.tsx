@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+
 import { Toast } from "@nova/ui";
 
 export type ToastType = "success" | "error" | "warning" | "info";
@@ -56,35 +57,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ toasts, addToast, removeToast, toast: toastHelpers }}>
       {children}
       <div className="pointer-events-none fixed bottom-4 right-4 z-50 flex w-full max-w-md flex-col gap-2">
-        {toasts.map((t) => {
-          let bgColor = "bg-white text-slate-900 border-slate-200";
-          if (t.type === "success")
-            bgColor = "bg-[color:var(--ds-success)] text-white border-transparent";
-          if (t.type === "error")
-            bgColor = "bg-[color:var(--ds-danger)] text-white border-transparent";
-          if (t.type === "warning")
-            bgColor = "bg-[color:var(--ds-warning)] text-white border-transparent";
-          if (t.type === "info")
-            bgColor = "bg-[color:var(--ds-info)] text-white border-transparent";
-
-          return (
-            <div key={t.id} className="pointer-events-auto">
-              <Toast>
-                <div
-                  className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3 shadow-lg ${bgColor} transition duration-300`}
-                >
-                  <span className="text-sm font-semibold">{t.message}</span>
-                  <button
-                    onClick={() => removeToast(t.id)}
-                    className="font-bold text-white/80 transition hover:text-white"
-                  >
-                    ×
-                  </button>
-                </div>
-              </Toast>
-            </div>
-          );
-        })}
+        {toasts.map((t) => (
+          <div key={t.id} className="pointer-events-auto">
+            <Toast
+              item={{ id: t.id, title: t.message, tone: t.type, duration: t.duration }}
+              onDismiss={() => removeToast(t.id)}
+            />
+          </div>
+        ))}
       </div>
     </ToastContext.Provider>
   );

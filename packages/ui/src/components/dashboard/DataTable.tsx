@@ -1,12 +1,20 @@
 "use client";
 
 import { useState, useMemo, type ReactNode } from "react";
-import { cn } from "@nova/utils";
+
 import {
-  Table, TableHead, TableBody, TableRow,
-  TableHeaderCell, TableCell, Skeleton, Pagination, EmptyState,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableHeaderCell,
+  TableCell,
+  Skeleton,
+  Pagination,
+  EmptyState,
 } from "@nova/design-system";
 import { Search } from "@nova/design-system";
+import { cn } from "@nova/utils";
 
 export interface DataTableColumn<T> {
   key: keyof T | string;
@@ -56,24 +64,33 @@ export function DataTable<T extends Record<string, unknown>>({
   className,
   onRowClick,
 }: DataTableProps<T>) {
-  const [query, setQuery]       = useState("");
-  const [sortKey, setSortKey]   = useState<string | null>(null);
-  const [sortDir, setSortDir]   = useState<SortDir>(null);
-  const [page, setPage]         = useState(1);
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<string | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>(null);
+  const [page, setPage] = useState(1);
 
   function handleSort(key: string) {
-    if (sortKey !== key) { setSortKey(key); setSortDir("asc"); }
-    else if (sortDir === "asc") setSortDir("desc");
-    else { setSortKey(null); setSortDir(null); }
+    if (sortKey !== key) {
+      setSortKey(key);
+      setSortDir("asc");
+    } else if (sortDir === "asc") setSortDir("desc");
+    else {
+      setSortKey(null);
+      setSortDir(null);
+    }
     setPage(1);
   }
 
   const filtered = useMemo(() => {
     if (!query.trim()) return data;
     const q = query.toLowerCase();
-    const keys = searchKeys ?? (columns.map((c) => c.key));
+    const keys = searchKeys ?? columns.map((c) => c.key);
     return data.filter((row) =>
-      keys.some((k) => String(row[k] ?? "").toLowerCase().includes(q))
+      keys.some((k) =>
+        String(row[k] ?? "")
+          .toLowerCase()
+          .includes(q),
+      ),
     );
   }, [data, query, searchKeys, columns]);
 
@@ -101,7 +118,10 @@ export function DataTable<T extends Record<string, unknown>>({
           <Search
             placeholder={searchPlaceholder}
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
             inputSize="sm"
           />
         </div>
@@ -142,13 +162,8 @@ export function DataTable<T extends Record<string, unknown>>({
                   className={cn(onRowClick && "cursor-pointer")}
                 >
                   {columns.map((col) => (
-                    <TableCell
-                      key={String(col.key)}
-                      style={{ textAlign: col.align ?? "left" }}
-                    >
-                      {col.render
-                        ? col.render(row, i)
-                        : String(row[col.key as keyof T] ?? "")}
+                    <TableCell key={String(col.key)} style={{ textAlign: col.align ?? "left" }}>
+                      {col.render ? col.render(row, i) : String(row[col.key as keyof T] ?? "")}
                     </TableCell>
                   ))}
                 </TableRow>
@@ -161,7 +176,7 @@ export function DataTable<T extends Record<string, unknown>>({
           icon={emptyIcon}
           title={emptyTitle}
           description={emptyDescription}
-          className="border-0 rounded-none"
+          className="rounded-none border-0"
         />
       )}
 

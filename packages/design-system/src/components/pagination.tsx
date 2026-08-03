@@ -1,4 +1,5 @@
 import type { HTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface PaginationProps extends HTMLAttributes<HTMLElement> {

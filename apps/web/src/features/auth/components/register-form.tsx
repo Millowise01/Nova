@@ -1,10 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
+
 import { Button, Input } from "@nova/ui";
+
 import { registerSchema, type RegisterFormValues } from "../auth.schemas";
+
 import { AuthFormShell } from "./auth-form-shell";
 
 export function RegisterForm() {

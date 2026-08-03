@@ -1,7 +1,8 @@
+import { darkTheme, type DarkTheme } from "./dark";
 import { lightTheme, type LightTheme } from "./light";
-import { darkTheme,  type DarkTheme  } from "./dark";
 
 export { ThemeProvider, useTheme } from "./provider";
+export type { ThemeTokens } from "./provider";
 
 export { lightTheme, darkTheme };
 export type { LightTheme, DarkTheme };
@@ -26,7 +27,7 @@ export type ThemeContract = LightTheme;
  */
 export const themes = {
   light: lightTheme,
-  dark:  darkTheme,
+  dark: darkTheme,
 } as const;
 
 export type ThemeName = keyof typeof themes;

@@ -1,12 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+
 import { Button, Card, Input } from "@nova/ui";
+import { emailSchema } from "@nova/validation";
 
 const schema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  email: emailSchema,
 });
 
 type NewsletterForm = z.infer<typeof schema>;

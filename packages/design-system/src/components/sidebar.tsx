@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
@@ -108,7 +109,7 @@ export function SidebarItem({
             : "text-[color:var(--color-foreground-muted)] hover:bg-[color:var(--color-muted)] hover:text-[color:var(--color-foreground)]",
           className,
         )}
-        {...(props)}
+        {...props}
       >
         {icon && (
           <span aria-hidden="true" className="shrink-0">

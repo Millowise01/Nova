@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
-import { cn } from "@nova/utils";
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
+import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+
+import { cn } from "@nova/utils";
 
 export type ToastTone = "success" | "error" | "warning" | "info" | "neutral";
 
@@ -89,7 +90,7 @@ function ToastViewport({
   );
 }
 
-function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
+export function Toast({ item, onDismiss }: { item: ToastItem; onDismiss: (id: string) => void }) {
   const tone = item.tone ?? "neutral";
 
   return (

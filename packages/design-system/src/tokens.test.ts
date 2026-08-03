@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { spacing, radius } from "./tokens";
+
 import { colors } from "./colors";
-import { themes } from "./themes";
 import { cssVars } from "./css-vars";
+import { themes } from "./themes";
+import { spacing, radius } from "./tokens";
 
 describe("design system tokens", () => {
   it("exposes the base spacing scale", () => {
@@ -68,7 +69,15 @@ describe("themes", () => {
   });
 
   it("all roles have hover, active, disabled states in light", () => {
-    const roles = ["primary", "secondary", "accent", "success", "warning", "error", "info"] as const;
+    const roles = [
+      "primary",
+      "secondary",
+      "accent",
+      "success",
+      "warning",
+      "error",
+      "info",
+    ] as const;
     for (const role of roles) {
       expect(themes.light[`${role}Hover`]).toBeTruthy();
       expect(themes.light[`${role}Active`]).toBeTruthy();

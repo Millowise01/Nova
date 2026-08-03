@@ -1,9 +1,19 @@
 import Link from "next/link";
-import { Badge, Button, Card } from "@nova/ui";
-import type { Product } from "@/types/domain";
-import { SectionTitle } from "@/features/shared/components";
 
-export function ProductSection({ title, description, products }: { title: string; description: string; products: Product[] }) {
+import { Badge, Button, Card } from "@nova/ui";
+
+import { SectionTitle } from "@/features/shared/components";
+import type { Product } from "@/types/domain";
+
+export function ProductSection({
+  title,
+  description,
+  products,
+}: {
+  title: string;
+  description: string;
+  products: Product[];
+}) {
   return (
     <section className="mx-auto w-full max-w-7xl space-y-4 px-4 md:px-6 lg:px-8">
       <div className="flex flex-wrap items-end justify-between gap-3">

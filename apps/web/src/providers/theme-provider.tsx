@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({
   children,
-  initialTheme = "system"
+  initialTheme = "system",
 }: {
   children: React.ReactNode;
   initialTheme?: Theme;
@@ -56,11 +56,7 @@ export function ThemeProvider({
     }
   }, [initialTheme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

@@ -1,15 +1,17 @@
 import type { Viewport } from "next";
-import { sessionSchema, type Session } from "@nova/auth";
-import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import type { ReactNode } from "react";
+
+import { sessionSchema, type Session } from "@nova/auth";
+
+import { LOCALES, COOKIE_KEYS } from "@/config/app";
+import { buildMetadata } from "@/lib/metadata";
 import { AppProviders } from "@/providers";
 import type { Theme } from "@/providers/theme-provider";
-import { buildMetadata } from "@/lib/metadata";
-import { LOCALES, COOKIE_KEYS } from "@/config/app";
 import "../globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
-import { cn } from "@nova/utils";
 import { X } from "lucide-react";
+import { useEffect, useRef, type HTMLAttributes, type ReactNode } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface DrawerProps {
   open: boolean;

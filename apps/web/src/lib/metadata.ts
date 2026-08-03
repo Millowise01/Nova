@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+
 import { APP_NAME } from "@nova/constants";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://nova.example.com";

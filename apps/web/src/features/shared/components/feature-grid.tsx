@@ -1,4 +1,5 @@
 import { Badge, Card } from "@nova/ui";
+
 import type { ModuleCard } from "@/types/domain";
 
 export function FeatureGrid({ items }: { items: ModuleCard[] }) {
@@ -12,7 +13,10 @@ export function FeatureGrid({ items }: { items: ModuleCard[] }) {
           </div>
           <p className="text-sm text-slate-600">{item.description}</p>
           {item.href ? (
-            <a className="text-sm font-semibold text-[color:var(--ds-primary)] hover:underline" href={item.href}>
+            <a
+              className="text-sm font-semibold text-[color:var(--ds-primary)] hover:underline"
+              href={item.href}
+            >
               Explore
             </a>
           ) : null}

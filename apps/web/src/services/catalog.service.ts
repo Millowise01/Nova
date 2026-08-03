@@ -1,25 +1,30 @@
+import { formatMoney } from "@nova/utils";
+
 import type { Brand, Category, Product } from "@/types/domain";
 
-const mockProduct = (index: number): Product => ({
-  id: `product-${index}` as Product["id"],
-  slug: `nova-product-${index}`,
-  title: `Nova Commerce Product ${index}`,
-  description: "Reliable cross-border commerce listing optimized for Sierra Leone customers.",
-  price: {
-    amount: 1400 + index * 50,
-    currency: "SLL",
-    formatted: `SLL ${(1400 + index * 50).toLocaleString()}`,
-    discountPercentage: index % 3 === 0 ? 12 : undefined,
-  },
-  rating: 4.2,
-  reviewCount: 120 + index,
-  images: [{ url: `/images/product-${index}.jpg`, alt: `Nova product ${index}` }],
-  sellerName: "Nova Verified Seller",
-  inStock: true,
-  ecoScore: ["A", "B", "C"][index % 3] as Product["ecoScore"],
-  category: "electronics",
-  tags: ["featured", "daily-deal"],
-});
+const mockProduct = (index: number): Product => {
+  const money = { amount: (1400 + index * 50).toFixed(2), currency: "SLE" as const };
+
+  return {
+    id: `product-${index}` as Product["id"],
+    slug: `nova-product-${index}`,
+    title: `Nova Commerce Product ${index}`,
+    description: "Reliable cross-border commerce listing optimized for Sierra Leone customers.",
+    price: {
+      ...money,
+      formatted: formatMoney(money),
+      discountPercentage: index % 3 === 0 ? 12 : undefined,
+    },
+    rating: 4.2,
+    reviewCount: 120 + index,
+    images: [{ url: `/images/product-${index}.jpg`, alt: `Nova product ${index}` }],
+    sellerName: "Nova Verified Seller",
+    inStock: true,
+    ecoScore: ["A", "B", "C"][index % 3] as Product["ecoScore"],
+    category: "electronics",
+    tags: ["featured", "daily-deal"],
+  };
+};
 
 export function getFeaturedProducts(): Product[] {
   return Array.from({ length: 8 }, (_, index) => mockProduct(index + 1));

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+
 import { themes, createTheme, type ThemeName } from "./index";
 
 /** Widened theme shape — string values instead of literal types, safe for runtime merging. */
@@ -31,12 +32,12 @@ export function ThemeProvider({
   attribute = "class",
 }: ThemeProviderProps) {
   const [themeName, setThemeName] = useState<ThemeName>(defaultTheme);
-  const [customOverrides, setCustomOverrides] = useState<Partial<ThemeTokens> | undefined>(overrides);
+  const [customOverrides, setCustomOverrides] = useState<Partial<ThemeTokens> | undefined>(
+    overrides,
+  );
 
   const baseTheme = themes[themeName] as ThemeTokens;
-  const theme: ThemeTokens = customOverrides
-    ? createTheme(customOverrides as Parameters<typeof createTheme>[0]) as ThemeTokens
-    : baseTheme;
+  const theme: ThemeTokens = customOverrides ? createTheme(customOverrides) : baseTheme;
 
   useEffect(() => {
     const root = document.documentElement;

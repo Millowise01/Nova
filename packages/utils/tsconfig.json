@@ -10,6 +10,10 @@
     "declarationMap": true
   },
   "include": ["src"],
-  "references": [],
+  "references": [
+    {
+      "path": "../types"
+    }
+  ],
   "exclude": ["node_modules", "dist"]
 }

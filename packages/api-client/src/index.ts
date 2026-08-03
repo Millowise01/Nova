@@ -4,6 +4,6 @@ export function createApiClient(baseURL: string) {
   return axios.create({
     baseURL,
     withCredentials: true,
-    timeout: 15000
+    timeout: 15000,
   });
 }

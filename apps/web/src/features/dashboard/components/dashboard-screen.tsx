@@ -11,12 +11,15 @@ const dashboardModules = [
   { title: "Addresses", description: "Saved delivery addresses and defaults." },
   { title: "Payment Methods", description: "Saved cards and payment preference routing." },
   { title: "Support Tickets", description: "Issue tracking and dispute history." },
-  { title: "Settings & Security", description: "Privacy, password, and connected devices." }
+  { title: "Settings & Security", description: "Privacy, password, and connected devices." },
 ];
 
 export function DashboardScreen() {
   return (
-    <ModuleShell subtitle="Customer dashboard modules aligned with account lifecycle flows." title="Customer Dashboard">
+    <ModuleShell
+      subtitle="Customer dashboard modules aligned with account lifecycle flows."
+      title="Customer Dashboard"
+    >
       <FeatureGrid items={dashboardModules} />
     </ModuleShell>
   );

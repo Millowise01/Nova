@@ -1,5 +1,6 @@
-import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 const stackVariants = cva("flex", {

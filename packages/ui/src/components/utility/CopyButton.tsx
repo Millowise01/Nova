@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type HTMLAttributes } from "react";
-import { cn } from "@nova/utils";
 import { Copy, Check } from "lucide-react";
+import { useState, type HTMLAttributes } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface CopyButtonProps extends HTMLAttributes<HTMLButtonElement> {
   value: string;

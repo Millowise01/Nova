@@ -1,8 +1,9 @@
 "use client";
 
+import { usePathname, useSearchParams } from "next/navigation";
 import { createContext, useContext, useEffect } from "react";
 import type { ReactNode } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+
 import { trackEvent } from "@nova/analytics";
 
 type AnalyticsContextType = {

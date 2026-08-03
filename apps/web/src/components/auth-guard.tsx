@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, type PropsWithChildren } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { useEffect, type PropsWithChildren } from "react";
+
 import { Spinner } from "@nova/ui";
-import { useAuth } from "@/providers";
+
 import { ROUTES } from "@/config/routes";
+import { useAuth } from "@/providers";
 
 export function AuthGuard({ children }: PropsWithChildren) {
   const { isAuthenticated, isLoading } = useAuth();

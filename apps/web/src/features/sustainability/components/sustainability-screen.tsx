@@ -7,12 +7,15 @@ const sustainabilityModules = [
   { title: "Eco Score", description: "Product-level sustainability scoring model." },
   { title: "Environmental Badges", description: "Visual trust indicators in catalog and PDP." },
   { title: "Donation History", description: "Climate and community donation timeline." },
-  { title: "Community Impact", description: "Aggregate social impact transparency metrics." }
+  { title: "Community Impact", description: "Aggregate social impact transparency metrics." },
 ];
 
 export function SustainabilityScreen() {
   return (
-    <ModuleShell subtitle="Sustainability experiences integrated into core customer journeys." title="Sustainability">
+    <ModuleShell
+      subtitle="Sustainability experiences integrated into core customer journeys."
+      title="Sustainability"
+    >
       <FeatureGrid items={sustainabilityModules} />
     </ModuleShell>
   );

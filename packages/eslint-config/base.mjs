@@ -1,6 +1,15 @@
+import path from "node:path";
+
 import js from "@eslint/js";
 import prettierConfig from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
+import importPlugin from "eslint-plugin-import";
+
+// This file lives at packages/eslint-config — resolve the actual monorepo root
+// so allowDefaultProject patterns below are stable regardless of where ESLint
+// is invoked from (a package's own "lint" script vs. lint-staged running from
+// the repo root against files across many packages at once).
+const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
 export default [
   // 1. Base Recommended Configs
@@ -26,17 +35,68 @@ export default [
   // 4. TS-specific compiler and rule configurations
   {
     files: ["**/*.{ts,tsx,mts,cts}"],
+    plugins: {
+      import: importPlugin,
+    },
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ["*.config.ts", "*.config.mts", "*.config.cts", ".storybook/*.ts"],
+          // Patterns are matched relative to tsconfigRootDir (repoRoot, below).
+          // typescript-eslint disallows "**" in these globs outright (a deliberate
+          // guard against accidentally running "default project" mode — slow —
+          // over huge swaths of files), so each location has to be listed as an
+          // explicit, finite-depth pattern rather than a wildcard-at-any-depth one.
+          //
+          // A wildcard like "packages/*/*.config.ts" is deliberately NOT used here:
+          // whether a package's root config file needs this fallback depends on
+          // whether that package's own tsconfig.json already includes it, and that
+          // varies per package (e.g. packages/tailwind-config/tsconfig.json already
+          // includes its tailwind.config.ts directly — adding it here would conflict
+          // with "found in the project service" rather than fill a real gap). Same
+          // reasoning ruled out apps/*/*.config.ts: every app's tsconfig.json already
+          // includes next.config.ts/tailwind.config.ts. Each entry below is listed
+          // explicitly because it was verified to have no other project coverage.
+          allowDefaultProject: [
+            "*.config.ts",
+            "*.config.mts",
+            "*.config.cts",
+            "packages/ui/vitest.config.ts",
+            "packages/*/.storybook/*.ts",
+            "packages/*/.storybook/*.tsx",
+          ],
         },
-        tsconfigRootDir: import.meta.dirname,
+        tsconfigRootDir: repoRoot,
+      },
+    },
+    settings: {
+      "import/resolver": {
+        typescript: true,
       },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "@typescript-eslint/consistent-type-imports": "error",
+      // Enforce a consistent import ordering: builtins/external first, then
+      // @nova/* workspace packages, then relative imports, each group blank-line separated.
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
+          pathGroups: [
+            {
+              pattern: "@nova/**",
+              group: "internal",
+              position: "before",
+            },
+          ],
+          pathGroupsExcludedImportTypes: ["builtin"],
+          "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
+        },
+      ],
+      // A relative import that reaches into another workspace package (e.g.
+      // "../../other-package/src/x") must go through its public @nova/* entrypoint instead.
+      "import/no-relative-packages": "error",
     },
   },
 

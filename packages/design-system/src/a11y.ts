@@ -13,13 +13,13 @@
  * or use this object with inline styles / CSS-in-JS.
  */
 export const focusRing = {
-  outline:      "2px solid var(--color-border-focus)",
+  outline: "2px solid var(--color-border-focus)",
   outlineOffset: "2px",
 } as const;
 
 /** Inset focus ring — for elements where outset ring clips (e.g. table cells). */
 export const focusRingInset = {
-  outline:      "2px solid var(--color-border-focus)",
+  outline: "2px solid var(--color-border-focus)",
   outlineOffset: "-2px",
 } as const;
 
@@ -38,9 +38,9 @@ export const focusRingOnDarkClass =
  * AA normal text: 4.5:1 | AA large text / UI: 3:1 | AAA: 7:1
  */
 export const contrastRatios = {
-  aa:       4.5,
-  aaLarge:  3.0,
-  aaa:      7.0,
+  aa: 4.5,
+  aaLarge: 3.0,
+  aaa: 7.0,
 } as const;
 
 /**
@@ -48,10 +48,13 @@ export const contrastRatios = {
  * @param hex — "#rrggbb" format
  */
 export function relativeLuminance(hex: string): number {
-  const rgb = hex.replace("#", "").match(/.{2}/g)!.map((c) => {
-    const v = parseInt(c, 16) / 255;
-    return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-  });
+  const rgb = hex
+    .replace("#", "")
+    .match(/.{2}/g)!
+    .map((c) => {
+      const v = parseInt(c, 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
   return 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2];
 }
 
@@ -63,7 +66,7 @@ export function contrastRatio(fg: string, bg: string): number {
   const l1 = relativeLuminance(fg);
   const l2 = relativeLuminance(bg);
   const lighter = Math.max(l1, l2);
-  const darker  = Math.min(l1, l2);
+  const darker = Math.min(l1, l2);
   return (lighter + 0.05) / (darker + 0.05);
 }
 
@@ -81,18 +84,18 @@ export function meetsAALarge(fg: string, bg: string): boolean {
 
 /** Keys used for keyboard navigation. */
 export const Keys = {
-  Enter:     "Enter",
-  Space:     " ",
-  Escape:    "Escape",
-  Tab:       "Tab",
-  ArrowUp:   "ArrowUp",
+  Enter: "Enter",
+  Space: " ",
+  Escape: "Escape",
+  Tab: "Tab",
+  ArrowUp: "ArrowUp",
   ArrowDown: "ArrowDown",
   ArrowLeft: "ArrowLeft",
-  ArrowRight:"ArrowRight",
-  Home:      "Home",
-  End:       "End",
-  PageUp:    "PageUp",
-  PageDown:  "PageDown",
+  ArrowRight: "ArrowRight",
+  Home: "Home",
+  End: "End",
+  PageUp: "PageUp",
+  PageDown: "PageDown",
 } as const;
 
 export type Key = (typeof Keys)[keyof typeof Keys];
@@ -105,17 +108,23 @@ export function isActivationKey(e: KeyboardEvent | React.KeyboardEvent): boolean
 /** Trap focus within a container — returns cleanup function. */
 export function trapFocus(container: HTMLElement): () => void {
   const focusable = container.querySelectorAll<HTMLElement>(
-    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
   );
   const first = focusable[0];
-  const last  = focusable[focusable.length - 1];
+  const last = focusable[focusable.length - 1];
 
   function onKeyDown(e: KeyboardEvent) {
     if (e.key !== Keys.Tab) return;
     if (e.shiftKey) {
-      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
     } else {
-      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
   }
 
@@ -138,9 +147,9 @@ export function prefersReducedMotion(): boolean {
  */
 export function safeMotion<T extends Record<string, unknown>>(
   full: T,
-  reduced: Partial<T> = {}
+  reduced: Partial<T> = {},
 ): T {
-  if (prefersReducedMotion()) return { ...full, ...reduced, transition: { duration: 0 } } as T;
+  if (prefersReducedMotion()) return { ...full, ...reduced, transition: { duration: 0 } };
   return full;
 }
 
@@ -171,7 +180,7 @@ export function iconButton(label: string) {
  */
 export function liveRegion(politeness: "polite" | "assertive" = "polite") {
   return {
-    role:        "status" as const,
+    role: "status" as const,
     "aria-live": politeness,
     "aria-atomic": true as const,
   };

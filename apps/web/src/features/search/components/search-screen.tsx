@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+
 import { Input, Spinner } from "@nova/ui";
+
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
 const searchModules = [

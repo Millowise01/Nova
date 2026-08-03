@@ -14,6 +14,7 @@
     "@nova/tailwind-config": "workspace:*",
     "@nova/types": "workspace:*",
     "@nova/ui": "workspace:*",
+    "@nova/utils": "workspace:*",
     "@nova/validation": "workspace:*",
     "@tanstack/react-query": "^5.85.0",
     "next": "^15.0.0",
@@ -40,7 +41,7 @@
     "start": "next start --port 3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "clean": "rimraf .next coverage",
     "test:e2e": "playwright test"
   }

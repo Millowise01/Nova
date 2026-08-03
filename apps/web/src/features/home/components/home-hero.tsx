@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { Badge, Button, Card } from "@nova/ui";
 
 export function HomeHero() {
@@ -12,7 +13,8 @@ export function HomeHero() {
               Shop trusted products from local and global sellers in one experience.
             </h1>
             <p className="max-w-xl text-base text-slate-600">
-              Nova blends marketplace convenience, wallet payments, sustainability scoring, and AI recommendations tailored to your lifestyle.
+              Nova blends marketplace convenience, wallet payments, sustainability scoring, and AI
+              recommendations tailored to your lifestyle.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link href="/categories">
@@ -29,17 +31,23 @@ export function HomeHero() {
             <Card className="bg-white/90">
               <p className="text-xs uppercase tracking-wide text-slate-500">Flash Deals</p>
               <p className="mt-2 text-2xl font-semibold">Up to 35% off</p>
-              <p className="mt-1 text-sm text-slate-600">Daily curated discounts with limited inventory alerts.</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Daily curated discounts with limited inventory alerts.
+              </p>
             </Card>
             <Card className="bg-white/90">
               <p className="text-xs uppercase tracking-wide text-slate-500">Eco Impact</p>
               <p className="mt-2 text-2xl font-semibold">1.8t CO2 Saved</p>
-              <p className="mt-1 text-sm text-slate-600">Track your environmental footprint across every order.</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Track your environmental footprint across every order.
+              </p>
             </Card>
             <Card className="bg-white/90 sm:col-span-2">
               <p className="text-xs uppercase tracking-wide text-slate-500">AI Assistant</p>
               <p className="mt-2 text-2xl font-semibold">Personalized shopping concierge</p>
-              <p className="mt-1 text-sm text-slate-600">Compare options, build gift lists, and discover products faster.</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Compare options, build gift lists, and discover products faster.
+              </p>
             </Card>
           </div>
         </div>

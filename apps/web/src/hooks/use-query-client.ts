@@ -2,6 +2,7 @@
 
 import { QueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+
 import { QUERY_STALE_TIME } from "@/config/app";
 
 export function useQueryClientInstance() {

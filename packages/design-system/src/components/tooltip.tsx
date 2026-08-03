@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, type ReactNode } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface TooltipProps {
@@ -20,7 +21,7 @@ const sideClasses = {
 
 export function Tooltip({ content, children, side = "top", delay = 300, className }: TooltipProps) {
   const [visible, setVisible] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const show = () => {
     timer.current = setTimeout(() => setVisible(true), delay);

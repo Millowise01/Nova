@@ -1,6 +1,7 @@
-import type { HTMLAttributes } from "react";
-import { cn } from "@nova/utils";
 import { Star, StarHalf } from "lucide-react";
+import type { HTMLAttributes } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface RatingStarsProps extends HTMLAttributes<HTMLDivElement> {
   value: number;

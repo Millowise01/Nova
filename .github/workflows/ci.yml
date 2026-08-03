@@ -10,6 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so turbo can diff against HEAD^1 to scope tasks to
+          # affected packages only; a shallow clone would break --filter=...[HEAD^1].
+          fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.4
@@ -18,7 +22,14 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm test
-      - run: pnpm build
+      - uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+      - run: pnpm exec turbo run lint --filter=...[HEAD^1]
+      - run: pnpm format:check
+      - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]
+      - run: pnpm exec turbo run test --filter=...[HEAD^1]
+      - run: pnpm exec turbo run build --filter=...[HEAD^1]

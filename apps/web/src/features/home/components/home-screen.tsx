@@ -1,3 +1,14 @@
+import { HomeHero } from "./home-hero";
+import { BrandsSection } from "./sections/brands-section";
+import { CategoriesSection } from "./sections/categories-section";
+import { DownloadAppSection } from "./sections/download-app-section";
+import { EcoBannerSection } from "./sections/eco-banner-section";
+import { NewsletterSection } from "./sections/newsletter-section";
+import { ProductSection } from "./sections/product-section";
+import { RecommendationsSection } from "./sections/recommendations-section";
+import { SellerSpotlightSection } from "./sections/seller-spotlight-section";
+import { TestimonialsSection } from "./sections/testimonials-section";
+
 import {
   getBestSellers,
   getCategories,
@@ -5,16 +16,6 @@ import {
   getPopularBrands,
   getTrendingProducts,
 } from "@/services/catalog.service";
-import { HomeHero } from "./home-hero";
-import { CategoriesSection } from "./sections/categories-section";
-import { ProductSection } from "./sections/product-section";
-import { BrandsSection } from "./sections/brands-section";
-import { SellerSpotlightSection } from "./sections/seller-spotlight-section";
-import { RecommendationsSection } from "./sections/recommendations-section";
-import { EcoBannerSection } from "./sections/eco-banner-section";
-import { DownloadAppSection } from "./sections/download-app-section";
-import { TestimonialsSection } from "./sections/testimonials-section";
-import { NewsletterSection } from "./sections/newsletter-section";
 
 export function HomeScreen() {
   const categories = getCategories();

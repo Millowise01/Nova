@@ -1,4 +1,6 @@
 import { forwardRef, type InputHTMLAttributes, useId } from "react";
+import type React from "react";
+
 import { cn } from "@nova/utils";
 
 export interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
@@ -87,5 +89,3 @@ export function RadioGroup({ label, error, children, className }: RadioGroupProp
     </fieldset>
   );
 }
-
-import type React from "react";

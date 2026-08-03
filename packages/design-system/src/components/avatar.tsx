@@ -1,5 +1,6 @@
-import type { HTMLAttributes, ImgHTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes, ImgHTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 const avatarVariants = cva(

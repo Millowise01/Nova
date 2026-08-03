@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type HTMLAttributes } from "react";
-import { cn } from "@nova/utils";
 import { Minus, Plus } from "lucide-react";
+import { useState, type HTMLAttributes } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface QuantityInputProps extends Omit<HTMLAttributes<HTMLDivElement>, "onChange"> {
   value?: number;

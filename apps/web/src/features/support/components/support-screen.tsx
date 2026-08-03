@@ -9,12 +9,15 @@ const supportModules = [
   { title: "Feedback", description: "Experience rating and feedback capture." },
   { title: "Report Seller", description: "Seller misconduct reporting workflow." },
   { title: "Report Product", description: "Product quality and listing issue reports." },
-  { title: "Dispute Center", description: "Escalation and dispute resolution center." }
+  { title: "Dispute Center", description: "Escalation and dispute resolution center." },
 ];
 
 export function SupportScreen() {
   return (
-    <ModuleShell subtitle="Support operations and self-service systems for the customer lifecycle." title="Customer Support">
+    <ModuleShell
+      subtitle="Support operations and self-service systems for the customer lifecycle."
+      title="Customer Support"
+    >
       <FeatureGrid items={supportModules} />
     </ModuleShell>
   );

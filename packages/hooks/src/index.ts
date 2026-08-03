@@ -9,6 +9,6 @@ export function useMediaQuery(query: string): boolean {
       return () => media.removeEventListener("change", callback);
     },
     () => (typeof window !== "undefined" ? window.matchMedia(query).matches : false),
-    () => false
+    () => false,
   );
 }

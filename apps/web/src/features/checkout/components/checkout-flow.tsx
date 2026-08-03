@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+
 import { Button, Card, Input, Select } from "@nova/ui";
+
 import { checkoutSchema, type CheckoutFormValues } from "../checkout.schemas";
 
 const steps = ["Address", "Delivery", "Payment", "Review", "Confirmation"] as const;

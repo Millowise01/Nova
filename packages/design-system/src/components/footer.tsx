@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface FooterProps extends HTMLAttributes<HTMLElement> {

@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
+
 import { Button, Card } from "./index";
 
 const meta = {
   title: "UI/Foundations",
-  component: Card
+  component: Card,
 } satisfies Meta<typeof Card>;
 
 export default meta;
@@ -15,5 +16,5 @@ export const Default: Story = {
     <Card>
       <Button>Continue</Button>
     </Card>
-  )
+  ),
 };

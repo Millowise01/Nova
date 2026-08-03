@@ -12,6 +12,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@nova/types": "workspace:*",
     "clsx": "^2.1.1",
     "tailwind-merge": "^2.5.2"
   }

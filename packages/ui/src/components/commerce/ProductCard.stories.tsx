@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { ProductCard } from "./ProductCard";
-import { Button } from "@nova/design-system";
 import { ShoppingCart } from "lucide-react";
+
+import { Button } from "@nova/design-system";
+
+import { ProductCard } from "./ProductCard";
 
 const meta = {
   title: "Commerce/ProductCard",
@@ -39,6 +41,7 @@ export const NoImage: Story = {
 };
 
 export const Grid: Story = {
+  args: { title: "Product", price: 0 },
   render: () => (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (

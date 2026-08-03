@@ -1,6 +1,7 @@
-import { forwardRef, type SelectHTMLAttributes, useId } from "react";
-import { cn } from "@nova/utils";
 import { ChevronDown } from "lucide-react";
+import { forwardRef, type SelectHTMLAttributes, useId } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface SelectOption {
   value: string;

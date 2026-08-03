@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 import { LayoutGrid, List, Settings } from "lucide-react";
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 
 const meta = {
   title: "Design System/Tabs",
@@ -12,6 +13,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Line: Story = {
+  args: { defaultValue: "overview" },
   render: () => (
     <Tabs defaultValue="overview" variant="line">
       <TabsList>
@@ -39,6 +41,7 @@ export const Line: Story = {
 };
 
 export const Pill: Story = {
+  args: { defaultValue: "all" },
   render: () => (
     <Tabs defaultValue="all" variant="pill">
       <TabsList>

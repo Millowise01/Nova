@@ -9,7 +9,7 @@ export default function RootNotFound() {
       </p>
       <Link
         href="/en"
-        className="rounded-lg bg-[#126b4f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f5a41] transition"
+        className="rounded-lg bg-[#126b4f] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0f5a41]"
       >
         Go to Homepage
       </Link>

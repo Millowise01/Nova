@@ -1,4 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
+
 import { cn } from "@nova/utils";
 
 export interface NavbarProps extends HTMLAttributes<HTMLElement> {
@@ -50,7 +51,7 @@ export function NavbarItem({
         active ? "bg-white/15 text-white" : "text-white/80 hover:bg-white/10 hover:text-white",
         className,
       )}
-      {...(props)}
+      {...props}
     >
       {icon && <span aria-hidden="true">{icon}</span>}
       {children}

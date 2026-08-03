@@ -1,7 +1,8 @@
 "use client";
 
-import type { PropsWithChildren } from "react";
 import { useTranslations } from "next-intl";
+import type { PropsWithChildren } from "react";
+
 import { Sidebar } from "@nova/ui";
 
 export function DashboardLayout({ children }: PropsWithChildren) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronDown } from "lucide-react";
 import {
   createContext,
   useContext,
@@ -8,8 +9,8 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
+
 import { cn } from "@nova/utils";
-import { ChevronDown } from "lucide-react";
 
 interface AccordionContextValue {
   openItems: Set<string>;

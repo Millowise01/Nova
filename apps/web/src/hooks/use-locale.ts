@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
+
 import { RTL_LOCALES, type Locale } from "@/config/app";
 
 export function useAppLocale() {

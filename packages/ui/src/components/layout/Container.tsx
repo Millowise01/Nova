@@ -1,5 +1,6 @@
-import type { HTMLAttributes } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { HTMLAttributes } from "react";
+
 import { cn } from "@nova/utils";
 
 const containerVariants = cva("mx-auto w-full px-4 sm:px-6", {

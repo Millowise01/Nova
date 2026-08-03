@@ -1,6 +1,7 @@
-import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@nova/utils";
 import { AlertCircle } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
+
+import { cn } from "@nova/utils";
 
 export interface ErrorStateProps extends HTMLAttributes<HTMLDivElement> {
   title?: string;

@@ -1,5 +1,5 @@
-import { buildMetadata } from "@/lib/metadata";
 import { ProductScreen } from "@/features/product/components/product-screen";
+import { buildMetadata } from "@/lib/metadata";
 
 export const metadata = buildMetadata({
   title: "Product Details",

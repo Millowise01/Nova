@@ -1,7 +1,8 @@
-import type { HTMLAttributes, ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@nova/utils";
 import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
+import type { HTMLAttributes, ReactNode } from "react";
+
+import { cn } from "@nova/utils";
 
 const alertVariants = cva("relative flex gap-3 rounded-lg border p-4 text-sm", {
   variants: {
