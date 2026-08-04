@@ -10,13 +10,13 @@ export const lightTheme = {
   /** Page background */
   background: "#ffffff",
   /** Default surface (cards, panels, sidebars) */
-  surface: "#f9fafb",
+  surface: "#F8FAFC",
   /** Elevated surface (dropdowns, popovers, modals) */
   surfaceRaised: "#ffffff",
   /** Scrim / backdrop overlay */
   surfaceOverlay: "rgba(255, 255, 255, 0.92)",
   /** Navigation background */
-  surfaceNav: "#002A63",
+  surfaceNav: "#0D2A63",
   /** Footer background */
   surfaceFooter: "#111827",
 
@@ -24,36 +24,36 @@ export const lightTheme = {
   /** Primary body text */
   foreground: "#111827",
   /** Secondary / supporting text */
-  foregroundMuted: "#4b5563",
+  foregroundMuted: "#475569",
   /** Placeholder, disabled, hint text */
-  foregroundSubtle: "#9ca3af",
+  foregroundSubtle: "#94A3B8",
   /** Text on primary-colored backgrounds */
   foregroundOnPrimary: "#ffffff",
   /** Text on accent-colored backgrounds */
   foregroundOnAccent: "#ffffff",
   /** Text on dark surfaces (nav, footer) */
-  foregroundOnDark: "#f9fafb",
+  foregroundOnDark: "#F8FAFC",
 
   /* ── Borders ─────────────────────────────────────────────── */
   /** Default border — inputs, cards, dividers */
-  border: "#e5e7eb",
+  border: "#F1F5F9",
   /** Stronger border — focused inputs, active states */
-  borderStrong: "#d1d5db",
+  borderStrong: "#E2E6E1",
   /** Input border */
-  borderInput: "#d1d5db",
+  borderInput: "#E2E6E1",
   /** Focused input border */
   borderFocus: "#1A56DB",
 
   /* ── Muted / Disabled ────────────────────────────────────── */
-  muted: "#f3f4f6",
-  mutedForeground: "#6b7280",
-  disabled: "#e5e7eb",
-  disabledForeground: "#9ca3af",
+  muted: "#F8FAFC",
+  mutedForeground: "#64748B",
+  disabled: "#F1F5F9",
+  disabledForeground: "#94A3B8",
 
-  /* ── Primary — Nova Navy #002A63 ─────────────────────────── */
-  primary: "#002A63",
-  primaryHover: "#002258",
-  primaryActive: "#001a44",
+  /* ── Primary — Nova Primary Blue #0D2A63 ──────────────────── */
+  primary: "#0D2A63",
+  primaryHover: "#0D2258",
+  primaryActive: "#0D1A44",
   primaryDisabled: "#99b5df",
   primarySubtle: "#e6edf7",
   primaryForeground: "#ffffff",
@@ -64,7 +64,7 @@ export const lightTheme = {
   secondaryHover: "#ccdaef",
   secondaryActive: "#99b5df",
   secondaryDisabled: "#f3f6fb",
-  secondaryForeground: "#002A63",
+  secondaryForeground: "#0D2A63",
   secondaryBorder: "#99b5df",
 
   /* ── Accent — Nova Orange #FF6A00 ────────────────────────── */
@@ -103,14 +103,21 @@ export const lightTheme = {
   errorForeground: "#ffffff",
   errorBorder: "#fca5a5",
 
-  /* ── Info — Accent Blue #1A56DB ──────────────────────────── */
-  info: "#1A56DB",
-  infoHover: "#174dc5",
-  infoActive: "#1344af",
-  infoDisabled: "#bbcff7",
-  infoSubtle: "#eef3fd",
+  /**
+   * Info — #2563EB, distinct from Accent Blue #1A56DB per the Phase 2 spec's
+   * Semantic Palette (they're two separate brand blues, not the same role).
+   * #2563EB matches Tailwind's blue-600 exactly, so the hover/active/subtle/
+   * border steps below use the corresponding Tailwind blue-700/800/50/300 —
+   * a verifiable basis, not hand-computed shades, since the source spec only
+   * gives the single base value.
+   */
+  info: "#2563EB",
+  infoHover: "#1D4ED8",
+  infoActive: "#1E40AF",
+  infoDisabled: "#BFDBFE",
+  infoSubtle: "#EFF6FF",
   infoForeground: "#ffffff",
-  infoBorder: "#779fef",
+  infoBorder: "#93C5FD",
 } as const;
 
 export type LightTheme = typeof lightTheme;

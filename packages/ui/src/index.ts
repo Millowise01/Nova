@@ -1,6 +1,9 @@
 // ── Primitives ────────────────────────────────────────────────────
 export * from "./components/primitives";
 
+// ── Typography ────────────────────────────────────────────────────
+export * from "./components/typography";
+
 // ── Layout ────────────────────────────────────────────────────────
 export * from "./components/layout";
 

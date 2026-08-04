@@ -2,7 +2,7 @@
  * Nova Icon System — Lucide React
  *
  * Size standards:  12 | 16 | 20 | 24 | 32 | 48
- * Stroke standards: 1 | 1.5 | 2
+ * Stroke standards: 1 | 1.5 | 2 | 2.5
  *
  * Default: size=20, strokeWidth=1.5
  */
@@ -22,6 +22,7 @@ export const iconStrokes = {
   thin: 1,
   regular: 1.5, // default
   bold: 2,
+  extrabold: 2.5,
 } as const;
 
 export type IconSize = keyof typeof iconSizes;

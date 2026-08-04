@@ -60,5 +60,16 @@
     "typescript-eslint": "^8.37.0",
     "vitest": "^3.2.4",
     "zod": "^3.23.8"
+  },
+  "pnpm": {
+    "overrides": {
+      "@storybook/addon-a11y": "8.6.18",
+      "@storybook/addon-essentials": "8.6.18",
+      "@storybook/addon-interactions": "8.6.18",
+      "@storybook/addon-themes": "8.6.18",
+      "@storybook/nextjs": "8.6.18",
+      "@storybook/react": "8.6.18",
+      "storybook": "8.6.18"
+    }
   }
 }

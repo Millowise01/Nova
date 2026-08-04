@@ -16,8 +16,8 @@ describe("design system tokens", () => {
 });
 
 describe("Nova brand color palette", () => {
-  it("navy base is #002A63", () => {
-    expect(colors.navy[500]).toBe("#002A63");
+  it("navy base is #0D2A63", () => {
+    expect(colors.navy[500]).toBe("#0D2A63");
   });
 
   it("orange base is #FF6A00", () => {
@@ -44,16 +44,17 @@ describe("Nova brand color palette", () => {
 });
 
 describe("themes", () => {
-  it("light primary is Nova Navy", () => {
-    expect(themes.light.primary).toBe("#002A63");
+  it("light primary is Nova Primary Blue", () => {
+    expect(themes.light.primary).toBe("#0D2A63");
   });
 
   it("light accent is Nova Orange", () => {
     expect(themes.light.accent).toBe("#FF6A00");
   });
 
-  it("light info is Accent Blue", () => {
-    expect(themes.light.info).toBe("#1A56DB");
+  it("light info is distinct from accent blue", () => {
+    expect(themes.light.info).toBe("#2563EB");
+    expect(themes.light.info).not.toBe(themes.light.borderFocus);
   });
 
   it("light foreground is Neutral Dark", () => {

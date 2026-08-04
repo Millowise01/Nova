@@ -1,6 +1,10 @@
 /**
  * Nova Elevation / Shadow Scale
- * Navy-tinted light shadows. Dark-mode uses neutral tints.
+ * Phase 2 Enterprise Design System spec, Section 7 — exact rgba values.
+ * Note: this replaces the prior scale's deliberate navy-tint (rgba(0,42,99,*))
+ * with the spec's plain black-tint (rgba(0,0,0,*)) — a visible aesthetic
+ * change, not just an addition. Dark-mode (shadowsDark, below) was already
+ * black-tinted and is unaffected.
  *
  * Use-case map:
  *   xs   — subtle lift: table rows, list items
@@ -12,13 +16,13 @@
  */
 export const shadows = {
   none: "none",
-  xs: "0 1px 2px rgba(0, 42, 99, 0.06)",
-  sm: "0 1px 3px rgba(0, 42, 99, 0.08), 0 1px 2px rgba(0, 42, 99, 0.05)",
-  md: "0 4px 8px rgba(0, 42, 99, 0.08), 0 2px 4px rgba(0, 42, 99, 0.05)",
-  lg: "0 8px 24px rgba(0, 42, 99, 0.10), 0 4px 8px rgba(0, 42, 99, 0.06)",
-  xl: "0 16px 40px rgba(0, 42, 99, 0.12), 0 8px 16px rgba(0, 42, 99, 0.06)",
-  "2xl": "0 24px 64px rgba(0, 42, 99, 0.18)",
-  inner: "inset 0 2px 4px rgba(0, 42, 99, 0.06)",
+  xs: "0 1px 2px rgba(0, 0, 0, 0.05)",
+  sm: "0 1px 3px rgba(0, 0, 0, 0.08)",
+  md: "0 4px 6px rgba(0, 0, 0, 0.10)",
+  lg: "0 10px 15px rgba(0, 0, 0, 0.12)",
+  xl: "0 20px 25px rgba(0, 0, 0, 0.15)",
+  "2xl": "0 25px 50px rgba(0, 0, 0, 0.18)",
+  inner: "inset 0 2px 4px rgba(0, 0, 0, 0.06)",
 } as const;
 
 /** Dark-mode shadow variants — neutral-tinted for dark surfaces. */

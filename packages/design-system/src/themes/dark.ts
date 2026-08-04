@@ -7,30 +7,30 @@ export const darkTheme = {
   /* ── Backgrounds & Surfaces ──────────────────────────────── */
   background: "#030712",
   surface: "#111827",
-  surfaceRaised: "#1f2937",
+  surfaceRaised: "#1E293B",
   surfaceOverlay: "rgba(3, 7, 18, 0.92)",
   surfaceNav: "#111827",
   surfaceFooter: "#030712",
 
   /* ── Foreground / Text ───────────────────────────────────── */
-  foreground: "#f9fafb",
-  foregroundMuted: "#d1d5db",
-  foregroundSubtle: "#6b7280",
+  foreground: "#F8FAFC",
+  foregroundMuted: "#E2E6E1",
+  foregroundSubtle: "#64748B",
   foregroundOnPrimary: "#ffffff",
   foregroundOnAccent: "#ffffff",
-  foregroundOnDark: "#f9fafb",
+  foregroundOnDark: "#F8FAFC",
 
   /* ── Borders ─────────────────────────────────────────────── */
-  border: "#374151",
-  borderStrong: "#4b5563",
-  borderInput: "#4b5563",
+  border: "#334155",
+  borderStrong: "#475569",
+  borderInput: "#475569",
   borderFocus: "#779fef",
 
   /* ── Muted / Disabled ────────────────────────────────────── */
-  muted: "#1f2937",
-  mutedForeground: "#9ca3af",
-  disabled: "#374151",
-  disabledForeground: "#6b7280",
+  muted: "#1E293B",
+  mutedForeground: "#94A3B8",
+  disabled: "#334155",
+  disabledForeground: "#64748B",
 
   /* ── Primary — lightened Navy for dark bg ────────────────── */
   primary: "#6690cf",
@@ -42,12 +42,12 @@ export const darkTheme = {
   primaryBorder: "#336bbf",
 
   /* ── Secondary ───────────────────────────────────────────── */
-  secondary: "#1f2937",
-  secondaryHover: "#374151",
-  secondaryActive: "#4b5563",
+  secondary: "#1E293B",
+  secondaryHover: "#334155",
+  secondaryActive: "#475569",
   secondaryDisabled: "#111827",
   secondaryForeground: "#ccdaef",
-  secondaryBorder: "#374151",
+  secondaryBorder: "#334155",
 
   /* ── Accent — Nova Orange stays vibrant on dark ──────────── */
   accent: "#FF6A00",
@@ -85,14 +85,20 @@ export const darkTheme = {
   errorForeground: "#030712",
   errorBorder: "#ef4444",
 
-  /* ── Info ────────────────────────────────────────────────── */
-  info: "#779fef",
-  infoHover: "#99b7f3",
-  infoActive: "#bbcff7",
-  infoDisabled: "#081e4d",
+  /**
+   * Info — Tailwind blue-400/300/200/900, mirroring how this theme already
+   * lightens other semantic colors for contrast against dark backgrounds
+   * (see warning/error above). Light theme's info uses blue-600 (#2563EB);
+   * infoBorder reuses that light-theme base value, matching the pattern
+   * used by warningBorder/errorBorder in this same file.
+   */
+  info: "#60A5FA",
+  infoHover: "#93C5FD",
+  infoActive: "#BFDBFE",
+  infoDisabled: "#1E3A8A",
   infoSubtle: "#0c1a3d",
   infoForeground: "#030712",
-  infoBorder: "#1A56DB",
+  infoBorder: "#2563EB",
 } as const;
 
 export type DarkTheme = typeof darkTheme;

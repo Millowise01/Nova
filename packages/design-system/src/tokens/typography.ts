@@ -4,18 +4,24 @@
  * Primary font: Inter
  * Fallback:     system-ui, sans-serif
  *
- * Scale roles (11 total):
- *   display      — hero sections, marketing banners
- *   h1           — page titles
- *   h2           — section headings
- *   h3           — sub-section headings
- *   h4           — card / panel headings
- *   bodyLarge    — lead paragraphs, feature descriptions
- *   body         — default body copy
- *   bodySmall    — secondary body, helper text
- *   caption      — image captions, timestamps, metadata
- *   label        — form labels, table headers, tags
- *   overline     — category labels, eyebrow text above headings
+ * Scale roles match the Phase 2 Enterprise Design System spec exactly
+ * (Section 2, Type Scale — Desktop). Sizes/line-heights below are the
+ * printed px values converted to rem; nothing here was carried over from
+ * the prior scale, which used different role names and step sizes.
+ *
+ *   display1     — 60px/72px — hero banners, marketing splash
+ *   display2     — 48px/56px — secondary hero / large section intro
+ *   heading1     — 36px/44px — page titles
+ *   heading2     — 30px/36px — section headings
+ *   heading3     — 24px/32px — sub-section headings
+ *   heading4     — 20px/28px — card / panel headings
+ *   bodyLarge    — 18px/28px — lead paragraphs, feature descriptions
+ *   bodyBase     — 16px/24px — default body copy
+ *   bodySmall    — 14px/20px — secondary body, helper text
+ *   caption      — 12px/16px — image captions, timestamps, metadata
+ *
+ * label/overline are retained beyond the source spec — form labels, table
+ * headers, and eyebrow text need a role and the image doesn't define one.
  */
 export const typography = {
   fontFamily: {
@@ -25,79 +31,87 @@ export const typography = {
   },
 
   scale: {
-    /** 60px / 900 — hero banners, marketing splash */
-    display: {
+    /** 60px / 72px — hero banners, marketing splash */
+    display1: {
       fontSize: "3.75rem",
-      lineHeight: "1",
-      fontWeight: 900,
+      lineHeight: "4.5rem",
+      fontWeight: 800,
       letterSpacing: "-0.04em",
       fontFamily: "display",
     },
-    /** 48px / 800 — page-level H1 */
-    h1: {
+    /** 48px / 56px — secondary hero / large section intro */
+    display2: {
       fontSize: "3rem",
-      lineHeight: "1.05",
+      lineHeight: "3.5rem",
       fontWeight: 800,
       letterSpacing: "-0.03em",
-      fontFamily: "sans",
+      fontFamily: "display",
     },
-    /** 36px / 700 — section H2 */
-    h2: {
+    /** 36px / 44px — page titles */
+    heading1: {
       fontSize: "2.25rem",
-      lineHeight: "1.1",
+      lineHeight: "2.75rem",
       fontWeight: 700,
       letterSpacing: "-0.02em",
       fontFamily: "sans",
     },
-    /** 28px / 700 — sub-section H3 */
-    h3: {
-      fontSize: "1.75rem",
-      lineHeight: "1.2",
+    /** 30px / 36px — section headings */
+    heading2: {
+      fontSize: "1.875rem",
+      lineHeight: "2.25rem",
       fontWeight: 700,
+      letterSpacing: "-0.02em",
+      fontFamily: "sans",
+    },
+    /** 24px / 32px — sub-section headings */
+    heading3: {
+      fontSize: "1.5rem",
+      lineHeight: "2rem",
+      fontWeight: 600,
       letterSpacing: "-0.01em",
       fontFamily: "sans",
     },
-    /** 22px / 600 — card / panel H4 */
-    h4: {
-      fontSize: "1.375rem",
-      lineHeight: "1.3",
+    /** 20px / 28px — card / panel headings */
+    heading4: {
+      fontSize: "1.25rem",
+      lineHeight: "1.75rem",
       fontWeight: 600,
       letterSpacing: "0em",
       fontFamily: "sans",
     },
-    /** 18px / 400 — lead paragraphs */
+    /** 18px / 28px — lead paragraphs */
     bodyLarge: {
       fontSize: "1.125rem",
-      lineHeight: "1.7",
+      lineHeight: "1.75rem",
       fontWeight: 400,
       letterSpacing: "0em",
       fontFamily: "sans",
     },
-    /** 16px / 400 — default body copy */
-    body: {
+    /** 16px / 24px — default body copy */
+    bodyBase: {
       fontSize: "1rem",
-      lineHeight: "1.6",
+      lineHeight: "1.5rem",
       fontWeight: 400,
       letterSpacing: "0em",
       fontFamily: "sans",
     },
-    /** 14px / 400 — secondary body, helper text */
+    /** 14px / 20px — secondary body, helper text */
     bodySmall: {
       fontSize: "0.875rem",
-      lineHeight: "1.55",
+      lineHeight: "1.25rem",
       fontWeight: 400,
       letterSpacing: "0em",
       fontFamily: "sans",
     },
-    /** 12px / 400 — captions, timestamps, metadata */
+    /** 12px / 16px — captions, timestamps, metadata */
     caption: {
       fontSize: "0.75rem",
-      lineHeight: "1.4",
+      lineHeight: "1rem",
       fontWeight: 400,
       letterSpacing: "0.01em",
       fontFamily: "sans",
     },
-    /** 14px / 600 — form labels, table headers */
+    /** 14px / 600 — form labels, table headers (not in source spec) */
     label: {
       fontSize: "0.875rem",
       lineHeight: "1.35",
@@ -105,7 +119,7 @@ export const typography = {
       letterSpacing: "0em",
       fontFamily: "sans",
     },
-    /** 11px / 700 uppercase — category eyebrow text */
+    /** 11px / 700 uppercase — category eyebrow text (not in source spec) */
     overline: {
       fontSize: "0.6875rem",
       lineHeight: "1.4",
@@ -131,11 +145,13 @@ export const typography = {
 
   /** Font-weight scale */
   weights: {
+    light: 300,
     regular: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
     extrabold: 800,
+    /** Beyond the source spec (which stops at Extra Bold 800) — retained extension. */
     black: 900,
   },
 

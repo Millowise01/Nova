@@ -20,7 +20,16 @@
       "Bash(rm -f web-build-debug.log dev-test.log lint-full*.log *)",
       "Bash(git add *)",
       "Bash(npx lint-staged *)",
-      "Bash(git add . *)"
+      "Bash(git add . *)",
+      "Read(//mnt/user-data/uploads/**)",
+      "Read(//c//**)",
+      "Bash(find /mnt -maxdepth 4)",
+      "Read(//c/Users/admin/Downloads/**)",
+      "Read(//c/Nova/packages/design-system/**)",
+      "Bash(pnpm --filter @nova/ui storybook:build)",
+      "Bash(pnpm --filter @nova/ui exec storybook build --disable-telemetry)",
+      "Read(//c/Nova/node_modules/.pnpm/**)",
+      "Read(//c/Nova/**)"
     ],
     "additionalDirectories": [
       "\\tmp",

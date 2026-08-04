@@ -15,12 +15,11 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "storybook": "storybook dev -p 6007",
-    "storybook:build": "storybook build",
     "test": "vitest run",
     "clean": "rimraf dist coverage storybook-static"
   },
   "dependencies": {
+    "@nova/icons": "workspace:*",
     "@nova/utils": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",

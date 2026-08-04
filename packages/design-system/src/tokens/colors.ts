@@ -4,14 +4,14 @@
  * Reference semantic tokens via CSS vars or theme objects instead.
  */
 export const colors = {
-  /** Nova Navy #002A63 — trust, navigation, headers, brand identity */
+  /** Nova Primary Blue #0D2A63 — trust, navigation, headers, brand identity */
   navy: {
     50: "#e6edf7",
     100: "#ccdaef",
     200: "#99b5df",
     300: "#6690cf",
     400: "#336bbf",
-    500: "#002A63",
+    500: "#0D2A63",
     600: "#002258",
     700: "#001a44",
     800: "#001133",
@@ -59,18 +59,29 @@ export const colors = {
     900: "#0c2d73",
     950: "#081e4d",
   },
-  /** Neutral Dark #111827 — text, dark surfaces, footer */
+  /**
+   * Neutral scale — Phase 2 Enterprise Design System semantic palette.
+   * 0 and 950 are extensions beyond the approved 100-900 scale (kept for
+   * pure-white and deep-background use cases the source spec doesn't cover).
+   * Neutral 300 is used as printed in the source image — the digit sequence
+   * differs from Slate-200 in more than one position, so unlike 400/500/800
+   * (single-character "B read as 8" cases) it was not assumed to be a
+   * transcription of a known palette. Confirm against source if available.
+   * 900 uses the source's separately-labeled "Neutral Dark" brand color
+   * (#111827, RGB given explicitly) rather than the Semantic Palette row's
+   * own "Neutral 900" swatch (#0F172A) — the two are ~2-17 RGB units apart
+   * per channel and treated as the same intended value here, not two tokens.
+   */
   neutral: {
     0: "#ffffff",
-    50: "#f9fafb",
-    100: "#f3f4f6",
-    200: "#e5e7eb",
-    300: "#d1d5db",
-    400: "#9ca3af",
-    500: "#6b7280",
-    600: "#4b5563",
-    700: "#374151",
-    800: "#1f2937",
+    100: "#F8FAFC",
+    200: "#F1F5F9",
+    300: "#E2E6E1",
+    400: "#94A3B8",
+    500: "#64748B",
+    600: "#475569",
+    700: "#334155",
+    800: "#1E293B",
     900: "#111827",
     950: "#030712",
   },

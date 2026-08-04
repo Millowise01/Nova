@@ -1,6 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
 
+import { iconSizes, iconStrokes, ShoppingCart } from "@nova/icons";
+
 import { useTheme } from "./themes/provider";
+import { breakpoints } from "./tokens/breakpoints";
 import { colors } from "./tokens/colors";
 import { motion } from "./tokens/motion";
 import { radius } from "./tokens/radius";
@@ -274,6 +277,49 @@ function MotionTokens() {
   );
 }
 
+/* ── Breakpoints ──────────────────────────────────────────────── */
+function BreakpointScale() {
+  return (
+    <Section title="Breakpoints (mobile-first)">
+      {Object.entries(breakpoints).map(([key, value]) => (
+        <TokenRow key={key} name={`breakpoints.${key}`} value={value} />
+      ))}
+    </Section>
+  );
+}
+
+/* ── Icons ────────────────────────────────────────────────────── */
+function IconSystem() {
+  return (
+    <Section title="Icon System (Lucide React)">
+      <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>Sizes</h3>
+      <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-end", marginBottom: "1rem" }}>
+        {Object.entries(iconSizes).map(([key, value]) => (
+          <div key={key} style={{ textAlign: "center" }}>
+            <ShoppingCart size={value} strokeWidth={1.5} />
+            <code style={{ display: "block", fontSize: 10, marginTop: 4 }}>
+              {key} ({value}px)
+            </code>
+          </div>
+        ))}
+      </div>
+      <h3 style={{ fontSize: "0.875rem", fontWeight: 600, marginBottom: "0.5rem" }}>
+        Stroke widths
+      </h3>
+      <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-end" }}>
+        {Object.entries(iconStrokes).map(([key, value]) => (
+          <div key={key} style={{ textAlign: "center" }}>
+            <ShoppingCart size={32} strokeWidth={value} />
+            <code style={{ display: "block", fontSize: 10, marginTop: 4 }}>
+              {key} ({value})
+            </code>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 /* ── Theme Switcher ───────────────────────────────────────────── */
 function ThemeSwitcher() {
   const { themeName, setTheme } = useTheme();
@@ -334,6 +380,8 @@ function TokenViewer() {
       <RadiusScale />
       <ShadowScale />
       <MotionTokens />
+      <BreakpointScale />
+      <IconSystem />
     </div>
   );
 }
