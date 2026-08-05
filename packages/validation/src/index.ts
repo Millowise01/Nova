@@ -161,3 +161,19 @@ export const cancelOrderSchema = z.object({
   reason: z.string().min(1).optional(),
 });
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Payments & Wallet
+// ════════════════════════════════════════════════════════════
+
+export const proposeRefundSchema = z.object({
+  paymentIntentId: z.string().uuid(),
+  amount: moneyAmountSchema,
+  reason: z.string().min(1),
+});
+export type ProposeRefundInput = z.infer<typeof proposeRefundSchema>;
+
+export const rejectRefundSchema = z.object({
+  reason: z.string().min(1),
+});
+export type RejectRefundInput = z.infer<typeof rejectRefundSchema>;

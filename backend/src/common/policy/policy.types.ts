@@ -14,15 +14,17 @@ import type { Order, Product } from "@prisma/client";
  * what lets `can('update', 'Product', { sellerId: user.id })` type-check the condition
  * against Product's real shape.
  */
-export type PolicyAction = "create" | "read" | "update" | "delete" | "cancel" | "manage";
+export type PolicyAction =
+  "create" | "read" | "update" | "delete" | "cancel" | "approve" | "manage";
 export type PolicySubject =
-  "Product" | Product | "Category" | "Brand" | "Order" | Order | "Cart" | "all";
+  "Product" | Product | "Category" | "Brand" | "Order" | Order | "Cart" | "RefundRequest" | "all";
 
 export type AppAbility = MongoAbility<[PolicyAction, PolicySubject]>;
 
 /** The string-only subset — what a route-level @RequirePermission decorator declares
  *  (it checks a subject TYPE, not a specific fetched row). */
-export type PolicySubjectTag = "Product" | "Category" | "Brand" | "Order" | "Cart" | "all";
+export type PolicySubjectTag =
+  "Product" | "Category" | "Brand" | "Order" | "Cart" | "RefundRequest" | "all";
 
 export interface PolicyUser {
   id: string;

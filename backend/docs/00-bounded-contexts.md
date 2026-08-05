@@ -12,11 +12,12 @@ This is not a style preference — it's the property that makes the microservice
 
 This build order is the project's own phased plan for backend implementation, not a sequencing given verbatim in Vol 2 B1 (B1 lists the 12 contexts without attaching phase labels itself — the phasing below was specified directly for this documentation pass).
 
-| Phase        | Contexts                                              | Status        |
-| ------------ | ----------------------------------------------------- | ------------- |
-| **Phase 1**  | Identity, Catalog, Cart & Checkout, Orders            | **Build now** |
-| **Phase 2+** | Payments & Wallet, Logistics, Finance, Trust & Safety | Deferred      |
-| **Phase 3+** | Sustainability, Marketing, Analytics, AI Platform     | Deferred      |
+| Phase                   | Contexts                                          | Status                                                                             |
+| ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **Phase 1**             | Identity, Catalog, Cart & Checkout, Orders        | **Built**                                                                          |
+| **Phase 2**             | Payments & Wallet                                 | **In progress** — see [09-payments-wallet-design.md](09-payments-wallet-design.md) |
+| **Phase 2** (remaining) | Logistics, Finance, Trust & Safety                | Deferred                                                                           |
+| **Phase 3+**            | Sustainability, Marketing, Analytics, AI Platform | Deferred                                                                           |
 
 ---
 
@@ -52,12 +53,17 @@ This build order is the project's own phased plan for backend implementation, no
 
 ---
 
-## Phase 2+ — Deferred
+## Phase 2 — In progress
 
 ### Payments & Wallet
 
-**Responsibilities:** Payment intents, PSP adapters, refunds, wallet ledger entries, settlement, reconciliation (Volume 5).
-**Owned schema:** `PaymentIntent` (references a PSP adapter and provider transaction ID), `WalletAccount` (one per `User` or `Seller`), `WalletLedgerEntry` (immutable, append-only; balances are _always derived by summing ledger entries, never stored and mutated directly_ — Vol 2, D2 calls this "the single most important integrity rule in the entire schema").
+**Responsibilities:** Payment intents, PSP adapters, refunds, wallet ledger entries (Volume 5). **Settlement and reconciliation are explicitly excluded from this context's build** — settlement/seller payouts are Finance's entities per this doc's own split (below), and reconciliation depends on a real PSP integration that doesn't exist yet. See [09-payments-wallet-design.md](09-payments-wallet-design.md) for the full design, the PSP-adapter stubbing decision, and where dual authorization (Vol 3, B4) becomes real the moment this context exists.
+
+**Owned schema:** `PaymentIntent` (references a PSP adapter and provider transaction ID), `WalletAccount` (one per `User` or `Seller`), `WalletLedgerEntry` (immutable, append-only; balances are _always derived by summing ledger entries, never stored and mutated directly_ — Vol 2, D2 calls this "the single most important integrity rule in the entire schema"), `RefundRequest` (the dual-authorization propose/approve record for refunds above a configured threshold).
+
+---
+
+## Phase 2 (remaining) — Deferred
 
 ### Logistics
 

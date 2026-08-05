@@ -403,3 +403,96 @@ model AuditLog {
   @@index([occurredAt])
   @@map("audit_logs")
 }
+
+// ============================================================
+// PAYMENTS & WALLET (Phase 2 — backend/docs/09-payments-wallet-design.md)
+// Settlement/SellerPayout are Finance's entities, not built here. Logistics'
+// CODReconciliation is not built here either. See the design doc's Scope section.
+// ============================================================
+
+model WalletAccount {
+  id          String @id @default(uuid())
+  ownerId     String @map("owner_id") // opaque reference to Identity's User (customer or seller)
+  ownerType   String @map("owner_type") // "customer" | "seller"
+  currency    String
+  countryCode String @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  ledgerEntries WalletLedgerEntry[]
+
+  @@unique([ownerId, currency])
+  @@index([ownerId])
+  @@map("wallet_accounts")
+}
+
+/// Append-only — balances are always SUM(amount), never a mutable column (Vol 2, D2 /
+/// Vol 5, C1). "amount" is signed: positive = credit, negative = debit.
+model WalletLedgerEntry {
+  id              String  @id @default(uuid())
+  walletAccountId String  @map("wallet_account_id")
+  amount          Decimal @map("amount") @db.Decimal(14, 2)
+  currency        String
+  type            String // "refund_credit" | "checkout_debit" | "store_credit" | "cashback"
+  referenceType   String? @map("reference_type") // e.g. "Order", "RefundRequest"
+  referenceId     String? @map("reference_id")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  walletAccount WalletAccount @relation(fields: [walletAccountId], references: [id])
+
+  @@index([walletAccountId])
+  @@index([referenceType, referenceId])
+  @@map("wallet_ledger_entries")
+}
+
+/// One per Order (created in the same transaction as the Order — backend/docs/09).
+/// providerReference is populated only once a real PSP adapter exists; the stub adapter
+/// never sets it.
+model PaymentIntent {
+  id                String  @id @default(uuid())
+  orderId           String  @unique @map("order_id") // opaque reference to Orders
+  userId            String? @map("user_id") // opaque reference to Identity's User
+  method            String // "orange_money" | "afrimoney" | "card" | "wallet" | "cod"
+  status            String  @default("pending") // pending|processing|succeeded|failed|refunded
+  amount            Decimal @map("amount") @db.Decimal(14, 2)
+  currency          String
+  providerReference String? @map("provider_reference")
+  countryCode       String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  @@index([orderId])
+  @@index([status])
+  @@map("payment_intents")
+}
+
+/// Vol 3, B4 dual authorization, made real for the first time in this codebase: a
+/// refund above the configured threshold needs a second, different approver before the
+/// wallet credit executes. proposedBy and approvedBy are opaque User references —
+/// enforced-different at the service layer (backend/docs/09), not by a DB constraint
+/// (Postgres can't easily express "these two columns must differ" as a CHECK against
+/// two nullable-until-approved columns without extra complexity this pass doesn't need).
+model RefundRequest {
+  id              String  @id @default(uuid())
+  paymentIntentId String  @map("payment_intent_id")
+  amount          Decimal @map("amount") @db.Decimal(14, 2)
+  currency        String
+  reason          String
+  status          String  @default("proposed") // proposed|approved|rejected|executed
+  proposedBy      String  @map("proposed_by")
+  approvedBy      String? @map("approved_by")
+  rejectionReason String? @map("rejection_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([paymentIntentId])
+  @@index([status])
+  @@map("refund_requests")
+}

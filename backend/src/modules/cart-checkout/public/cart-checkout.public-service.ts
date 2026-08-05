@@ -10,6 +10,7 @@ export interface CheckoutSessionSnapshot {
   userId: string | null;
   totalAmount: string;
   totalCurrency: string;
+  paymentMethod: string;
   lines: { variantId: string; quantity: number }[];
 }
 
@@ -36,6 +37,7 @@ export class CartCheckoutPublicService {
       userId: session.userId,
       totalAmount: session.totalAmount.toFixed(2),
       totalCurrency: session.totalCurrency,
+      paymentMethod: session.paymentMethod,
       lines,
     };
   }

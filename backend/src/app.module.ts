@@ -9,13 +9,14 @@ import { CartCheckoutModule } from "./modules/cart-checkout";
 import { CatalogModule } from "./modules/catalog";
 import { IdentityModule } from "./modules/identity";
 import { OrdersModule } from "./modules/orders";
+import { PaymentsWalletModule } from "./modules/payments-wallet";
 import { PrismaModule } from "./prisma/prisma.module";
 
-// All four Phase 1 bounded contexts (backend/docs/00-bounded-contexts.md), plus the
-// cross-cutting security infrastructure from backend/docs/08-security-implementation-
-// checklist.md (policy engine, audit logging, Redis-backed rate limiting) every module
-// consumes. Payments & Wallet, Logistics, Finance, Trust & Safety, and everything in
-// Phase 3 are explicitly out of scope for this pass and are not wired here.
+// Phase 1's four bounded contexts plus Payments & Wallet (Phase 2, in progress —
+// backend/docs/09-payments-wallet-design.md), plus the cross-cutting security
+// infrastructure from backend/docs/08 every module consumes. Logistics, Finance,
+// Trust & Safety, and everything in Phase 3 are explicitly out of scope and not
+// wired here.
 @Module({
   imports: [
     ConfigModule,
@@ -26,6 +27,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     IdentityModule,
     CatalogModule,
     CartCheckoutModule,
+    PaymentsWalletModule,
     OrdersModule,
   ],
 })

@@ -15,6 +15,7 @@ import type { PolicyUser } from "../../../common/policy/policy.types";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { CartCheckoutPublicService } from "../../cart-checkout";
 import { CatalogPublicService } from "../../catalog";
+import { PaymentsWalletPublicService } from "../../payments-wallet";
 
 import { canCancel, canTransition, type OrderStatus } from "./order-state-machine";
 
@@ -31,6 +32,7 @@ export class OrdersService {
     private readonly prisma: PrismaService,
     private readonly cartCheckout: CartCheckoutPublicService,
     private readonly catalog: CatalogPublicService,
+    private readonly paymentsWallet: PaymentsWalletPublicService,
     private readonly audit: AuditLogger,
     private readonly abilityFactory: AbilityFactory,
   ) {}
@@ -149,10 +151,41 @@ export class OrdersService {
         },
       });
 
+      // Payment processing (Vol 5, B1) — a one-directional call into Payments &
+      // Wallet, WITHIN this same transaction (backend/docs/09's documented design,
+      // and the documented limitation that comes with it once a real, non-instant
+      // PSP adapter exists). Orders decides its own resulting status; Payments &
+      // Wallet never touches the orders table.
+      const paymentResult = await this.paymentsWallet.processPaymentForOrder(tx, {
+        orderId: order.id,
+        userId: session.userId ?? userId,
+        method: session.paymentMethod,
+        amount: order.totalAmount.toFixed(2),
+        currency: order.totalCurrency,
+      });
+
+      const finalStatus = paymentResult.succeeded ? "confirmed" : "cancelled";
+      const finalOrder = await tx.order.update({
+        where: { id: order.id },
+        data: { status: finalStatus },
+      });
+
+      if (!paymentResult.succeeded) {
+        await tx.outboxEvent.create({
+          data: {
+            aggregateType: "Order",
+            aggregateId: order.id,
+            eventType: "OrderCancelled",
+            eventVersion: 1,
+            payload: { orderId: order.id, previousStatus: "placed", reason: "payment_failed" },
+          },
+        });
+      }
+
       const body = {
         data: {
           id: order.id,
-          status: order.status,
+          status: finalOrder.status,
           total: { amount: order.totalAmount.toFixed(2), currency: order.totalCurrency },
           subOrders: order.subOrders.map((s) => ({
             id: s.id,
@@ -160,6 +193,7 @@ export class OrdersService {
             status: s.status,
             subtotal: { amount: s.subtotalAmount.toFixed(2), currency: s.subtotalCurrency },
           })),
+          paymentIntentId: paymentResult.paymentIntentId,
           createdAt: order.createdAt.toISOString(),
         },
       };

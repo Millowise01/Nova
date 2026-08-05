@@ -98,7 +98,11 @@ describe("Orders (integration) — including idempotent checkout orchestration",
         district: "Western Area",
         phone: "+23276000000",
         deliveryMethod: "standard",
-        paymentMethod: "wallet",
+        // "card" (not "wallet") deliberately — routes through the always-succeeding
+        // stub PSP adapter, not a real wallet balance the test buyer never funded.
+        // Wallet-specific payment behavior (including insufficient-balance) is
+        // covered by payments-wallet's own integration tests.
+        paymentMethod: "card",
       })
       .expect(201);
 
@@ -139,7 +143,12 @@ describe("Orders (integration) — including idempotent checkout orchestration",
         .send({ checkoutSessionId })
         .expect(201);
 
-      expect(first.body.data.status).toBe("placed");
+      // "confirmed", not "placed" — the stub PSP adapter succeeds synchronously, so by
+      // the time this response is returned the payment has already been processed and
+      // Orders has already transitioned the order forward (backend/docs/09). "placed"
+      // is now a transient, never-externally-observable intermediate state.
+      expect(first.body.data.status).toBe("confirmed");
+      expect(first.body.data.paymentIntentId).toEqual(expect.any(String));
       expect(first.body.data.total.amount).toBe("50.00"); // 25.00 * 2
       expect(first.body.data.subOrders).toHaveLength(1);
 
