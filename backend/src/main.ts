@@ -8,6 +8,7 @@ import { AppModule } from "./app.module";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { MoneySerializationInterceptor } from "./common/interceptors/money-serialization.interceptor";
 import { AppConfigService } from "./config/config.service";
+import { mergeZodRequestBodies } from "./openapi/zod-openapi";
 
 export function buildOpenApiDocument(app: Awaited<ReturnType<typeof NestFactory.create>>) {
   const config = new DocumentBuilder()
@@ -21,8 +22,13 @@ export function buildOpenApiDocument(app: Awaited<ReturnType<typeof NestFactory.
     .addTag("catalog")
     .addTag("cart-checkout")
     .addTag("orders")
+    .addTag("payments-wallet")
     .build();
-  return SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config);
+  // Request-body schemas come from the SAME Zod schemas ZodValidationPipe uses
+  // for real validation — see openapi/zod-openapi.ts.
+  mergeZodRequestBodies(document);
+  return document;
 }
 
 async function bootstrap() {

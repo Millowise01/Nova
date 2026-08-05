@@ -6,11 +6,11 @@ import { cn } from "@nova/utils";
 const containerVariants = cva("mx-auto w-full px-4 sm:px-6", {
   variants: {
     size: {
-      sm: "max-w-[640px]",
-      md: "max-w-[768px]",
-      lg: "max-w-[1024px]",
-      xl: "max-w-[1280px]",
-      "2xl": "max-w-[1536px]",
+      sm: "max-w-sm",
+      md: "max-w-md",
+      lg: "max-w-lg",
+      xl: "max-w-xl",
+      "2xl": "max-w-2xl",
       full: "max-w-none",
     },
   },

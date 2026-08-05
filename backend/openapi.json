@@ -10,7 +10,50 @@
             "description": ""
           }
         },
-        "tags": ["auth"]
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "firstName": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "lastName": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 7
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8
+                  },
+                  "confirmPassword": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                },
+                "required": [
+                  "firstName",
+                  "lastName",
+                  "email",
+                  "phone",
+                  "password",
+                  "confirmPassword"
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/auth/login": {
@@ -22,7 +65,27 @@
             "description": ""
           }
         },
-        "tags": ["auth"]
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 8
+                  }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/auth/refresh": {
@@ -34,7 +97,23 @@
             "description": ""
           }
         },
-        "tags": ["auth"]
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["refreshToken"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/auth/otp": {
@@ -46,7 +125,31 @@
             "description": ""
           }
         },
-        "tags": ["auth"]
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destination": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 7
+                      }
+                    ]
+                  }
+                },
+                "required": ["destination"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/auth/otp/verify": {
@@ -58,7 +161,36 @@
             "description": ""
           }
         },
-        "tags": ["auth"]
+        "tags": ["auth"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "destination": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "email"
+                      },
+                      {
+                        "type": "string",
+                        "minLength": 7
+                      }
+                    ]
+                  },
+                  "code": {
+                    "type": "string",
+                    "minLength": 6,
+                    "maxLength": 6
+                  }
+                },
+                "required": ["destination", "code"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/categories": {
@@ -70,7 +202,32 @@
             "description": ""
           }
         },
-        "tags": ["catalog"]
+        "tags": ["catalog"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9-]+$"
+                  },
+                  "parentId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": ["name", "slug"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/brands": {
@@ -82,7 +239,28 @@
             "description": ""
           }
         },
-        "tags": ["catalog"]
+        "tags": ["catalog"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9-]+$"
+                  }
+                },
+                "required": ["name", "slug"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/products": {
@@ -94,7 +272,69 @@
             "description": ""
           }
         },
-        "tags": ["catalog"]
+        "tags": ["catalog"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "categoryId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "brandId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "slug": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "^[a-z0-9-]+$"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "variants": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "sku": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "priceAmount": {
+                          "type": "string",
+                          "pattern": "^\\d+(\\.\\d{1,2})?$"
+                        },
+                        "priceCurrency": {
+                          "type": "string",
+                          "enum": ["SLE", "USD"]
+                        },
+                        "stockQuantity": {
+                          "type": "integer",
+                          "minimum": 0
+                        }
+                      },
+                      "required": ["sku", "name", "priceAmount", "priceCurrency", "stockQuantity"]
+                    },
+                    "minItems": 1
+                  }
+                },
+                "required": ["categoryId", "title", "slug", "variants"]
+              }
+            }
+          }
+        }
       },
       "get": {
         "operationId": "CatalogController_listProducts",
@@ -188,7 +428,28 @@
             "description": ""
           }
         },
-        "tags": ["cart-checkout"]
+        "tags": ["cart-checkout"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "variantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "quantity": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "exclusiveMinimum": true
+                  }
+                },
+                "required": ["variantId", "quantity"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/carts/{cartId}/checkout/session": {
@@ -209,7 +470,159 @@
             "description": ""
           }
         },
-        "tags": ["cart-checkout"]
+        "tags": ["cart-checkout"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "addressLine": {
+                    "type": "string",
+                    "minLength": 3
+                  },
+                  "city": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "district": {
+                    "type": "string",
+                    "minLength": 2
+                  },
+                  "phone": {
+                    "type": "string",
+                    "minLength": 7
+                  },
+                  "deliveryMethod": {
+                    "type": "string",
+                    "enum": ["standard", "express", "pickup"]
+                  },
+                  "paymentMethod": {
+                    "type": "string",
+                    "enum": ["wallet", "card", "mobile-money"]
+                  },
+                  "promoCode": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "addressLine",
+                  "city",
+                  "district",
+                  "phone",
+                  "deliveryMethod",
+                  "paymentMethod"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wallet/balance": {
+      "get": {
+        "operationId": "WalletController_getBalance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["payments-wallet"]
+      }
+    },
+    "/v1/wallet/refunds": {
+      "post": {
+        "operationId": "WalletController_proposeRefund",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["payments-wallet"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentIntentId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "amount": {
+                    "type": "string",
+                    "pattern": "^\\d+(\\.\\d{1,2})?$"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["paymentIntentId", "amount", "reason"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/wallet/refunds/{id}/approve": {
+      "patch": {
+        "operationId": "WalletController_approveRefund",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["payments-wallet"]
+      }
+    },
+    "/v1/wallet/refunds/{id}/reject": {
+      "patch": {
+        "operationId": "WalletController_rejectRefund",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["payments-wallet"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": ["reason"]
+              }
+            }
+          }
+        }
       }
     },
     "/v1/orders": {
@@ -221,7 +634,23 @@
             "description": ""
           }
         },
-        "tags": ["orders"]
+        "tags": ["orders"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "checkoutSessionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": ["checkoutSessionId"]
+              }
+            }
+          }
+        }
       },
       "get": {
         "operationId": "OrdersController_listOrders",
@@ -273,7 +702,22 @@
             "description": ""
           }
         },
-        "tags": ["orders"]
+        "tags": ["orders"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -298,6 +742,10 @@
     },
     {
       "name": "orders",
+      "description": ""
+    },
+    {
+      "name": "payments-wallet",
       "description": ""
     }
   ],

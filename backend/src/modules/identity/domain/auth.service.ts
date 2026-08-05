@@ -38,11 +38,20 @@ export class AuthService {
     ctx: RequestContext,
   ): Promise<{ user: AuthenticatedUser; tokens: AuthTokens }> {
     const emailHash = this.pii.hash(input.email);
-    const existing = await this.prisma.user.findUnique({ where: { emailHash } });
-    if (existing) {
+    const existingEmail = await this.prisma.user.findUnique({ where: { emailHash } });
+    if (existingEmail) {
       throw new ConflictError(
         "EMAIL_ALREADY_REGISTERED",
         "An account with this email already exists.",
+      );
+    }
+
+    const phoneHash = this.pii.hash(input.phone);
+    const existingPhone = await this.prisma.user.findUnique({ where: { phoneHash } });
+    if (existingPhone) {
+      throw new ConflictError(
+        "PHONE_ALREADY_REGISTERED",
+        "An account with this phone number already exists.",
       );
     }
 
@@ -53,7 +62,7 @@ export class AuthService {
         emailEncrypted: this.pii.encrypt(input.email),
         emailHash,
         phoneEncrypted: this.pii.encrypt(input.phone),
-        phoneHash: this.pii.hash(input.phone),
+        phoneHash,
         roles: ["customer"],
         authFactors: {
           create: { type: "password", passwordHash },

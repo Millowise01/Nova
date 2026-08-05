@@ -18,7 +18,7 @@ export function Navbar({ logo, actions, sticky, children, className, ...props }:
       )}
       {...props}
     >
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-xl items-center gap-4 px-4 sm:px-6">
         {logo && <div className="shrink-0">{logo}</div>}
         {children && <nav className="flex flex-1 items-center gap-1">{children}</nav>}
         {actions && <div className="ml-auto flex items-center gap-2">{actions}</div>}

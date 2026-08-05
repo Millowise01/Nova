@@ -1,5 +1,11 @@
-import type { Preview } from "@storybook/react";
+import type { Decorator, Preview } from "@storybook/nextjs-vite";
 import "@nova/design-system/css/tokens.css";
+
+const withTheme: Decorator = (Story, context: { globals: Record<string, unknown> }) => {
+  const theme = (context.globals["theme"] as string | undefined) ?? "light";
+  document.documentElement.className = theme === "light" ? "" : theme;
+  return <Story />;
+};
 
 const preview: Preview = {
   parameters: {
@@ -20,13 +26,7 @@ const preview: Preview = {
       },
     },
   },
-  decorators: [
-    (Story, context) => {
-      const theme = (context.globals["theme"] as string | undefined) ?? "light";
-      document.documentElement.className = theme === "light" ? "" : theme;
-      return <Story />;
-    },
-  ],
+  decorators: [withTheme],
 };
 
 export default preview;

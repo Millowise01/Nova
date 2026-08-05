@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ShoppingCart } from "lucide-react";
 
 import { Button } from "@nova/design-system";

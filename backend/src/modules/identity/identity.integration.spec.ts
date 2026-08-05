@@ -84,6 +84,22 @@ describe("Identity — auth flow (e2e)", () => {
     expect(response.body.error.correlationId).toEqual(expect.any(String));
   });
 
+  it("rejects a duplicate signup with the same phone number, with a clean 409 rather than a 500", async () => {
+    const first = uniqueUser();
+    await request(app.getHttpServer()).post("/v1/auth/signup").send(first).expect(201);
+
+    const second = uniqueUser();
+    second.phone = first.phone;
+
+    const response = await request(app.getHttpServer())
+      .post("/v1/auth/signup")
+      .send(second)
+      .expect(409);
+
+    expect(response.body.error.code).toBe("PHONE_ALREADY_REGISTERED");
+    expect(response.body.error.correlationId).toEqual(expect.any(String));
+  });
+
   it("logs in with correct credentials and rejects incorrect ones identically", async () => {
     const payload = uniqueUser();
     await request(app.getHttpServer()).post("/v1/auth/signup").send(payload).expect(201);

@@ -32,7 +32,11 @@ jobs:
       - name: SAST (Semgrep) — backend/, per Vol 3 G1 ("every pull request")
         run: |
           python3 -m pip install semgrep
-          semgrep scan backend/src --config=auto --error --metrics=off
+          # NOT --config=auto: current semgrep versions refuse to build an auto
+          # config with metrics off ("Cannot create auto config when metrics are
+          # off"), which made this step fail outright on every run. A named
+          # public registry ruleset needs no metrics/telemetry round-trip.
+          semgrep scan backend/src --config=p/security-audit --error --metrics=off
       - run: pnpm exec turbo run lint --filter=...[HEAD^1]
       - run: pnpm format:check
       - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]

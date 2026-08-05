@@ -18,7 +18,7 @@ export function Footer({ logo, columns, bottom, children, className, ...props }:
       {...props}
     >
       {(logo || columns || children) && (
-        <div className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6">
+        <div className="mx-auto max-w-xl px-4 py-12 sm:px-6">
           {logo && <div className="mb-8">{logo}</div>}
           {columns && <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">{columns}</div>}
           {children}
@@ -26,7 +26,7 @@ export function Footer({ logo, columns, bottom, children, className, ...props }:
       )}
       {bottom && (
         <div className="border-t border-white/10">
-          <div className="mx-auto max-w-[1280px] px-4 py-4 sm:px-6">{bottom}</div>
+          <div className="mx-auto max-w-xl px-4 py-4 sm:px-6">{bottom}</div>
         </div>
       )}
     </footer>
