@@ -29,6 +29,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
       - run: pnpm secretlint
+      - name: SAST (Semgrep) — backend/, per Vol 3 G1 ("every pull request")
+        run: |
+          python3 -m pip install semgrep
+          semgrep scan backend/src --config=auto --error --metrics=off
       - run: pnpm exec turbo run lint --filter=...[HEAD^1]
       - run: pnpm format:check
       - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]

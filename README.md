@@ -10,6 +10,7 @@ apps/
   seller/     Seller portal shell
   admin/      Admin portal shell
   docs/       Platform documentation shell
+backend/      NestJS + Prisma API — Identity, Catalog, Cart & Checkout, Orders (Phase 1)
 packages/
   ui/              Shared UI primitives and Storybook
   design-system/    Shared tokens, fonts, and themes
@@ -105,9 +106,17 @@ This repo uses [Turborepo](https://turborepo.com) to run scripts (`build`, `lint
 
 **Filtering to what changed.** CI doesn't run every task against every package on every push — it uses `--filter=...[HEAD^1]`, meaning "only packages that changed since the previous commit, plus everything that depends on them." A change to a leaf package with no dependents (e.g. `packages/icons`) only triggers that one package; a change to something widely depended-on (e.g. `packages/types`) correctly cascades to everything downstream. You can reproduce this locally: `pnpm exec turbo run build --filter=...[HEAD^1]`.
 
-## Notes
+## Backend
 
-The legacy `backend/` folder is left in place as a placeholder for the API server work that follows the storefront pass. The new workspace lives at the root and is the source of truth going forward.
+`backend/` is a real NestJS + Prisma + PostgreSQL API — the first working slice, covering Phase 1's four bounded contexts (Identity, Catalog, Cart & Checkout, Orders; see [backend/docs/00-bounded-contexts.md](backend/docs/00-bounded-contexts.md) for the full build order and what's still deferred). It's a separate pnpm workspace member (`backend`, not under `apps/` — see [pnpm-workspace.yaml](pnpm-workspace.yaml)) with its own CommonJS `tsconfig.json`, since NestJS's decorator/DI model isn't compatible with the rest of the repo's ESM/bundler TypeScript config.
+
+- `docker compose up -d` — starts local Postgres (port **5433**, not 5432 — see the comment in [docker-compose.yml](docker-compose.yml) about a native Postgres install already using the default port on some machines) and Redis.
+- `cp backend/.env.example backend/.env`, fill in the secrets (`PII_ENCRYPTION_KEY`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — generation commands are in the file's comments).
+- `pnpm --filter @nova/backend prisma:generate` then `pnpm --filter @nova/backend prisma:migrate` — applies the schema to your local database.
+- `pnpm --filter @nova/backend dev` — runs the API on <http://localhost:4000/v1>, with live Swagger/OpenAPI docs at `/docs` and the spec written to `backend/openapi.json` on every boot.
+- `pnpm --filter @nova/backend test` — the module test suites (unit + integration against the real dockerized Postgres, not mocks).
+
+Every request body is validated against a schema from `@nova/validation` — the same package the frontend forms use — never a locally redefined one; see `packages/validation/src/index.ts`.
 
 ## Next Phase: Public Storefront
 

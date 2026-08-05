@@ -1,0 +1,405 @@
+// Nova backend — Phase 1 schema (Identity, Catalog, Cart & Checkout, Orders only).
+// Conventions per backend/docs/03-database-conventions.md:
+//   - snake_case tables/columns, PascalCase singular Prisma models
+//   - every table: created_at/updated_at/created_by/updated_by, deleted_at (soft delete)
+//   - country_code on every org-scoped table
+//   - Money = numeric(14,2) + currency code, never float
+//   - NO @relation across bounded-context boundaries — a field like `sellerId` on Product
+//     is a plain scalar column (opaque reference to Identity's User), never a Prisma
+//     @relation, because a @relation would generate a real FK constraint and that would
+//     be exactly the direct cross-module table dependency backend/docs/00 prohibits.
+//     @relation is only used WITHIN a single bounded context below.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// IDENTITY
+// ============================================================
+
+model User {
+  id             String   @id @default(uuid())
+  emailEncrypted String   @map("email_encrypted")
+  emailHash      String   @unique @map("email_hash")
+  phoneEncrypted String?  @map("phone_encrypted")
+  phoneHash      String?  @unique @map("phone_hash")
+  roles          String[] @default(["customer"])
+  countryCode    String   @default("SL") @map("country_code")
+  // MFA enforcement gate (Vol 3, B1: mandatory for seller/admin, optional for customers).
+  // Actual TOTP enrollment/challenge flow is out of scope this pass — this flag is the
+  // extension point: once real MFA setup exists, enabling it flips this to true, and the
+  // login-time gate (already enforced — see AuthService) starts allowing seller/admin
+  // logins instead of blocking them.
+  mfaEnabled     Boolean  @default(false) @map("mfa_enabled")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  authFactors AuthFactor[]
+  sessions    Session[]
+
+  @@index([createdAt])
+  @@map("users")
+}
+
+/// One row per way a User can authenticate — password today; otp/social/passkey are
+/// modeled (per backend/docs/00) but only "password" and "otp" are exercised this pass.
+model AuthFactor {
+  id     String @id @default(uuid())
+  userId String @map("user_id")
+  type   String // "password" | "otp" (MFA/social/passkey deferred — out of scope this pass)
+
+  // Populated only for type = "password". Never populated for "otp".
+  passwordHash String? @map("password_hash")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("auth_factors")
+}
+
+/// Refresh-token tracking — one row per issued refresh token, enabling server-side
+/// revocation (backend/docs/05: "a server-side revocation list so any session can be
+/// force-terminated immediately").
+model Session {
+  id               String    @id @default(uuid())
+  userId           String    @map("user_id")
+  refreshTokenHash String    @unique @map("refresh_token_hash")
+  userAgent        String?   @map("user_agent")
+  ipAddress        String?   @map("ip_address")
+  revokedAt        DateTime? @map("revoked_at") @db.Timestamptz
+  expiresAt        DateTime  @map("expires_at") @db.Timestamptz
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+/// Stubbed OTP delivery (confirmed decision — see backend's otp module): a code is
+/// generated and hashed here; in development it is logged, never actually sent.
+model OtpCode {
+  id              String    @id @default(uuid())
+  destinationHash String    @map("destination_hash") // hash of the phone/email it was sent to
+  codeHash        String    @map("code_hash")
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz
+  consumedAt      DateTime? @map("consumed_at") @db.Timestamptz
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([destinationHash])
+  @@map("otp_codes")
+}
+
+// ============================================================
+// CATALOG
+// ============================================================
+
+model Category {
+  id          String  @id @default(uuid())
+  parentId    String? @map("parent_id")
+  name        String
+  slug        String  @unique
+  countryCode String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  parent   Category?  @relation("CategoryToParent", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToParent")
+  products Product[]
+
+  @@index([parentId])
+  @@map("categories")
+}
+
+model Brand {
+  id          String @id @default(uuid())
+  name        String
+  slug        String @unique
+  countryCode String @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  products Product[]
+
+  @@map("brands")
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  sellerId    String  @map("seller_id") // opaque reference to Identity's User — no @relation
+  categoryId  String  @map("category_id")
+  brandId     String? @map("brand_id")
+  title       String
+  slug        String  @unique
+  description String?
+  status      String  @default("draft") // draft | published | archived
+  countryCode String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  createdBy String?   @map("created_by")
+  updatedBy String?   @map("updated_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  category   Category           @relation(fields: [categoryId], references: [id])
+  brand      Brand?             @relation(fields: [brandId], references: [id])
+  variants   Variant[]
+  attributes ProductAttribute[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("products")
+}
+
+model Variant {
+  id        String @id @default(uuid())
+  productId String @map("product_id")
+  sku       String @unique
+  name      String // e.g. "Red / Large"
+
+  priceAmount   Decimal @map("price_amount") @db.Decimal(14, 2)
+  priceCurrency String  @map("price_currency") // Money — matches @nova/types CurrencyCode
+
+  stockQuantity Int @default(0) @map("stock_quantity")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("variants")
+}
+
+model ProductAttribute {
+  id        String @id @default(uuid())
+  productId String @map("product_id")
+  key       String
+  value     String
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("product_attributes")
+}
+
+// ============================================================
+// CART & CHECKOUT
+// ============================================================
+
+model Cart {
+  id          String  @id @default(uuid())
+  userId      String? @map("user_id") // opaque reference to Identity's User — null = guest
+  guestToken  String? @unique @map("guest_token") // opaque token issued to guest sessions
+  status      String  @default("active") // active | converted | abandoned
+  countryCode String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  lines            CartLine[]
+  checkoutSessions CheckoutSession[]
+
+  @@index([userId])
+  @@map("carts")
+}
+
+model CartLine {
+  id        String @id @default(uuid())
+  cartId    String @map("cart_id")
+  variantId String @map("variant_id") // opaque reference to Catalog's Variant — no @relation
+  quantity  Int
+
+  // Price snapshot at add-time — re-confirmed against Catalog synchronously at checkout-session
+  // creation (backend/docs/00: Cart & Checkout ↔ Catalog synchronous-call pattern), not re-read here.
+  unitPriceAmount   Decimal @map("unit_price_amount") @db.Decimal(14, 2)
+  unitPriceCurrency String  @map("unit_price_currency")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@index([cartId])
+  @@map("cart_lines")
+}
+
+/// Existence and shape justified in backend/docs/00-bounded-contexts.md and 07-glossary.md:
+/// distinct from Cart, created via POST /v1/checkout/session, consumed exactly once by
+/// Orders' POST /v1/orders.
+model CheckoutSession {
+  id     String  @id @default(uuid())
+  cartId String  @map("cart_id")
+  userId String? @map("user_id") // opaque reference to Identity's User
+
+  addressLine    String @map("address_line")
+  city           String
+  district       String
+  phone          String
+  deliveryMethod String @map("delivery_method") // standard | express | pickup
+  paymentMethod  String @map("payment_method") // wallet | card | mobile-money
+
+  subtotalAmount   Decimal @map("subtotal_amount") @db.Decimal(14, 2)
+  subtotalCurrency String  @map("subtotal_currency")
+  totalAmount      Decimal @map("total_amount") @db.Decimal(14, 2)
+  totalCurrency    String  @map("total_currency")
+
+  status     String    @default("pending") // pending | consumed | expired
+  consumedAt DateTime? @map("consumed_at") @db.Timestamptz
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  cart Cart @relation(fields: [cartId], references: [id])
+
+  @@index([cartId])
+  @@index([status])
+  @@map("checkout_sessions")
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+model Order {
+  id                String  @id @default(uuid())
+  checkoutSessionId String  @unique @map("checkout_session_id") // opaque ref to Cart & Checkout
+  userId            String? @map("user_id") // opaque reference to Identity's User
+
+  status String @default("placed") // placed|confirmed|packed|shipped|delivered|completed|cancelled|returned
+
+  totalAmount   Decimal @map("total_amount") @db.Decimal(14, 2)
+  totalCurrency String  @map("total_currency")
+  countryCode   String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+  version   Int       @default(0)
+
+  subOrders SubOrder[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model SubOrder {
+  id       String @id @default(uuid())
+  orderId  String @map("order_id")
+  sellerId String @map("seller_id") // opaque reference to Identity's User
+
+  status String @default("placed")
+
+  subtotalAmount   Decimal @map("subtotal_amount") @db.Decimal(14, 2)
+  subtotalCurrency String  @map("subtotal_currency")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([sellerId])
+  @@map("sub_orders")
+}
+
+/// The outbox — backend/docs/04-events-and-jobs.md's proposed schema, implemented now
+/// per this task's explicit instruction even though no consumer exists yet.
+model OutboxEvent {
+  id            String    @id @default(uuid())
+  aggregateType String    @map("aggregate_type")
+  aggregateId   String    @map("aggregate_id")
+  eventType     String    @map("event_type")
+  eventVersion  Int       @map("event_version")
+  payload       Json
+  occurredAt    DateTime  @default(now()) @map("occurred_at") @db.Timestamptz
+  publishedAt   DateTime? @map("published_at") @db.Timestamptz
+  attempts      Int       @default(0)
+
+  @@index([occurredAt])
+  @@map("outbox_events")
+}
+
+/// Generic idempotency-key dedupe store (backend/docs/02-api-standards.md). Scoped here
+/// rather than as shared cross-cutting infrastructure because Orders' POST /v1/orders is
+/// the only idempotent endpoint this pass — extract it if a second consumer needs it.
+model IdempotencyKey {
+  id           String   @id @default(uuid())
+  key          String   @map("key")
+  endpoint     String
+  requestHash  String   @map("request_hash")
+  statusCode   Int      @map("status_code")
+  responseBody Json     @map("response_body")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([key, endpoint])
+  @@map("idempotency_keys")
+}
+
+// ============================================================
+// AUDIT LOG (cross-cutting)
+// ============================================================
+
+/// Vol 3, E1's audit logging standard, stood up now rather than deferred with the rest
+/// of Trust & Safety (backend/docs/05-security-baseline.md's proposed resolution to the
+/// "Phase 1 writes to a Phase 2+ context's table" tension): every module gets a thin,
+/// synchronous AuditLogger (backend/src/common/audit/) that writes here directly, so
+/// Trust & Safety inherits an already-populated table instead of retrofitting one.
+/// "Audit records can never be edited or deleted through any application code path" —
+/// enforced by convention (no update/delete call site exists anywhere in this codebase),
+/// not by a database trigger in this pass.
+model AuditLog {
+  id            String   @id @default(uuid())
+  actorId       String?  @map("actor_id") // null = unauthenticated/system-initiated action
+  action        String // controlled vocabulary, e.g. "user.login", "product.create"
+  targetType    String   @map("target_type") // e.g. "User", "Product", "Order"
+  targetId      String?  @map("target_id")
+  reason        String? // required by the caller for sensitive ops; optional at the schema level
+  occurredAt    DateTime @default(now()) @map("occurred_at") @db.Timestamptz // server-generated, never client-supplied
+  ipAddress     String?  @map("ip_address")
+  correlationId String   @map("correlation_id")
+
+  @@index([actorId])
+  @@index([action])
+  @@index([occurredAt])
+  @@map("audit_logs")
+}

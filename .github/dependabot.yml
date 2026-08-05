@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # SCA (Vol 3, G1: "every pull request and on a recurring schedule against the
+  # deployed dependency tree") — Dependabot covers the recurring-schedule half
+  # natively; the every-PR half is already covered by CI installing the exact
+  # locked dependency tree on every push (pnpm install --frozen-lockfile).
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    groups:
+      # Batch routine patch/minor bumps into one PR instead of dozens — a security
+      # advisory bump (which Dependabot always opens individually regardless of
+      # grouping) still gets its own PR.
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -106,6 +106,24 @@ export default [
     files: ["**/*.{js,mjs,cjs}"],
   })),
 
-  // 6. Prettier integration to prevent style conflicts
+  // 6. Test files — an HTTP test client (e.g. Supertest's response.body) is inherently
+  // `any`-typed; asserting on response.body.data.whatever in a test is completely
+  // standard practice, not an unsafe-type-flow bug the way the same pattern would be in
+  // application code. Relaxing no-unsafe-* here (and only here) keeps those rules
+  // meaningful everywhere else instead of the alternative — sprinkling `as` casts or
+  // eslint-disable comments through every test file just to satisfy a rule that isn't
+  // actually protecting against anything in this context.
+  {
+    files: ["**/*.spec.ts", "**/*.test.ts"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+    },
+  },
+
+  // 7. Prettier integration to prevent style conflicts
   prettierConfig,
 ];
