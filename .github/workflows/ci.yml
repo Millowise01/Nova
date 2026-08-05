@@ -28,6 +28,7 @@ jobs:
           key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-turbo-
+      - run: pnpm secretlint
       - run: pnpm exec turbo run lint --filter=...[HEAD^1]
       - run: pnpm format:check
       - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]
