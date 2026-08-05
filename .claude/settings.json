@@ -43,7 +43,12 @@
       "Read(//c/Users/admin/OneDrive/Desktop/Millo's Projects/NOVA series/**)",
       "Read(//c/Users/admin/OneDrive/Desktop/Millo's Projects/NOVA Documents/**)",
       "Bash(python3 -c \"import docx\")",
-      "Bash(python3 -c \"import docx2txt\")"
+      "Bash(python3 -c \"import docx2txt\")",
+      "Bash(grep -rn \"\\\\[#[0-9a-fA-F]\\\\{3,6\\\\}\\\\]\" --include=\"*.tsx\" .)",
+      "Bash(mkdir -p /c/Users/admin/AppData/Local/Temp/claude/c--Nova/8e752e9c-9621-495d-bd74-7bb731031588/scratchpad/docx/Nova_Vol6_Seller_Admin_Customer_Experience)",
+      "Bash(unzip -o -q '/c/Users/admin/OneDrive/Desktop/Millo'\\\\''s Projects/NOVA series/Nova_Vol6_Seller_Admin_Customer_Experience.docx' -d /c/Users/admin/AppData/Local/Temp/claude/c--Nova/8e752e9c-9621-495d-bd74-7bb731031588/scratchpad/docx/Nova_Vol6_Seller_Admin_Customer_Experience)",
+      "Bash(node /c/Users/admin/AppData/Local/Temp/claude/c--Nova/8e752e9c-9621-495d-bd74-7bb731031588/scratchpad/docx2txt.mjs /c/Users/admin/AppData/Local/Temp/claude/c--Nova/8e752e9c-9621-495d-bd74-7bb731031588/scratchpad/docx/Nova_Vol6_Seller_Admin_Customer_Experience/word/document.xml /c/Users/admin/AppData/Local/Temp/claude/c--Nova/8e752e9c-9621-495d-bd74-7bb731031588/scratchpad/Nova_Vol6_Seller_Admin_Customer_Experience.txt)",
+      "Read(//c/Users/admin/.claude/projects/c--Nova/memory/**)"
     ],
     "additionalDirectories": [
       "\\tmp",
