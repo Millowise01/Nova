@@ -29,7 +29,21 @@
       "Bash(pnpm --filter @nova/ui storybook:build)",
       "Bash(pnpm --filter @nova/ui exec storybook build --disable-telemetry)",
       "Read(//c/Nova/node_modules/.pnpm/**)",
-      "Read(//c/Nova/**)"
+      "Read(//c/Nova/**)",
+      "Bash(grep -iE '\\\\.env\\($|\\\\.\\)')",
+      "Bash(grep -iE '^\\\\.env$|\\\\.env\\\\.local$|\\\\.env\\\\.production|\\\\.env\\\\.development|secrets?\\\\.')",
+      "PowerShell(cd C:\\\\Nova; pnpm run secretlint; Write-Host \"EXIT CODE: $LASTEXITCODE\")",
+      "Bash(git commit *)",
+      "Bash(git reset *)",
+      "Bash(pnpm view *)",
+      "Bash(find /c/Users/admin/Desktop -maxdepth 3 -iname \"*nova*\" 2>/dev/null)",
+      "Read(//c/Users/admin/Desktop/**)",
+      "Bash(find /c/Users/admin -maxdepth 4 -iname \"*nova*\" 2>/dev/null | grep -viE \"node_modules|appdata|\\\\.claude\")",
+      "Read(//c/Users/admin/**)",
+      "Read(//c/Users/admin/OneDrive/Desktop/Millo's Projects/NOVA series/**)",
+      "Read(//c/Users/admin/OneDrive/Desktop/Millo's Projects/NOVA Documents/**)",
+      "Bash(python3 -c \"import docx\")",
+      "Bash(python3 -c \"import docx2txt\")"
     ],
     "additionalDirectories": [
       "\\tmp",

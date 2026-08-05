@@ -69,21 +69,31 @@ No publish step is ever required — every `@nova/*` package is consumed directl
 
 - `corepack enable`
 - `pnpm install`
-- Copy the environment files (see [.env.example](.env.example) and [apps/web/.env.example](apps/web/.env.example) for what each variable does):
+- Copy the environment files (see [.env.example](.env.example) and [apps/web/.env.example](apps/web/.env.example) for what each variable does). Recommended, not currently required — nothing on the `pnpm dev` boot path reads them yet, but that'll change once real API calls are wired up:
 
   ```sh
   cp .env.example .env
   cp apps/web/.env.example apps/web/.env
   ```
 
-- `pnpm dev`
+- `pnpm dev` — runs `web`, `seller`, `admin`, and `docs` together:
+
+  | App                         | URL                     |
+  | --------------------------- | ----------------------- |
+  | `web` (customer storefront) | <http://localhost:3000> |
+  | `seller` (seller portal)    | <http://localhost:3001> |
+  | `admin` (admin portal)      | <http://localhost:3002> |
+  | `docs`                      | <http://localhost:3003> |
+
+  To run just one, filter to its package: `pnpm --filter @nova/web dev` (swap in `@nova/seller`, `@nova/admin`, or `@nova/docs`).
+
 - `pnpm build`
 - `pnpm lint`
 - `pnpm format` — reformat the repo with Prettier
 - `pnpm format:check` — check formatting without writing (what CI runs)
 - `pnpm typecheck`
 - `pnpm test`
-- `pnpm storybook`
+- `pnpm storybook` — currently broken: an unresolved `@storybook/nextjs` + Next.js 15 internal webpack-vendoring incompatibility crashes both `storybook dev` and `storybook build`. Not fixable by reconfiguring this repo — needs either a Next.js downgrade or an upstream Storybook fix.
 
 ## How the Task Graph Works
 
