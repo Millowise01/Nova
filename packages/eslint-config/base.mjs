@@ -61,6 +61,10 @@ export default [
             "*.config.mts",
             "*.config.cts",
             "packages/ui/vitest.config.ts",
+            // Same composite + rootDir:"./src" build config as packages/ui —
+            // vitest.config.ts sits at the package root, outside "src/**", so
+            // it has no other project coverage either.
+            "packages/api-client/vitest.config.ts",
             "packages/*/.storybook/*.ts",
             "packages/*/.storybook/*.tsx",
           ],

@@ -17,6 +17,8 @@
     "next.config.ts",
     "tailwind.config.ts",
     "middleware.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
     ".next/types/**/*.ts"
   ],
   "references": [

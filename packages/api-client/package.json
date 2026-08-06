@@ -7,10 +7,16 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@nova/validation": "workspace:*",
     "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "msw": "^2.15.0",
+    "vitest": "^3.2.4"
   }
 }
