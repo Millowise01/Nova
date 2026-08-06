@@ -2,10 +2,10 @@
 
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
-import { catalogKeys } from "./catalog.keys";
-
 import { QUERY_STALE_TIME } from "@/config/app";
 import { getProductBySlug, listProducts } from "@/services/catalog.service";
+
+import { catalogKeys } from "./catalog.keys";
 
 /** Cursor pagination via useInfiniteQuery, per the backend's cursor envelope
  *  ({ data, pageInfo: { hasMore, nextCursor } }) mapped exactly as

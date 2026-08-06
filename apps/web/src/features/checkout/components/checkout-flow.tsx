@@ -7,10 +7,10 @@ import { useForm } from "react-hook-form";
 
 import { Button, Card, Input, Select } from "@nova/ui";
 
-import { checkoutSchema, type CheckoutFormValues } from "../checkout.schemas";
-
 import { useCreateOrderMutation } from "@/features/orders/orders.mutations";
 import { ensureCartId, createCheckoutSession } from "@/services/cart-checkout.service";
+
+import { checkoutSchema, type CheckoutFormValues } from "../checkout.schemas";
 
 const steps = ["Address", "Delivery", "Payment", "Review", "Confirmation"] as const;
 

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { Button, Card, ErrorState, Spinner } from "@nova/ui";
 import { formatMoney } from "@nova/utils";
 
-import { useWalletBalanceQuery } from "../wallet.queries";
-
 import { useAuth } from "@/providers/auth-provider";
+
+import { useWalletBalanceQuery } from "../wallet.queries";
 
 // Confirmed against the real backend route table (backend/src/modules/payments-wallet):
 // only GET /wallet/balance is a genuine self-service customer feature. There is no

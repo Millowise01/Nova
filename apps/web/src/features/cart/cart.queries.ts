@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { cartKeys } from "./cart.keys";
-
 import { QUERY_STALE_TIME } from "@/config/app";
 import { ensureCartId, getCart } from "@/services/cart-checkout.service";
+
+import { cartKeys } from "./cart.keys";
 
 export function useCartQuery() {
   return useQuery({

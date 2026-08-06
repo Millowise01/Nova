@@ -1,8 +1,8 @@
 import type { AddCartLineInput, CheckoutFormValues } from "@nova/validation";
 
-import { getApiClient } from "./api";
-
 import { clearStoredCartId, getStoredCartId, setStoredCartId } from "@/lib/cart-id-store";
+
+import { getApiClient } from "./api";
 
 /** Gets the persisted cart id, creating a new cart on the backend if none is
  *  stored yet. A cart is addressable purely by id — there is no "get my

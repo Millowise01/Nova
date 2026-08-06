@@ -2,10 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { orderKeys } from "./orders.keys";
-
 import { QUERY_STALE_TIME } from "@/config/app";
 import { getOrder, listOrders } from "@/services/orders.service";
+
+import { orderKeys } from "./orders.keys";
 
 export function useOrdersListQuery() {
   return useQuery({

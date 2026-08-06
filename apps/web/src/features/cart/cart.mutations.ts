@@ -5,10 +5,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Money } from "@nova/types";
 import type { CartResponse } from "@nova/validation";
 
-import { cartKeys } from "./cart.keys";
-
 import { useToast } from "@/providers/toast-provider";
 import { addLine, ensureCartId } from "@/services/cart-checkout.service";
+
+import { cartKeys } from "./cart.keys";
 
 export interface AddToCartInput {
   variantId: string;

@@ -2,9 +2,9 @@ import { tokenStore } from "@nova/api-client";
 import { type Session, sessionSchema } from "@nova/auth";
 import type { AuthResponse, LoginInput, RegisterInput } from "@nova/validation";
 
-import { getApiClient } from "./api";
-
 import { decodeJwtPayload } from "@/lib/decode-jwt";
+
+import { getApiClient } from "./api";
 
 function sessionFromAuthResponse(auth: AuthResponse): Session {
   const { exp } = decodeJwtPayload(auth.accessToken);

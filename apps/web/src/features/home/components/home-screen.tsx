@@ -2,6 +2,9 @@
 
 import { Spinner } from "@nova/ui";
 
+import { adaptProduct } from "@/features/catalog/adapt-product";
+import { useProductsQuery } from "@/features/catalog/catalog.queries";
+
 import { getCategories, getPopularBrands } from "../home.mock-data";
 
 import { HomeHero } from "./home-hero";
@@ -14,9 +17,6 @@ import { ProductSection } from "./sections/product-section";
 import { RecommendationsSection } from "./sections/recommendations-section";
 import { SellerSpotlightSection } from "./sections/seller-spotlight-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
-
-import { adaptProduct } from "@/features/catalog/adapt-product";
-import { useProductsQuery } from "@/features/catalog/catalog.queries";
 
 export function HomeScreen() {
   // Categories/brands stay mocked — no backend list endpoint exists for either.
