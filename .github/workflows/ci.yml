@@ -9,7 +9,7 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Full history so turbo can diff against HEAD^1 to scope tasks to
           # affected packages only; a shallow clone would break --filter=...[HEAD^1].
