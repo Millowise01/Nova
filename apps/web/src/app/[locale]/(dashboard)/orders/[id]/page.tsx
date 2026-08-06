@@ -1,5 +1,6 @@
-import { OrdersScreen } from "@/features/orders/components/orders-screen";
+import { OrderDetailScreen } from "@/features/orders/components/order-detail-screen";
 
-export default function OrderDetailsPage() {
-  return <OrdersScreen />;
+export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <OrderDetailScreen orderId={id} />;
 }

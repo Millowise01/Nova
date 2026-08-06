@@ -6,6 +6,11 @@ export const metadata = buildMetadata({
   description: "Detailed product information, reviews, shipping, and seller trust details.",
 });
 
-export default function ProductDetailsPage() {
-  return <ProductScreen />;
+export default async function ProductDetailsPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return <ProductScreen slug={slug} />;
 }

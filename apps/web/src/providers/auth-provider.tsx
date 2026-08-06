@@ -5,6 +5,8 @@ import { createContext, useContext, useEffect, useState, useTransition } from "r
 
 import { type Session, sessionSchema } from "@nova/auth";
 
+import { logout as clearTokens, restoreSession } from "@/services/auth.service";
+
 type AuthContextType = {
   session: Session | null;
   isAuthenticated: boolean;
@@ -45,6 +47,7 @@ export function AuthProvider({
 
   const logout = () => {
     setIsLoading(true);
+    clearTokens();
     setSession(null);
     document.cookie = "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     startTransition(() => {
@@ -64,13 +67,28 @@ export function AuthProvider({
     const rawSession = getCookie("nova_session");
     if (rawSession) {
       try {
-        const parsed: unknown = JSON.parse(rawSession);
-        setSession(sessionSchema.parse(parsed));
+        setSession(sessionSchema.parse(JSON.parse(rawSession) as unknown));
       } catch {
         document.cookie =
           "nova_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
       }
     }
+
+    // The access token is memory-only and never survives a reload — silently
+    // trade the persisted refresh token for a fresh one whenever a page loads,
+    // regardless of whether the cookie above parsed. This also transparently
+    // recovers from a stale/tampered cookie as long as the refresh token is
+    // still valid.
+    void restoreSession().then((restored) => {
+      if (restored) {
+        login(restored);
+      } else if (rawSession) {
+        // Cookie claimed a session but the refresh token is gone/expired —
+        // don't leave the UI showing a logged-in state that can't actually
+        // make an authenticated request.
+        logout();
+      }
+    });
   }, []);
 
   return (

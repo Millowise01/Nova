@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -8,10 +9,23 @@ import { Button, Card, Input, Select } from "@nova/ui";
 
 import { checkoutSchema, type CheckoutFormValues } from "../checkout.schemas";
 
+import { useCreateOrderMutation } from "@/features/orders/orders.mutations";
+import { ensureCartId, createCheckoutSession } from "@/services/cart-checkout.service";
+
 const steps = ["Address", "Delivery", "Payment", "Review", "Confirmation"] as const;
 
 export function CheckoutFlow() {
   const [step, setStep] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
+  const router = useRouter();
+  const createOrder = useCreateOrderMutation();
+
+  // Generated once per mount of this component — i.e. once per checkout
+  // ATTEMPT — and reused across every retry of that same attempt (including a
+  // double-click on "Place Order"), per docs/frontend/01-data-fetching-
+  // conventions.md's idempotency convention. A genuinely new attempt (the user
+  // navigates away and back) remounts this component and gets a fresh key.
+  const idempotencyKey = useState(() => crypto.randomUUID())[0];
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -27,10 +41,24 @@ export function CheckoutFlow() {
   });
 
   const stepName = useMemo(() => steps[step], [step]);
+  const isLastStep = step === steps.length - 1;
 
-  const onSubmit = (data: CheckoutFormValues) => {
-    // TODO: Implement checkout
-    console.log(data);
+  const onSubmit = async (data: CheckoutFormValues) => {
+    setSubmitting(true);
+    try {
+      const cartId = await ensureCartId();
+      const session = await createCheckoutSession(cartId, data);
+      const order = await createOrder.mutateAsync({
+        checkoutSessionId: session.id,
+        idempotencyKey,
+      });
+      router.push(`/orders/${order.id}`);
+    } catch {
+      // createOrder's own onError already surfaces a toast; a session-creation
+      // failure (e.g. empty cart) falls through to here with no toast yet.
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,7 +84,7 @@ export function CheckoutFlow() {
         <form
           className="grid gap-3 md:grid-cols-2"
           onSubmit={(event) => {
-            void form.handleSubmit(onSubmit)(event);
+            event.preventDefault();
           }}
         >
           <Input placeholder="Address line" {...form.register("addressLine")} />
@@ -95,8 +123,21 @@ export function CheckoutFlow() {
             Back
           </Button>
 
-          <Button onClick={() => setStep((value) => Math.min(steps.length - 1, value + 1))}>
-            {step === steps.length - 1 ? "Place Order" : "Continue"}
+          <Button
+            disabled={submitting || createOrder.isPending}
+            onClick={() => {
+              if (isLastStep) {
+                void form.handleSubmit(onSubmit)();
+              } else {
+                setStep((value) => Math.min(steps.length - 1, value + 1));
+              }
+            }}
+          >
+            {isLastStep
+              ? submitting || createOrder.isPending
+                ? "Placing order..."
+                : "Place Order"
+              : "Continue"}
           </Button>
         </div>
       </Card>

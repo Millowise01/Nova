@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nova/validation": "workspace:*",
     "axios": "^1.11.0"
   }
 }

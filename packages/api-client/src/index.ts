@@ -1,9 +1,37 @@
-import axios from "axios";
+import { createAuthEndpoints } from "./endpoints/auth";
+import { createCartCheckoutEndpoints } from "./endpoints/cart-checkout";
+import { createCatalogEndpoints } from "./endpoints/catalog";
+import { createOrdersEndpoints } from "./endpoints/orders";
+import { createWalletEndpoints } from "./endpoints/wallet";
+import { createApiClient as createHttpClient, type NovaHttpClient } from "./http-client";
 
-export function createApiClient(baseURL: string) {
-  return axios.create({
-    baseURL,
-    withCredentials: true,
-    timeout: 15000,
-  });
+export { ApiError, toApiError, type ApiErrorShape } from "./errors";
+export { tokenStore } from "./token-store";
+export { createApiClient } from "./http-client";
+export type { NovaHttpClient } from "./http-client";
+export type { ListProductsParams } from "./endpoints/catalog";
+
+export interface NovaApiClient {
+  raw: NovaHttpClient;
+  auth: ReturnType<typeof createAuthEndpoints>;
+  catalog: ReturnType<typeof createCatalogEndpoints>;
+  cart: ReturnType<typeof createCartCheckoutEndpoints>;
+  orders: ReturnType<typeof createOrdersEndpoints>;
+  wallet: ReturnType<typeof createWalletEndpoints>;
+}
+
+/** The single, typed, Zod-validated client for the whole app — every response
+ *  is validated against the same schemas the backend's ZodValidationPipe (and,
+ *  on the request side, the backend itself) uses, sourced from @nova/validation. */
+export function createNovaApiClient(baseURL: string): NovaApiClient {
+  const raw = createHttpClient(baseURL);
+
+  return {
+    raw,
+    auth: createAuthEndpoints(raw),
+    catalog: createCatalogEndpoints(raw),
+    cart: createCartCheckoutEndpoints(raw),
+    orders: createOrdersEndpoints(raw),
+    wallet: createWalletEndpoints(raw),
+  };
 }

@@ -1,55 +1,31 @@
-import type { AxiosError } from "axios";
-
-import { createApiClient } from "@nova/api-client";
+import { createNovaApiClient, type NovaApiClient } from "@nova/api-client";
 import { getEnvironment } from "@nova/config";
 
-type ApiClient = ReturnType<typeof createApiClient>;
+/**
+ * Client-side only. The api-client's access token lives in an in-memory,
+ * module-level singleton (see @nova/api-client/token-store) — safe here
+ * because each browser tab genuinely has its own JS module instance, which
+ * is NOT true on the server (one Node process serves many users' requests),
+ * so this client is never used for authenticated server-side/RSC data
+ * fetching. All authenticated queries in this app run from "use client"
+ * components via React Query hooks instead. The previous version of this
+ * file tried to forward the `nova_session` cookie as a Bearer token — that
+ * cookie is a {userId, roles, expiresAt} summary for middleware route
+ * guards (apps/web/middleware.ts), never a real JWT, so it could never have
+ * worked as API auth.
+ */
 
 declare global {
-  var __novaApiClient: ApiClient | undefined;
+  var __novaApiClient: NovaApiClient | undefined;
 }
 
-export function getApiClient(): ApiClient {
-  if (!globalThis.__novaApiClient) {
-    const env = getEnvironment();
-    const client = createApiClient(env.NEXT_PUBLIC_API_BASE_URL);
-
-    client.interceptors.request.use(
-      async (config) => {
-        if (typeof window === "undefined") {
-          try {
-            const { cookies } = await import("next/headers");
-            const cookieStore = await cookies();
-            const session = cookieStore.get("nova_session")?.value;
-            if (session) {
-              config.headers.Cookie = `nova_session=${session}`;
-              config.headers.Authorization = `Bearer ${session}`;
-            }
-          } catch {
-            // Safe fallback outside Next.js request context
-          }
-        }
-        return config;
-      },
-      (error: unknown) => Promise.reject(error instanceof Error ? error : new Error(String(error))),
+export function getApiClient(): NovaApiClient {
+  if (typeof window === "undefined") {
+    throw new Error(
+      'getApiClient() is client-side only — call it from a "use client" component/hook, not during SSR/RSC rendering.',
     );
-
-    client.interceptors.response.use(
-      (response) => response,
-      (error: AxiosError<{ message?: string; code?: string; details?: unknown }>) => {
-        const normalizedError = new Error(
-          error.response?.data?.message ?? error.message ?? "An unexpected error occurred",
-        );
-        Object.assign(normalizedError, {
-          status: error.response?.status,
-          code: error.response?.data?.code ?? error.code,
-          details: error.response?.data?.details ?? null,
-        });
-        return Promise.reject(normalizedError);
-      },
-    );
-
-    globalThis.__novaApiClient = client;
   }
+
+  globalThis.__novaApiClient ??= createNovaApiClient(getEnvironment().NEXT_PUBLIC_API_BASE_URL);
   return globalThis.__novaApiClient;
 }

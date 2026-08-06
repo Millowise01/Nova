@@ -1,81 +1,16 @@
-import { formatMoney } from "@nova/utils";
+import type { ListProductsParams } from "@nova/api-client";
 
-import type { Brand, Category, Product } from "@/types/domain";
+import { getApiClient } from "./api";
 
-const mockProduct = (index: number): Product => {
-  const money = { amount: (1400 + index * 50).toFixed(2), currency: "SLE" as const };
-
-  return {
-    id: `product-${index}` as Product["id"],
-    slug: `nova-product-${index}`,
-    title: `Nova Commerce Product ${index}`,
-    description: "Reliable cross-border commerce listing optimized for Sierra Leone customers.",
-    price: {
-      ...money,
-      formatted: formatMoney(money),
-      discountPercentage: index % 3 === 0 ? 12 : undefined,
-    },
-    rating: 4.2,
-    reviewCount: 120 + index,
-    images: [{ url: `/images/product-${index}.jpg`, alt: `Nova product ${index}` }],
-    sellerName: "Nova Verified Seller",
-    inStock: true,
-    ecoScore: ["A", "B", "C"][index % 3] as Product["ecoScore"],
-    category: "electronics",
-    tags: ["featured", "daily-deal"],
-  };
-};
-
-export function getFeaturedProducts(): Product[] {
-  return Array.from({ length: 8 }, (_, index) => mockProduct(index + 1));
+export function listProducts(params: ListProductsParams = {}) {
+  return getApiClient().catalog.listProducts(params);
 }
 
-export function getTrendingProducts(): Product[] {
-  return Array.from({ length: 8 }, (_, index) => mockProduct(index + 11));
+export function getProductBySlug(slug: string) {
+  return getApiClient().catalog.getProductBySlug(slug);
 }
 
-export function getBestSellers(): Product[] {
-  return Array.from({ length: 8 }, (_, index) => mockProduct(index + 21));
-}
-
-export function getCategories(): Category[] {
-  return [
-    {
-      id: "cat-electronics" as Category["id"],
-      slug: "electronics",
-      name: "Electronics",
-      productCount: 2300,
-    },
-    { id: "cat-fashion" as Category["id"], slug: "fashion", name: "Fashion", productCount: 4100 },
-    {
-      id: "cat-home" as Category["id"],
-      slug: "home-living",
-      name: "Home & Living",
-      productCount: 1800,
-    },
-    { id: "cat-beauty" as Category["id"], slug: "beauty", name: "Beauty", productCount: 900 },
-  ];
-}
-
-export function getPopularBrands(): Brand[] {
-  return [
-    {
-      id: "brand-1" as Brand["id"],
-      slug: "nova-tech",
-      name: "Nova Tech",
-      logoUrl: "/brands/nova-tech.svg",
-    },
-    {
-      id: "brand-2" as Brand["id"],
-      slug: "freetown-style",
-      name: "Freetown Style",
-      logoUrl: "/brands/freetown-style.svg",
-    },
-    {
-      id: "brand-3" as Brand["id"],
-      slug: "green-market",
-      name: "Green Market",
-      logoUrl: "/brands/green-market.svg",
-    },
-  ];
-}
+// getCategories()/getPopularBrands() are intentionally NOT here — there is no
+// GET /categories or GET /brands endpoint on the backend (only POST/create).
+// See features/home/home.queries.ts for where the previous mock category/brand
+// data is still used, explicitly marked as such.

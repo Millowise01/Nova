@@ -177,3 +177,240 @@ export const rejectRefundSchema = z.object({
   reason: z.string().min(1),
 });
 export type RejectRefundInput = z.infer<typeof rejectRefundSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Response schemas — the frontend's shared source of truth for what the real
+// backend actually returns. Shapes below are captured directly from live
+// requests against a running backend (not assumed from controller reading),
+// including two real, deliberately-preserved backend inconsistencies:
+//   - POST /orders returns Money as nested { amount, currency } objects;
+//     GET /orders and GET /orders/:id return the flat Prisma-row shape
+//     (totalAmount + totalCurrency as separate string fields). Two different
+//     schemas below reflect this rather than papering over it.
+//   - There is no GET /categories or GET /brands list endpoint — only POST
+//     (create) exists for both. Categories/brands are only otherwise
+//     observable nested inside a product detail response.
+// ════════════════════════════════════════════════════════════
+
+export const moneySchema = z.object({
+  amount: moneyAmountSchema,
+  currency: currencyCodeSchema,
+});
+export type MoneyResponse = z.infer<typeof moneySchema>;
+
+export const pageInfoSchema = z.object({
+  hasMore: z.boolean(),
+  nextCursor: z.string().nullable().optional(),
+});
+
+// ─── Identity ──────────────────────────────────────────────
+
+export const userSchema = z.object({
+  id: z.string().uuid(),
+  roles: z.array(z.string()),
+});
+export type UserResponse = z.infer<typeof userSchema>;
+
+export const authTokensSchema = z.object({
+  accessToken: z.string().min(1),
+  refreshToken: z.string().min(1),
+});
+export type AuthTokensResponse = z.infer<typeof authTokensSchema>;
+
+/** POST /v1/auth/signup and POST /v1/auth/login both return this shape. */
+export const authResponseSchema = authTokensSchema.extend({ user: userSchema });
+export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+/** POST /v1/auth/refresh — rotates both tokens, does NOT re-return `user`. */
+export const refreshResponseSchema = authTokensSchema;
+export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
+
+// ─── Catalog ───────────────────────────────────────────────
+
+export const categorySchema = z.object({
+  id: z.string().uuid(),
+  parentId: z.string().uuid().nullable(),
+  name: z.string(),
+  slug: z.string(),
+  countryCode: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type CategoryResponse = z.infer<typeof categorySchema>;
+
+export const brandSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  slug: z.string(),
+  countryCode: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type BrandResponse = z.infer<typeof brandSchema>;
+
+export const variantSchema = z.object({
+  id: z.string().uuid(),
+  productId: z.string().uuid(),
+  sku: z.string(),
+  name: z.string(),
+  priceAmount: moneyAmountSchema,
+  priceCurrency: currencyCodeSchema,
+  stockQuantity: z.number().int(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type VariantResponse = z.infer<typeof variantSchema>;
+
+/** Shape returned by both GET /products (list) and GET /products/:slug (detail) —
+ *  detail additionally nests `category` and `brand`, list does not. */
+export const productSchema = z.object({
+  id: z.string().uuid(),
+  sellerId: z.string().uuid(),
+  categoryId: z.string().uuid(),
+  brandId: z.string().uuid().nullable(),
+  title: z.string(),
+  slug: z.string(),
+  description: z.string().nullable(),
+  status: z.string(),
+  countryCode: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+  variants: z.array(variantSchema),
+});
+export type ProductResponse = z.infer<typeof productSchema>;
+
+export const productDetailSchema = productSchema.extend({
+  category: categorySchema,
+  brand: brandSchema.nullable(),
+});
+export type ProductDetailResponse = z.infer<typeof productDetailSchema>;
+
+export const productListResponseSchema = z.object({
+  data: z.array(productSchema),
+  pageInfo: pageInfoSchema,
+});
+export type ProductListResponse = z.infer<typeof productListResponseSchema>;
+
+// ─── Cart & Checkout ───────────────────────────────────────
+
+export const cartCreateResponseSchema = z.object({
+  cartId: z.string().uuid(),
+  // null when the cart is created by an authenticated user (userId set instead) —
+  // only guest cart creation gets a real guestToken. Confirmed against real
+  // backend behavior: backend/src/modules/cart-checkout/domain/cart.service.ts.
+  guestToken: z.string().nullable(),
+});
+export type CartCreateResponse = z.infer<typeof cartCreateResponseSchema>;
+
+export const cartLineSchema = z.object({
+  id: z.string().uuid(),
+  cartId: z.string().uuid(),
+  variantId: z.string().uuid(),
+  quantity: z.number().int(),
+  unitPriceAmount: moneyAmountSchema,
+  unitPriceCurrency: currencyCodeSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type CartLineResponse = z.infer<typeof cartLineSchema>;
+
+export const cartSchema = z.object({
+  id: z.string().uuid(),
+  status: z.string(),
+  lines: z.array(cartLineSchema),
+  subtotal: moneySchema,
+});
+export type CartResponse = z.infer<typeof cartSchema>;
+
+/** POST /v1/carts/:cartId/checkout/session — flat Prisma-row shape. */
+export const checkoutSessionSchema = z.object({
+  id: z.string().uuid(),
+  cartId: z.string().uuid(),
+  userId: z.string().uuid().nullable(),
+  addressLine: z.string(),
+  city: z.string(),
+  district: z.string(),
+  phone: z.string(),
+  deliveryMethod: z.string(),
+  paymentMethod: z.string(),
+  subtotalAmount: moneyAmountSchema,
+  subtotalCurrency: currencyCodeSchema,
+  totalAmount: moneyAmountSchema,
+  totalCurrency: currencyCodeSchema,
+  status: z.string(),
+  consumedAt: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type CheckoutSessionResponse = z.infer<typeof checkoutSessionSchema>;
+
+// ─── Orders ────────────────────────────────────────────────
+
+/** POST /v1/orders response — Money fields are NESTED objects here only. */
+export const orderCreateResponseSchema = z.object({
+  id: z.string().uuid(),
+  status: z.string(),
+  total: moneySchema,
+  subOrders: z.array(
+    z.object({
+      id: z.string().uuid(),
+      sellerId: z.string().uuid(),
+      status: z.string(),
+      subtotal: moneySchema,
+    }),
+  ),
+  paymentIntentId: z.string().uuid().nullable(),
+  createdAt: z.string(),
+});
+export type OrderCreateResponse = z.infer<typeof orderCreateResponseSchema>;
+
+export const subOrderSchema = z.object({
+  id: z.string().uuid(),
+  orderId: z.string().uuid(),
+  sellerId: z.string().uuid(),
+  status: z.string(),
+  subtotalAmount: moneyAmountSchema,
+  subtotalCurrency: currencyCodeSchema,
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+});
+export type SubOrderResponse = z.infer<typeof subOrderSchema>;
+
+/** GET /v1/orders and GET /v1/orders/:id — flat Prisma-row shape, distinct from
+ *  the POST /v1/orders response above. */
+export const orderSchema = z.object({
+  id: z.string().uuid(),
+  checkoutSessionId: z.string().uuid(),
+  userId: z.string().uuid().nullable(),
+  status: z.string(),
+  totalAmount: moneyAmountSchema,
+  totalCurrency: currencyCodeSchema,
+  countryCode: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  deletedAt: z.string().nullable(),
+  subOrders: z.array(subOrderSchema),
+});
+export type OrderResponse = z.infer<typeof orderSchema>;
+
+/** PATCH /v1/orders/:id/cancel — a THIRD distinct order shape. The domain
+ *  service's cancelOrder() returns a bare `tx.order.update()` result with no
+ *  `subOrders` include (confirmed against backend/src/modules/orders/domain/
+ *  orders.service.ts), unlike GET's orderSchema above. Callers that need
+ *  subOrders after cancelling should invalidate/refetch via getOrder(), not
+ *  trust this response to have them. */
+export const orderCancelResponseSchema = orderSchema.omit({ subOrders: true });
+export type OrderCancelResponse = z.infer<typeof orderCancelResponseSchema>;
+
+// ─── Payments & Wallet ─────────────────────────────────────
+
+/** GET /v1/wallet/balance — the only wallet read endpoint that exists today. */
+export const walletBalanceSchema = moneySchema;
+export type WalletBalanceResponse = z.infer<typeof walletBalanceSchema>;

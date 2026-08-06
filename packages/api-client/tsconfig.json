@@ -10,6 +10,6 @@
     "declarationMap": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
-  "references": [],
+  "references": [{ "path": "../validation" }],
   "exclude": ["node_modules", "dist"]
 }

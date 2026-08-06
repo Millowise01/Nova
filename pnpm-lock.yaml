@@ -465,6 +465,9 @@ importers:
 
   packages/api-client:
     dependencies:
+      '@nova/validation':
+        specifier: workspace:*
+        version: link:../validation
       axios:
         specifier: ^1.11.0
         version: 1.18.1
