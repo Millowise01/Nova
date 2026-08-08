@@ -7,5 +7,12 @@
     "declarationMap": false,
     "rootDir": "."
   },
-  "include": ["src", ".storybook/*.ts", ".storybook/*.tsx", "*.config.ts", "*.config.mts"]
+  "include": [
+    "src",
+    ".storybook/*.ts",
+    ".storybook/*.tsx",
+    "*.config.ts",
+    "*.config.mts",
+    "vitest.setup.ts"
+  ]
 }

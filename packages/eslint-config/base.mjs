@@ -61,10 +61,20 @@ export default [
             "*.config.mts",
             "*.config.cts",
             "packages/ui/vitest.config.ts",
+            // lint-staged runs eslint from the repo root for packages/* files
+            // (its per-package cwd scoping only covers apps/* and backend —
+            // see lint-staged.config.mjs), which resolves the root
+            // eslint.config.mjs -> this base config directly, bypassing
+            // packages/ui's own eslint.config.mjs (and its tsconfig.lint.json
+            // override, which already covers vitest.setup.ts for the
+            // `pnpm --filter @nova/ui lint` path). Both paths need coverage.
+            "packages/ui/vitest.setup.ts",
             // Same composite + rootDir:"./src" build config as packages/ui —
             // vitest.config.ts sits at the package root, outside "src/**", so
             // it has no other project coverage either.
             "packages/api-client/vitest.config.ts",
+            "packages/design-system/vitest.config.ts",
+            "packages/design-system/vitest.setup.ts",
             "packages/*/.storybook/*.ts",
             "packages/*/.storybook/*.tsx",
           ],
