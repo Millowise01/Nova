@@ -23,7 +23,7 @@
     "@nova/utils": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",
-    "react": "^19.0.0"
+    "react": "^19.2.8"
   },
   "devDependencies": {
     "@storybook/addon-themes": "^10.5.6",

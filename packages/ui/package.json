@@ -8,7 +8,7 @@
   "dependencies": {
     "@nova/design-system": "workspace:*",
     "@nova/utils": "workspace:*",
-    "react": "^19.0.0",
+    "react": "^19.2.8",
     "recharts": "^2.15.4"
   },
   "devDependencies": {
