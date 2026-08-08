@@ -76,14 +76,14 @@ export const lightTheme = {
   accentForeground: "#ffffff",
   accentBorder: "#ffa366",
 
-  /* ── Success ─────────────────────────────────────────────── */
-  success: "#16a34a",
-  successHover: "#15803d",
-  successActive: "#166534",
-  successDisabled: "#bbf7d0",
-  successSubtle: "#f0fdf4",
+  /* ── Success — Nova Green #16A34A ─────────────────────────── */
+  success: "#16A34A",
+  successHover: "#149343",
+  successActive: "#12823b",
+  successDisabled: "#abf4c6",
+  successSubtle: "#eafcf1",
   successForeground: "#ffffff",
-  successBorder: "#86efac",
+  successBorder: "#81eea9",
 
   /* ── Warning ─────────────────────────────────────────────── */
   warning: "#d97706",
@@ -94,30 +94,29 @@ export const lightTheme = {
   warningForeground: "#ffffff",
   warningBorder: "#fcd34d",
 
-  /* ── Error ───────────────────────────────────────────────── */
-  error: "#dc2626",
-  errorHover: "#b91c1c",
-  errorActive: "#991b1b",
-  errorDisabled: "#fecaca",
-  errorSubtle: "#fef2f2",
+  /* ── Error — Nova Red #DC2626 ──────────────────────────────── */
+  error: "#DC2626",
+  errorHover: "#c82020",
+  errorActive: "#b11d1d",
+  errorDisabled: "#f5c0c0",
+  errorSubtle: "#fcefef",
   errorForeground: "#ffffff",
-  errorBorder: "#fca5a5",
+  errorBorder: "#f0a0a0",
 
   /**
    * Info — #2563EB, distinct from Accent Blue #1A56DB per the Phase 2 spec's
    * Semantic Palette (they're two separate brand blues, not the same role).
-   * #2563EB matches Tailwind's blue-600 exactly, so the hover/active/subtle/
-   * border steps below use the corresponding Tailwind blue-700/800/50/300 —
-   * a verifiable basis, not hand-computed shades, since the source spec only
-   * gives the single base value.
+   * Now backed by `colors.info` in tokens/colors.ts — hover/active/disabled/
+   * subtle/border pull from that generated scale (600/700/200/50/300),
+   * matching the same mapping used for success/error above.
    */
   info: "#2563EB",
-  infoHover: "#1D4ED8",
-  infoActive: "#1E40AF",
-  infoDisabled: "#BFDBFE",
-  infoSubtle: "#EFF6FF",
+  infoHover: "#1554e0",
+  infoActive: "#124bc6",
+  infoDisabled: "#bfd1f9",
+  infoSubtle: "#eff4fe",
   infoForeground: "#ffffff",
-  infoBorder: "#93C5FD",
+  infoBorder: "#9fbaf6",
 } as const;
 
 export type LightTheme = typeof lightTheme;

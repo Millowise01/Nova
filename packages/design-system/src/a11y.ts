@@ -1,5 +1,5 @@
 /**
- * Nova Accessibility Utilities — WCAG 2.1 AA
+ * Nova Accessibility Utilities — WCAG 2.2 AA
  *
  * Covers: focus styles, color contrast, keyboard navigation,
  * reduced motion, and screen reader helpers.
@@ -34,7 +34,7 @@ export const focusRingOnDarkClass =
 // ── Color contrast ────────────────────────────────────────────────
 
 /**
- * WCAG 2.1 contrast ratio thresholds.
+ * WCAG 2.2 contrast ratio thresholds (1.4.3 Contrast (Minimum) — unchanged from 2.1).
  * AA normal text: 4.5:1 | AA large text / UI: 3:1 | AAA: 7:1
  */
 export const contrastRatios = {

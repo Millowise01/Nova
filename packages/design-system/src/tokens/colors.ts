@@ -85,18 +85,28 @@ export const colors = {
     900: "#111827",
     950: "#030712",
   },
-  /** Success — Green */
+  /**
+   * Success — Green, anchored on approved brand value #16A34A.
+   * Previously this scale was the *unmodified* stock Tailwind `green`
+   * palette (50–900), with the brand color sitting at the 600 step and a
+   * wrong Tailwind default (#22c55e) squatting at 500. Regenerated here so
+   * the brand anchor is correctly at 500: H/S held constant at the anchor's
+   * HSL values, L stepped per-fraction using the pattern derived from this
+   * file's orange/blue scales (the two scales that hold S constant across
+   * their ramp — navy varies S too and looks hand-transcribed, not
+   * generated, so it wasn't used as the reference).
+   */
   green: {
-    50: "#f0fdf4",
-    100: "#dcfce7",
-    200: "#bbf7d0",
-    300: "#86efac",
-    400: "#4ade80",
-    500: "#22c55e",
-    600: "#16a34a",
-    700: "#15803d",
-    800: "#166534",
-    900: "#14532d",
+    50: "#eafcf1",
+    100: "#d5f9e2",
+    200: "#abf4c6",
+    300: "#81eea9",
+    400: "#57e88d",
+    500: "#16A34A",
+    600: "#149343",
+    700: "#12823b",
+    800: "#0f7134",
+    900: "#0b5326",
   },
   /** Warning — Amber */
   amber: {
@@ -111,18 +121,44 @@ export const colors = {
     800: "#92400e",
     900: "#78350f",
   },
-  /** Error — Red */
+  /**
+   * Error — Red, anchored on approved brand value #DC2626.
+   * Same situation as green above: this was the unmodified stock Tailwind
+   * `red` palette, brand color at 600, wrong default (#ef4444) at 500.
+   * Regenerated with the same method (constant H/S, fractional L stepping
+   * from the orange/blue reference pattern).
+   */
   red: {
-    50: "#fef2f2",
-    100: "#fee2e2",
-    200: "#fecaca",
-    300: "#fca5a5",
-    400: "#f87171",
-    500: "#ef4444",
-    600: "#dc2626",
-    700: "#b91c1c",
-    800: "#991b1b",
-    900: "#7f1d1d",
+    50: "#fcefef",
+    100: "#fadfdf",
+    200: "#f5c0c0",
+    300: "#f0a0a0",
+    400: "#ea8080",
+    500: "#DC2626",
+    600: "#c82020",
+    700: "#b11d1d",
+    800: "#9b1919",
+    900: "#711212",
+  },
+  /**
+   * Info — #2563EB. Distinct from Accent Blue (`blue.500` = #1A56DB) per
+   * the Phase 2 Semantic Palette — these are two separate brand blues with
+   * different roles (info state vs. links/interactive elements), not a
+   * duplicate. Did not previously exist as a token scale; theme files were
+   * hand-authoring info states from stock Tailwind blue. Generated with the
+   * same constant-H/S, fractional-L method used for green/red above.
+   */
+  info: {
+    50: "#eff4fe",
+    100: "#dfe8fc",
+    200: "#bfd1f9",
+    300: "#9fbaf6",
+    400: "#7fa3f3",
+    500: "#2563EB",
+    600: "#1554e0",
+    700: "#124bc6",
+    800: "#1041ad",
+    900: "#0c307f",
   },
 } as const;
 

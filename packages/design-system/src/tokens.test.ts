@@ -37,9 +37,14 @@ describe("Nova brand color palette", () => {
   });
 
   it("exposes functional scales", () => {
-    expect(colors.green[600]).toBe("#16a34a");
+    expect(colors.green[500]).toBe("#16A34A");
     expect(colors.amber[600]).toBe("#d97706");
-    expect(colors.red[600]).toBe("#dc2626");
+    expect(colors.red[500]).toBe("#DC2626");
+  });
+
+  it("info base is #2563EB and distinct from accent blue", () => {
+    expect(colors.info[500]).toBe("#2563EB");
+    expect(colors.info[500]).not.toBe(colors.blue[500]);
   });
 });
 

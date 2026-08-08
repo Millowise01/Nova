@@ -320,7 +320,7 @@ import { iconSizes, iconStrokes } from "@nova/icons";
 
 ## Accessibility Rules
 
-### WCAG 2.1 AA Requirements
+### WCAG 2.2 AA Requirements
 
 1. **Color contrast** — All text must meet 4.5:1 (normal) or 3:1 (large/UI). Use `contrastRatio()` from `@nova/design-system` to verify.
 2. **Focus states** — Every interactive element must have a visible focus ring. Use `focusRingClass` or Tailwind `focus-visible:ring-2 focus-visible:ring-border-focus`.

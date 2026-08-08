@@ -58,14 +58,14 @@ export const darkTheme = {
   accentForeground: "#ffffff",
   accentBorder: "#e65f00",
 
-  /* ── Success ─────────────────────────────────────────────── */
-  success: "#4ade80",
-  successHover: "#86efac",
-  successActive: "#bbf7d0",
-  successDisabled: "#14532d",
-  successSubtle: "#052e16",
+  /* ── Success — lightened Nova Green for contrast on dark ──── */
+  success: "#57e88d",
+  successHover: "#81eea9",
+  successActive: "#abf4c6",
+  successDisabled: "#0b5326",
+  successSubtle: "#073518",
   successForeground: "#030712",
-  successBorder: "#22c55e",
+  successBorder: "#16A34A",
 
   /* ── Warning ─────────────────────────────────────────────── */
   warning: "#fbbf24",
@@ -76,27 +76,27 @@ export const darkTheme = {
   warningForeground: "#030712",
   warningBorder: "#f59e0b",
 
-  /* ── Error ───────────────────────────────────────────────── */
-  error: "#f87171",
-  errorHover: "#fca5a5",
-  errorActive: "#fecaca",
-  errorDisabled: "#7f1d1d",
-  errorSubtle: "#2d0a0a",
+  /* ── Error — lightened Nova Red for contrast on dark ──────── */
+  error: "#ea8080",
+  errorHover: "#f0a0a0",
+  errorActive: "#f5c0c0",
+  errorDisabled: "#711212",
+  errorSubtle: "#480c0c",
   errorForeground: "#030712",
-  errorBorder: "#ef4444",
+  errorBorder: "#DC2626",
 
   /**
-   * Info — Tailwind blue-400/300/200/900, mirroring how this theme already
-   * lightens other semantic colors for contrast against dark backgrounds
-   * (see warning/error above). Light theme's info uses blue-600 (#2563EB);
-   * infoBorder reuses that light-theme base value, matching the pattern
-   * used by warningBorder/errorBorder in this same file.
+   * Info — now backed by `colors.info` (#2563EB anchor) instead of stock
+   * Tailwind blue, mirroring how this theme already lightens other semantic
+   * colors for contrast against dark backgrounds (see success/error above).
+   * infoBorder reuses the light-theme base value, matching the pattern used
+   * by successBorder/errorBorder in this same file.
    */
-  info: "#60A5FA",
-  infoHover: "#93C5FD",
-  infoActive: "#BFDBFE",
-  infoDisabled: "#1E3A8A",
-  infoSubtle: "#0c1a3d",
+  info: "#7fa3f3",
+  infoHover: "#9fbaf6",
+  infoActive: "#bfd1f9",
+  infoDisabled: "#0c307f",
+  infoSubtle: "#071e51",
   infoForeground: "#030712",
   infoBorder: "#2563EB",
 } as const;
