@@ -5,10 +5,20 @@ import { formatMoney } from "@nova/utils";
 
 import { useAddToCartMutation } from "@/features/cart/cart.mutations";
 import { useProductQuery } from "@/features/catalog/catalog.queries";
+import {
+  useAddToWishlistMutation,
+  useRemoveFromWishlistMutation,
+} from "@/features/wishlist/wishlist.mutations";
+import { useWishlistQuery } from "@/features/wishlist/wishlist.queries";
+import { useAuth } from "@/providers/auth-provider";
 
 export function ProductScreen({ slug }: { slug: string }) {
   const query = useProductQuery(slug);
   const addToCart = useAddToCartMutation();
+  const { isAuthenticated } = useAuth();
+  const wishlistQuery = useWishlistQuery();
+  const addToWishlist = useAddToWishlistMutation();
+  const removeFromWishlist = useRemoveFromWishlistMutation();
 
   if (query.isLoading) {
     return (
@@ -30,6 +40,7 @@ export function ProductScreen({ slug }: { slug: string }) {
 
   const product = query.data;
   const variant = product.variants[0];
+  const wishlistItem = wishlistQuery.data?.items.find((item) => item.productId === product.id);
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6 lg:px-8">
@@ -61,20 +72,44 @@ export function ProductScreen({ slug }: { slug: string }) {
             </Badge>
           </div>
 
-          <Button
-            className="w-full sm:w-auto"
-            disabled={!variant || variant.stockQuantity === 0 || addToCart.isPending}
-            onClick={() => {
-              if (!variant) return;
-              addToCart.mutate({
-                variantId: variant.id,
-                quantity: 1,
-                unitPrice: { amount: variant.priceAmount, currency: variant.priceCurrency },
-              });
-            }}
-          >
-            {addToCart.isPending ? "Adding..." : "Add to Cart"}
-          </Button>
+          <div className="flex flex-wrap gap-3">
+            <Button
+              disabled={!variant || variant.stockQuantity === 0 || addToCart.isPending}
+              onClick={() => {
+                if (!variant) return;
+                addToCart.mutate({
+                  variantId: variant.id,
+                  quantity: 1,
+                  unitPrice: { amount: variant.priceAmount, currency: variant.priceCurrency },
+                });
+              }}
+            >
+              {addToCart.isPending ? "Adding..." : "Add to Cart"}
+            </Button>
+
+            {isAuthenticated && (
+              <Button
+                disabled={addToWishlist.isPending || removeFromWishlist.isPending}
+                onClick={() => {
+                  if (wishlistItem) {
+                    removeFromWishlist.mutate(wishlistItem.id);
+                  } else {
+                    addToWishlist.mutate({
+                      productId: product.id,
+                      optimisticProduct: {
+                        id: product.id,
+                        title: product.title,
+                        slug: product.slug,
+                      },
+                    });
+                  }
+                }}
+                variant="outline"
+              >
+                {wishlistItem ? "Remove from Wishlist" : "Add to Wishlist"}
+              </Button>
+            )}
+          </div>
 
           {product.variants.length > 1 && (
             <div className="space-y-2 pt-2">

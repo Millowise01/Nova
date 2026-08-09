@@ -283,4 +283,84 @@ describe("Identity — auth flow (e2e)", () => {
       expect(response.body.error.code).toBe("MFA_SETUP_REQUIRED");
     });
   });
+
+  describe("Profile — GET/PATCH /v1/me", () => {
+    async function signUp() {
+      const payload = uniqueUser();
+      const signup = await request(app.getHttpServer())
+        .post("/v1/auth/signup")
+        .send(payload)
+        .expect(201);
+      return { payload, accessToken: signup.body.data.accessToken as string };
+    }
+
+    it("requires auth", async () => {
+      await request(app.getHttpServer()).get("/v1/me").expect(401);
+    });
+
+    it("persists name from signup's firstName+lastName (real bug fixed — previously discarded), and GET /me returns decrypted email/phone read-only", async () => {
+      const { payload, accessToken } = await signUp();
+
+      const response = await request(app.getHttpServer())
+        .get("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect(response.body.data.name).toBe(`${payload.firstName} ${payload.lastName}`);
+      expect(response.body.data.email).toBe(payload.email);
+      expect(response.body.data.phone).toBe(payload.phone);
+      expect(response.body.data.locale).toBe("en");
+      expect(response.body.data.roles).toEqual(["customer"]);
+    });
+
+    it("updates name and locale via PATCH", async () => {
+      const { accessToken } = await signUp();
+
+      const response = await request(app.getHttpServer())
+        .patch("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ name: "New Name", locale: "fr" })
+        .expect(200);
+
+      expect(response.body.data.name).toBe("New Name");
+      expect(response.body.data.locale).toBe("fr");
+
+      const refetched = await request(app.getHttpServer())
+        .get("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(200);
+      expect(refetched.body.data.name).toBe("New Name");
+    });
+
+    it("cannot change email or phone through PATCH /me — those fields are silently stripped by the schema, not applied", async () => {
+      const { payload, accessToken } = await signUp();
+
+      await request(app.getHttpServer())
+        .patch("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({ name: "Still Allowed", email: "hijacked@example.test", phone: "+23299999999" })
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .get("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .expect(200);
+
+      // name DID change (it was in the request); email/phone did NOT (schema strips them).
+      expect(response.body.data.name).toBe("Still Allowed");
+      expect(response.body.data.email).toBe(payload.email);
+      expect(response.body.data.phone).toBe(payload.phone);
+    });
+
+    it("rejects an empty PATCH body — at least one field must be provided", async () => {
+      const { accessToken } = await signUp();
+
+      const response = await request(app.getHttpServer())
+        .patch("/v1/me")
+        .set("Authorization", `Bearer ${accessToken}`)
+        .send({})
+        .expect(400);
+      expect(response.body.error.code).toBe("VALIDATION_FAILED");
+    });
+  });
 });

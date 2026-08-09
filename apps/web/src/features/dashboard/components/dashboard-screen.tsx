@@ -3,7 +3,11 @@ import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 const dashboardModules = [
   { title: "Overview", description: "Summary of account activity and order health." },
   { title: "Orders", description: "Order history, tracking, and invoice access." },
-  { title: "Wishlist", description: "Saved products and future purchase tracking." },
+  {
+    title: "Wishlist",
+    description: "Saved products and future purchase tracking.",
+    href: "/wishlist",
+  },
   { title: "Wallet", description: "Balance, rewards, and cashback surfaces." },
   { title: "Rewards", description: "Loyalty and campaign participation metrics." },
   { title: "Notifications", description: "Central notification preferences and feed." },

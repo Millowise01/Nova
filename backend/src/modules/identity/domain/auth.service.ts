@@ -63,6 +63,11 @@ export class AuthService {
         emailHash,
         phoneEncrypted: this.pii.encrypt(input.phone),
         phoneHash,
+        // Real bug found and fixed while wiring GET /v1/me: registerSchema has always
+        // captured firstName/lastName, but this create() never persisted them anywhere
+        // — every user's name was silently discarded at signup. name is now actually
+        // stored, which is what makes GET /v1/me meaningful for pre-existing signups too.
+        name: `${input.firstName} ${input.lastName}`.trim(),
         roles: ["customer"],
         authFactors: {
           create: { type: "password", passwordHash },

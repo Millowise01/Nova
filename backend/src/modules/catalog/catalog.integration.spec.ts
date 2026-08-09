@@ -239,4 +239,146 @@ describe("Catalog (integration)", () => {
       .expect(404);
     expect(notFound.body.error.code).toBe("PRODUCT_NOT_FOUND");
   });
+
+  it("lists categories and brands — previously only create (POST) existed for either", async () => {
+    const suffix = randomUUID().slice(0, 8);
+    const categoryName = `Listable Category ${suffix}`;
+    const brandName = `Listable Brand ${suffix}`;
+
+    await request(app.getHttpServer())
+      .post("/v1/categories")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ name: categoryName, slug: `listable-category-${suffix}` })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post("/v1/brands")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ name: brandName, slug: `listable-brand-${suffix}` })
+      .expect(201);
+
+    const categories = await request(app.getHttpServer()).get("/v1/categories").expect(200);
+    expect(categories.body.data.some((c: { name: string }) => c.name === categoryName)).toBe(true);
+
+    const brands = await request(app.getHttpServer()).get("/v1/brands").expect(200);
+    expect(brands.body.data.some((b: { name: string }) => b.name === brandName)).toBe(true);
+
+    // Public reads — no Authorization header needed at all.
+    expect(categories.status).toBe(200);
+    expect(brands.status).toBe(200);
+  });
+
+  it("filters products by isFeatured and isFlashSale via query params", async () => {
+    const suffix = randomUUID().slice(0, 8);
+    const category = await request(app.getHttpServer())
+      .post("/v1/categories")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ name: "Merch", slug: `merch-${suffix}` })
+      .expect(201);
+
+    async function createProduct(flags: { isFeatured?: boolean; isFlashSale?: boolean }) {
+      const s = randomUUID().slice(0, 8);
+      const res = await request(app.getHttpServer())
+        .post("/v1/products")
+        .set("Authorization", `Bearer ${sellerToken}`)
+        .send({
+          categoryId: category.body.data.id,
+          title: `Merch Product ${s}`,
+          slug: `merch-product-${s}`,
+          ...flags,
+          variants: [
+            {
+              sku: `MP-${s}`,
+              name: "Default",
+              priceAmount: "1.00",
+              priceCurrency: "SLE",
+              stockQuantity: 1,
+            },
+          ],
+        })
+        .expect(201);
+      return res.body.data.id as string;
+    }
+
+    const featuredId = await createProduct({ isFeatured: true });
+    const flashSaleId = await createProduct({ isFlashSale: true });
+    const plainId = await createProduct({});
+
+    const featured = await request(app.getHttpServer())
+      .get("/v1/products")
+      .query({ featured: "true" })
+      .expect(200);
+    const featuredIds = featured.body.data.map((p: { id: string }) => p.id);
+    expect(featuredIds).toContain(featuredId);
+    expect(featuredIds).not.toContain(flashSaleId);
+    expect(featuredIds).not.toContain(plainId);
+
+    const flashSale = await request(app.getHttpServer())
+      .get("/v1/products")
+      .query({ flashSale: "true" })
+      .expect(200);
+    const flashSaleIds = flashSale.body.data.map((p: { id: string }) => p.id);
+    expect(flashSaleIds).toContain(flashSaleId);
+    expect(flashSaleIds).not.toContain(featuredId);
+  });
+
+  it("public seller storefront: GET /sellers/:id returns a public profile (no email/phone), GET /sellers/:id/products lists only their products, and a non-seller ID 404s", async () => {
+    const suffix = randomUUID().slice(0, 8);
+
+    // sellerToken belongs to a user with a real name (set at signup) and the seller role.
+    const me = await request(app.getHttpServer())
+      .get("/v1/me")
+      .set("Authorization", `Bearer ${sellerToken}`)
+      .expect(200);
+    const sellerId = me.body.data.id as string;
+
+    const category = await request(app.getHttpServer())
+      .post("/v1/categories")
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({ name: "Storefront", slug: `storefront-${suffix}` })
+      .expect(201);
+
+    const product = await request(app.getHttpServer())
+      .post("/v1/products")
+      .set("Authorization", `Bearer ${sellerToken}`)
+      .send({
+        categoryId: category.body.data.id,
+        title: "Storefront Product",
+        slug: `storefront-product-${suffix}`,
+        variants: [
+          {
+            sku: `SF-${suffix}`,
+            name: "Default",
+            priceAmount: "2.00",
+            priceCurrency: "SLE",
+            stockQuantity: 1,
+          },
+        ],
+      })
+      .expect(201);
+
+    const profile = await request(app.getHttpServer()).get(`/v1/sellers/${sellerId}`).expect(200);
+    expect(profile.body.data.id).toBe(sellerId);
+    expect(profile.body.data.name).toEqual(expect.any(String));
+    expect(profile.body.data).not.toHaveProperty("email");
+    expect(profile.body.data).not.toHaveProperty("phone");
+
+    const products = await request(app.getHttpServer())
+      .get(`/v1/sellers/${sellerId}/products`)
+      .expect(200);
+    const ids = products.body.data.map((p: { id: string; sellerId: string }) => {
+      expect(p.sellerId).toBe(sellerId);
+      return p.id;
+    });
+    expect(ids).toContain(product.body.data.id);
+
+    // A customer (not a seller) is not a valid storefront — 404, not an empty profile.
+    const customerMe = await request(app.getHttpServer())
+      .get("/v1/me")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .expect(200);
+    const notFound = await request(app.getHttpServer())
+      .get(`/v1/sellers/${customerMe.body.data.id}`)
+      .expect(404);
+    expect(notFound.body.error.code).toBe("SELLER_NOT_FOUND");
+  });
 });

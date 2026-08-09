@@ -37,6 +37,13 @@ export class AbilityFactory {
     can("create", "Cart");
     can("create", "Order");
     can(["read", "cancel"], "Order", { userId: user.id }); // ABAC — only their own orders.
+    // Wishlist: every authenticated user manages their own — the GET/POST routes are
+    // inherently self-scoped (operate on "my wishlist", no ability check needed there,
+    // same reasoning as Cart/Order creation above), but DELETE /wishlist/items/:id takes
+    // an arbitrary item ID that could belong to someone else's wishlist, so that one DOES
+    // check this condition via subject() at the service layer (mirrors OrdersService's
+    // getOrder/cancelOrder pattern exactly).
+    can(["create", "read", "delete"], "Wishlist", { userId: user.id });
 
     return build();
   }

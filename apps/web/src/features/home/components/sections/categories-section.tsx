@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 import { Card } from "@nova/ui";
+import type { CategoryResponse } from "@nova/validation";
 
 import { SectionTitle } from "@/features/shared/components";
-import type { Category } from "@/types/domain";
 
-export function CategoriesSection({ categories }: { categories: Category[] }) {
+export function CategoriesSection({ categories }: { categories: CategoryResponse[] }) {
   return (
     <section className="mx-auto w-full max-w-7xl space-y-4 px-4 md:px-6 lg:px-8">
       <SectionTitle
@@ -17,9 +17,6 @@ export function CategoriesSection({ categories }: { categories: Category[] }) {
           <Link href={`/categories/${category.slug}`} key={category.id}>
             <Card className="h-full space-y-2 transition hover:-translate-y-0.5 hover:shadow-md">
               <h3 className="text-base font-semibold">{category.name}</h3>
-              <p className="text-sm text-slate-600">
-                {category.productCount.toLocaleString()} products
-              </p>
             </Card>
           </Link>
         ))}

@@ -5,9 +5,11 @@ import {
   createBrandSchema,
   createCategorySchema,
   createProductSchema,
+  listProductsQuerySchema,
   type CreateBrandInput,
   type CreateCategoryInput,
   type CreateProductInput,
+  type ListProductsQuery,
 } from "@nova/validation";
 
 import { JwtAuthGuard, type AuthenticatedRequest } from "../../../common/guards/jwt-auth.guard";
@@ -58,13 +60,47 @@ export class CatalogController {
   }
 
   @Get("products")
-  async listProducts(@Query("cursor") cursor?: string) {
-    return this.catalog.listProducts(cursor);
+  async listProducts(
+    @Query(new ZodValidationPipe(listProductsQuerySchema)) query: ListProductsQuery,
+  ) {
+    return this.catalog.listProducts(query);
   }
 
   @Get("products/:slug")
   async getProduct(@Param("slug") slug: string) {
     const product = await this.catalog.getProductBySlug(slug);
     return { data: product };
+  }
+
+  // Public, unguarded reads — same as GET /products above. Previously only
+  // POST (create) existed for either; there was no way to list them at all.
+  @Get("categories")
+  async listCategories() {
+    const categories = await this.catalog.listCategories();
+    return { data: categories };
+  }
+
+  @Get("brands")
+  async listBrands() {
+    const brands = await this.catalog.listBrands();
+    return { data: brands };
+  }
+
+  // Public seller storefront — read-only, no auth required.
+  @Get("sellers/:id")
+  async getSellerProfile(@Param("id") id: string) {
+    const seller = await this.catalog.getSellerProfile(id);
+    return { data: seller };
+  }
+
+  @Get("sellers/:id/products")
+  async listSellerProducts(
+    @Param("id") id: string,
+    @Query(new ZodValidationPipe(listProductsQuerySchema)) query: ListProductsQuery,
+  ) {
+    // Ensure the seller actually exists (and is a seller) before listing — 404s
+    // cleanly instead of silently returning an empty product list for a bad ID.
+    await this.catalog.getSellerProfile(id);
+    return this.catalog.listProducts({ ...query, sellerId: id });
   }
 }

@@ -1,7 +1,17 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import type { Request } from "express";
 
-import { IdentityPublicService } from "../../modules/identity";
+// Deep import, not the "../../modules/identity" barrel — IdentityModule itself
+// now has a controller (MeController) that needs this guard, which made the
+// barrel import circular: identity.module.ts -> me.controller.ts ->
+// jwt-auth.guard.ts -> identity's own barrel -> identity.module.ts (in
+// progress). CommonJS resolves that circular require to a not-yet-populated
+// module object, so IdentityPublicService silently came back `undefined` here
+// — which is what actually caused "Nest can't resolve dependencies of the
+// JwtAuthGuard", not a real DI wiring gap (confirmed by direct repro: removing
+// the guard fixed bootstrap; adding it as an explicit provider did not, since
+// the class reference itself was the problem, not its registration).
+import { IdentityPublicService } from "../../modules/identity/public/identity.public-service";
 import { UnauthorizedError } from "../errors/api-error";
 
 export interface AuthenticatedRequest extends Request {

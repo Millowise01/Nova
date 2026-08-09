@@ -29,6 +29,13 @@ model User {
   emailHash      String   @unique @map("email_hash")
   phoneEncrypted String?  @map("phone_encrypted")
   phoneHash      String?  @unique @map("phone_hash")
+  // Nullable — existing rows predate this column, and it's not part of the
+  // POST /v1/auth/signup contract's persisted fields being retrofitted here
+  // (register() now sets it from firstName+lastName — see AuthService).
+  name           String?
+  // Profile/Settings scope only — GET/PATCH /v1/me deliberately never touches
+  // email/phone (those need their own verify-then-change flow, not built here).
+  locale         String   @default("en")
   roles          String[] @default(["customer"])
   countryCode    String   @default("SL") @map("country_code")
   // MFA enforcement gate (Vol 3, B1: mandatory for seller/admin, optional for customers).
@@ -159,6 +166,15 @@ model Product {
   status      String  @default("draft") // draft | published | archived
   countryCode String  @default("SL") @map("country_code")
 
+  // Merchandising flags — curated "featured"/"flash sale" views over Catalog's own
+  // products, not a Marketing bounded-context extraction (backend/docs/00 explicitly
+  // reserves Campaigns/flash-sales-the-concept for a not-yet-designed Marketing
+  // context; these two booleans plus a filtered GET /products query are the deliberately
+  // small, low-risk slice confirmed in scope instead — no campaignId/collectionId,
+  // no Campaign/Collection models this pass).
+  isFeatured  Boolean @default(false) @map("is_featured")
+  isFlashSale Boolean @default(false) @map("is_flash_sale")
+
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
   createdBy String?   @map("created_by")
@@ -175,6 +191,8 @@ model Product {
   @@index([categoryId])
   @@index([status])
   @@index([createdAt])
+  @@index([isFeatured])
+  @@index([isFlashSale])
   @@map("products")
 }
 
@@ -213,6 +231,47 @@ model ProductAttribute {
 
   @@index([productId])
   @@map("product_attributes")
+}
+
+// ============================================================
+// WISHLIST
+// One small bounded context of its own (owns its schema per backend/docs/00's
+// ownership rule) rather than folded into Catalog or Identity — it references
+// both Product/Variant (Catalog) and User (Identity) as opaque scalar columns,
+// same no-cross-context-@relation convention as everywhere else in this file.
+// ============================================================
+
+/// One per user (enforced by the unique userId below) — created lazily on first
+/// GET/POST rather than at signup, since most users never use it.
+model Wishlist {
+  id          String @id @default(uuid())
+  userId      String @unique @map("user_id") // opaque reference to Identity's User
+  countryCode String @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  items WishlistItem[]
+
+  @@index([userId])
+  @@map("wishlists")
+}
+
+model WishlistItem {
+  id         String  @id @default(uuid())
+  wishlistId String  @map("wishlist_id")
+  productId  String  @map("product_id") // opaque reference to Catalog's Product
+  variantId  String? @map("variant_id") // opaque reference to Catalog's Variant — optional: a user can save a product in general, or a specific variant
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  wishlist Wishlist @relation(fields: [wishlistId], references: [id])
+
+  @@index([wishlistId])
+  @@index([productId])
+  @@map("wishlist_items")
 }
 
 // ============================================================

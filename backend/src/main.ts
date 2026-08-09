@@ -19,10 +19,12 @@ export function buildOpenApiDocument(app: Awaited<ReturnType<typeof NestFactory.
     .setVersion("1.0")
     .addBearerAuth()
     .addTag("auth")
+    .addTag("identity")
     .addTag("catalog")
     .addTag("cart-checkout")
     .addTag("orders")
     .addTag("payments-wallet")
+    .addTag("wishlist")
     .build();
   const document = SwaggerModule.createDocument(app, config);
   // Request-body schemas come from the SAME Zod schemas ZodValidationPipe uses

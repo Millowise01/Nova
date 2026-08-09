@@ -3,6 +3,7 @@ import { createCartCheckoutEndpoints } from "./endpoints/cart-checkout";
 import { createCatalogEndpoints } from "./endpoints/catalog";
 import { createOrdersEndpoints } from "./endpoints/orders";
 import { createWalletEndpoints } from "./endpoints/wallet";
+import { createWishlistEndpoints } from "./endpoints/wishlist";
 import { createApiClient as createHttpClient, type NovaHttpClient } from "./http-client";
 
 export { ApiError, toApiError, type ApiErrorShape } from "./errors";
@@ -18,6 +19,7 @@ export interface NovaApiClient {
   cart: ReturnType<typeof createCartCheckoutEndpoints>;
   orders: ReturnType<typeof createOrdersEndpoints>;
   wallet: ReturnType<typeof createWalletEndpoints>;
+  wishlist: ReturnType<typeof createWishlistEndpoints>;
 }
 
 /** The single, typed, Zod-validated client for the whole app — every response
@@ -33,5 +35,6 @@ export function createNovaApiClient(baseURL: string): NovaApiClient {
     cart: createCartCheckoutEndpoints(raw),
     orders: createOrdersEndpoints(raw),
     wallet: createWalletEndpoints(raw),
+    wishlist: createWishlistEndpoints(raw),
   };
 }

@@ -1,8 +1,11 @@
+import { ProfileCard } from "@/features/account/components/profile-card";
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
+// "Profile" is now real (below) — removed from the placeholder grid. The rest
+// genuinely have no backend yet (currency display, dark mode persistence,
+// privacy controls, MFA/session management, notification routing, connected
+// devices, account deletion) and stay as placeholders.
 const settingsModules = [
-  { title: "Profile", description: "Personal profile and contact details." },
-  { title: "Language", description: "Localization and language preferences." },
   { title: "Currency", description: "Regional pricing display options." },
   { title: "Dark Mode", description: "Theme mode preferences and persistence." },
   { title: "Privacy", description: "Data visibility and profile privacy controls." },
@@ -18,7 +21,10 @@ export function SettingsScreen() {
       subtitle="Customer account settings and privacy/security control center."
       title="Settings"
     >
-      <FeatureGrid items={settingsModules} />
+      <div className="space-y-6">
+        <ProfileCard />
+        <FeatureGrid items={settingsModules} />
+      </div>
     </ModuleShell>
   );
 }

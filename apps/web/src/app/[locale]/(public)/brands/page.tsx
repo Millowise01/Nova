@@ -1,5 +1,5 @@
-import { CatalogScreen } from "@/features/catalog/components/catalog-screen";
+import { BrandsScreen } from "@/features/catalog/components/brands-screen";
 
 export default function BrandsPage() {
-  return <CatalogScreen />;
+  return <BrandsScreen />;
 }

@@ -1,6 +1,6 @@
 import { tokenStore } from "@nova/api-client";
 import { type Session, sessionSchema } from "@nova/auth";
-import type { AuthResponse, LoginInput, RegisterInput } from "@nova/validation";
+import type { AuthResponse, LoginInput, RegisterInput, UpdateMeInput } from "@nova/validation";
 
 import { decodeJwtPayload } from "@/lib/decode-jwt";
 
@@ -58,4 +58,12 @@ export async function restoreSession(): Promise<Session | null> {
  *  table) — logout is purely client-side token/cookie clearing. */
 export function logout(): void {
   tokenStore.clear();
+}
+
+export function getMe() {
+  return getApiClient().auth.getMe();
+}
+
+export function updateMe(input: UpdateMeInput) {
+  return getApiClient().auth.updateMe(input);
 }

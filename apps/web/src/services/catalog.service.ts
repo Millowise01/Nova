@@ -10,7 +10,21 @@ export function getProductBySlug(slug: string) {
   return getApiClient().catalog.getProductBySlug(slug);
 }
 
-// getCategories()/getPopularBrands() are intentionally NOT here — there is no
-// GET /categories or GET /brands endpoint on the backend (only POST/create).
-// See features/home/home.queries.ts for where the previous mock category/brand
-// data is still used, explicitly marked as such.
+export function listCategories() {
+  return getApiClient().catalog.listCategories();
+}
+
+export function listBrands() {
+  return getApiClient().catalog.listBrands();
+}
+
+export function getSellerProfile(sellerId: string) {
+  return getApiClient().catalog.getSellerProfile(sellerId);
+}
+
+export function listSellerProducts(
+  sellerId: string,
+  params: Omit<ListProductsParams, "sellerId"> = {},
+) {
+  return getApiClient().catalog.listSellerProducts(sellerId, params);
+}

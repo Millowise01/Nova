@@ -193,6 +193,28 @@
         }
       }
     },
+    "/v1/me": {
+      "get": {
+        "operationId": "MeController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["identity"]
+      },
+      "patch": {
+        "operationId": "MeController_updateMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["identity"]
+      }
+    },
     "/v1/categories": {
       "post": {
         "operationId": "CatalogController_createCategory",
@@ -228,6 +250,16 @@
             }
           }
         }
+      },
+      "get": {
+        "operationId": "CatalogController_listCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["catalog"]
       }
     },
     "/v1/brands": {
@@ -261,6 +293,16 @@
             }
           }
         }
+      },
+      "get": {
+        "operationId": "CatalogController_listBrands",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["catalog"]
       }
     },
     "/v1/products": {
@@ -298,6 +340,12 @@
                   },
                   "description": {
                     "type": "string"
+                  },
+                  "isFeatured": {
+                    "type": "boolean"
+                  },
+                  "isFlashSale": {
+                    "type": "boolean"
                   },
                   "variants": {
                     "type": "array",
@@ -338,16 +386,7 @@
       },
       "get": {
         "operationId": "CatalogController_listProducts",
-        "parameters": [
-          {
-            "name": "cursor",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": ""
@@ -362,6 +401,48 @@
         "parameters": [
           {
             "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["catalog"]
+      }
+    },
+    "/v1/sellers/{id}": {
+      "get": {
+        "operationId": "CatalogController_getSellerProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["catalog"]
+      }
+    },
+    "/v1/sellers/{id}/products": {
+      "get": {
+        "operationId": "CatalogController_listSellerProducts",
+        "parameters": [
+          {
+            "name": "id",
             "required": true,
             "in": "path",
             "schema": {
@@ -719,6 +800,51 @@
           }
         }
       }
+    },
+    "/v1/wishlist": {
+      "get": {
+        "operationId": "WishlistController_getWishlist",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["wishlist"]
+      }
+    },
+    "/v1/wishlist/items": {
+      "post": {
+        "operationId": "WishlistController_addItem",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": ["wishlist"]
+      }
+    },
+    "/v1/wishlist/items/{itemId}": {
+      "delete": {
+        "operationId": "WishlistController_removeItem",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": ["wishlist"]
+      }
     }
   },
   "info": {
@@ -730,6 +856,10 @@
   "tags": [
     {
       "name": "auth",
+      "description": ""
+    },
+    {
+      "name": "identity",
       "description": ""
     },
     {
@@ -746,6 +876,10 @@
     },
     {
       "name": "payments-wallet",
+      "description": ""
+    },
+    {
+      "name": "wishlist",
       "description": ""
     }
   ],

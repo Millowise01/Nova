@@ -1,9 +1,9 @@
 import { Card } from "@nova/ui";
+import type { BrandResponse } from "@nova/validation";
 
 import { SectionTitle } from "@/features/shared/components";
-import type { Brand } from "@/types/domain";
 
-export function BrandsSection({ brands }: { brands: Brand[] }) {
+export function BrandsSection({ brands }: { brands: BrandResponse[] }) {
   return (
     <section className="mx-auto w-full max-w-7xl space-y-4 px-4 md:px-6 lg:px-8">
       <SectionTitle

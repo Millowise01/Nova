@@ -1,5 +1,6 @@
-import { CatalogScreen } from "@/features/catalog/components/catalog-screen";
+import { SellerStoreScreen } from "@/features/catalog/components/seller-store-screen";
 
-export default function SellerStorePage() {
-  return <CatalogScreen />;
+export default async function SellerStorePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  return <SellerStoreScreen sellerId={slug} />;
 }

@@ -21,6 +21,8 @@ function productFixture(overrides: Record<string, unknown> = {}) {
     description: null,
     status: "active",
     countryCode: "SL",
+    isFeatured: false,
+    isFlashSale: false,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     deletedAt: null,

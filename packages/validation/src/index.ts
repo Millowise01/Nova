@@ -80,6 +80,21 @@ export const refreshTokenSchema = z.object({
 });
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
 
+/** PATCH /v1/me — deliberately scoped to name/locale only. Email/phone are excluded
+ *  on purpose (confirmed decision): changing either needs its own verify-then-change
+ *  flow (propose new value, confirm via OTP, then swap) that doesn't exist yet, not a
+ *  silent field update alongside name/locale. Both fields optional so a caller can
+ *  patch just one. */
+export const updateMeSchema = z
+  .object({
+    name: z.string().min(1).max(120).optional(),
+    locale: z.string().min(2).max(10).optional(),
+  })
+  .refine((value) => value.name !== undefined || value.locale !== undefined, {
+    message: "At least one field (name or locale) must be provided",
+  });
+export type UpdateMeInput = z.infer<typeof updateMeSchema>;
+
 // ════════════════════════════════════════════════════════════
 // Catalog — backend API contracts (no frontend seller-portal form exists yet).
 // ════════════════════════════════════════════════════════════
@@ -121,9 +136,36 @@ export const createProductSchema = z.object({
     .min(1)
     .regex(/^[a-z0-9-]+$/, "slug must be lowercase, alphanumeric, hyphen-separated"),
   description: z.string().optional(),
+  // Merchandising flags — optional, default false at the schema/DB level. A seller
+  // marks their own listing featured/flash-sale at creation time; there's no
+  // separate moderation/approval step for either in this pass.
+  isFeatured: z.boolean().optional(),
+  isFlashSale: z.boolean().optional(),
   variants: z.array(createProductVariantSchema).min(1),
 });
 export type CreateProductInput = z.infer<typeof createProductSchema>;
+
+/** Query params for GET /v1/products — cursor pagination plus the merchandising
+ *  filters confirmed in scope (featured/flashSale booleans, sellerId for the seller
+ *  storefront). Query strings arrive as raw strings, so booleans are parsed from the
+ *  literal "true"/"false" rather than z.coerce.boolean() (which would treat the
+ *  string "false" as truthy, since it's non-empty). */
+export const listProductsQuerySchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  featured: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+  flashSale: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+  categoryId: z.string().uuid().optional(),
+  brandId: z.string().uuid().optional(),
+  sellerId: z.string().uuid().optional(),
+});
+export type ListProductsQuery = z.infer<typeof listProductsQuerySchema>;
 
 // ════════════════════════════════════════════════════════════
 // Cart & Checkout
@@ -147,6 +189,16 @@ export const checkoutSchema = z.object({
   promoCode: z.string().optional(),
 });
 export type CheckoutFormValues = z.infer<typeof checkoutSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Wishlist
+// ════════════════════════════════════════════════════════════
+
+export const addWishlistItemSchema = z.object({
+  productId: z.string().uuid(),
+  variantId: z.string().uuid().optional(),
+});
+export type AddWishlistItemInput = z.infer<typeof addWishlistItemSchema>;
 
 // ════════════════════════════════════════════════════════════
 // Orders
@@ -225,6 +277,31 @@ export type AuthResponse = z.infer<typeof authResponseSchema>;
 export const refreshResponseSchema = authTokensSchema;
 export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
 
+/** GET /v1/me — the only endpoint that returns a user's own decrypted email/phone
+ *  (read-only context on their own profile page; PATCH /v1/me cannot change either —
+ *  see updateMeSchema above). */
+export const meSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().nullable(),
+  email: emailSchema,
+  phone: phoneSchema.nullable(),
+  locale: z.string(),
+  roles: z.array(z.string()),
+  countryCode: z.string(),
+  createdAt: z.string(),
+});
+export type MeResponse = z.infer<typeof meSchema>;
+
+/** GET /v1/sellers/:id — deliberately minimal: there is no dedicated Seller profile
+ *  table in the schema today (only a "seller" role string on User), so this is just
+ *  the public-safe subset of User fields. Never includes email/phone. */
+export const sellerPublicProfileSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().nullable(),
+  memberSince: z.string(),
+});
+export type SellerPublicProfileResponse = z.infer<typeof sellerPublicProfileSchema>;
+
 // ─── Catalog ───────────────────────────────────────────────
 
 export const categorySchema = z.object({
@@ -239,6 +316,11 @@ export const categorySchema = z.object({
 });
 export type CategoryResponse = z.infer<typeof categorySchema>;
 
+/** GET /v1/categories — flat list, unpaginated (small bounded dataset, matches the
+ *  existing GET /v1/orders precedent of no cursor envelope for non-product lists). */
+export const categoryListResponseSchema = z.object({ data: z.array(categorySchema) });
+export type CategoryListResponse = z.infer<typeof categoryListResponseSchema>;
+
 export const brandSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
@@ -249,6 +331,10 @@ export const brandSchema = z.object({
   deletedAt: z.string().nullable(),
 });
 export type BrandResponse = z.infer<typeof brandSchema>;
+
+/** GET /v1/brands — same unpaginated shape as categories above. */
+export const brandListResponseSchema = z.object({ data: z.array(brandSchema) });
+export type BrandListResponse = z.infer<typeof brandListResponseSchema>;
 
 export const variantSchema = z.object({
   id: z.string().uuid(),
@@ -276,6 +362,8 @@ export const productSchema = z.object({
   description: z.string().nullable(),
   status: z.string(),
   countryCode: z.string(),
+  isFeatured: z.boolean(),
+  isFlashSale: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
   deletedAt: z.string().nullable(),
@@ -349,6 +437,32 @@ export const checkoutSessionSchema = z.object({
   deletedAt: z.string().nullable(),
 });
 export type CheckoutSessionResponse = z.infer<typeof checkoutSessionSchema>;
+
+// ─── Wishlist ──────────────────────────────────────────────
+
+export const wishlistItemSchema = z.object({
+  id: z.string().uuid(),
+  wishlistId: z.string().uuid(),
+  productId: z.string().uuid(),
+  variantId: z.string().uuid().nullable(),
+  createdAt: z.string(),
+  deletedAt: z.string().nullable(),
+  // Enriched server-side via a synchronous call into Catalog's public service
+  // (backend/docs/01-module-contract.md's cross-module read pattern) — null when
+  // the product has since been deleted, so the frontend can render "no longer
+  // available" without a broken link/N+1 lookup by (nonexistent) slug.
+  product: z.object({ id: z.string().uuid(), title: z.string(), slug: z.string() }).nullable(),
+});
+export type WishlistItemResponse = z.infer<typeof wishlistItemSchema>;
+
+export const wishlistSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  items: z.array(wishlistItemSchema),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type WishlistResponse = z.infer<typeof wishlistSchema>;
 
 // ─── Orders ────────────────────────────────────────────────
 

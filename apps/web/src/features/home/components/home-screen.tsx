@@ -3,9 +3,11 @@
 import { Spinner } from "@nova/ui";
 
 import { adaptProduct } from "@/features/catalog/adapt-product";
-import { useProductsQuery } from "@/features/catalog/catalog.queries";
-
-import { getCategories, getPopularBrands } from "../home.mock-data";
+import {
+  useBrandsQuery,
+  useCategoriesQuery,
+  useProductsQuery,
+} from "@/features/catalog/catalog.queries";
 
 import { HomeHero } from "./home-hero";
 import { BrandsSection } from "./sections/brands-section";
@@ -19,15 +21,19 @@ import { SellerSpotlightSection } from "./sections/seller-spotlight-section";
 import { TestimonialsSection } from "./sections/testimonials-section";
 
 export function HomeScreen() {
-  // Categories/brands stay mocked — no backend list endpoint exists for either.
-  const categories = getCategories();
-  const brands = getPopularBrands();
+  const categoriesQuery = useCategoriesQuery();
+  const brandsQuery = useBrandsQuery();
+  const categories = categoriesQuery.data?.data ?? [];
+  const brands = brandsQuery.data?.data ?? [];
 
-  // Real product data. The backend has no concept of "featured" vs "trending"
-  // vs "best sellers" (no such categorization exists on Product) — all three
-  // sections below necessarily show the same real product list; a genuine
+  // Featured now has a real backing field (Product.isFeatured) — genuinely
+  // filtered, not the same list as below. Trending/Best Sellers still have no
+  // real concept on the backend (no view/purchase-count tracking exists), so
+  // those two necessarily keep showing the same general product list; a real
   // backend limitation, not a frontend oversight.
+  const featuredQuery = useProductsQuery({ featured: true });
   const productsQuery = useProductsQuery();
+  const featuredProducts = (featuredQuery.data?.pages[0]?.data ?? []).map(adaptProduct);
   const products = (productsQuery.data?.pages[0]?.data ?? []).map(adaptProduct);
 
   if (productsQuery.isLoading) {
@@ -43,8 +49,8 @@ export function HomeScreen() {
       <HomeHero />
       <CategoriesSection categories={categories} />
       <ProductSection
-        description="Real listings from Nova's catalog."
-        products={products}
+        description="Real listings from Nova's catalog, marked isFeatured."
+        products={featuredProducts.length > 0 ? featuredProducts : products}
         title="Featured Products"
       />
       <ProductSection
