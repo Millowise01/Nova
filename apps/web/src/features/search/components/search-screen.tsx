@@ -1,40 +1,74 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import { Input, Spinner } from "@nova/ui";
+import { EmptyState, ErrorState, Input, ProductCard, Spinner } from "@nova/ui";
 
-import { FeatureGrid, ModuleShell } from "@/features/shared/components";
+import { ModuleShell } from "@/features/shared/components";
 
-const searchModules = [
-  { title: "Instant Search", description: "Low-latency result updates while typing." },
-  { title: "Autocomplete", description: "Suggestions for products, categories, and sellers." },
-  { title: "Recent Searches", description: "Personalized search memory for quick repeat queries." },
-  { title: "Trending Searches", description: "Trending intent signals and campaign phrases." },
-  { title: "Voice Search", description: "Voice entry placeholder with future API integration." },
-  { title: "Search History", description: "Search timeline and quick restore actions." },
-];
+import { useSearchQuery } from "../search.queries";
+import { useDebouncedValue } from "../use-debounced-value";
+
+const DEBOUNCE_MS = 350;
 
 export function SearchScreen() {
-  const query = useQuery({
-    queryKey: ["search", "trending"],
-    queryFn: () => ["smartphone", "air fryer", "solar lamp", "running shoes"],
-  });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+
+  const [inputValue, setInputValue] = useState(initialQuery);
+  const debouncedQuery = useDebouncedValue(inputValue, DEBOUNCE_MS);
+
+  // Keeps the URL shareable/bookmarkable (e.g. /search?q=wireless mouse) without
+  // firing a request on every keystroke — the query itself is driven off
+  // debouncedQuery, not the URL.
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    if (debouncedQuery.trim()) {
+      params.set("q", debouncedQuery);
+    } else {
+      params.delete("q");
+    }
+    router.replace(`/search?${params.toString()}`, { scroll: false });
+  }, [debouncedQuery]); // intentionally excludes router/searchParams — only the debounced value should retrigger this
+
+  const query = useSearchQuery(debouncedQuery);
 
   return (
     <ModuleShell
-      subtitle="Enterprise search architecture with extensible AI-ready touchpoints."
-      title="Search Experience"
+      subtitle="Search products by name, description, category, brand, and price."
+      title="Search"
     >
-      <Input placeholder="Search products, sellers, categories" type="search" />
-      {query.isLoading ? (
-        <div className="flex items-center gap-2 text-sm text-slate-600">
-          <Spinner className="h-4 w-4" /> Loading search signals...
+      <Input
+        aria-label="Search products"
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder="Search products, sellers, categories"
+        type="search"
+        value={inputValue}
+      />
+
+      {!debouncedQuery.trim() ? null : query.isLoading ? (
+        <div className="flex items-center gap-2 py-8 text-sm text-slate-600">
+          <Spinner className="h-4 w-4" /> Searching...
         </div>
-      ) : (
-        <div className="text-sm text-slate-600">Trending now: {query.data?.join(", ")}</div>
-      )}
-      <FeatureGrid items={searchModules} />
+      ) : query.isError ? (
+        <ErrorState description="We couldn't run that search." title="Something went wrong" />
+      ) : query.data && query.data.data.length === 0 ? (
+        <EmptyState description={`No products matched "${debouncedQuery}".`} title="No results" />
+      ) : query.data ? (
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {query.data.data.map((product) => (
+            <ProductCard
+              currency={product.variants[0]?.priceCurrency ?? "SLE"}
+              href={`/product/${product.slug}`}
+              key={product.id}
+              price={Number(product.variants[0]?.priceAmount ?? 0)}
+              title={product.title}
+            />
+          ))}
+        </div>
+      ) : null}
     </ModuleShell>
   );
 }

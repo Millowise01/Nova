@@ -164,6 +164,12 @@ export const listProductsQuerySchema = z.object({
   categoryId: z.string().uuid().optional(),
   brandId: z.string().uuid().optional(),
   sellerId: z.string().uuid().optional(),
+  // Batch B — full-text search (Postgres tsvector/tsquery on title+description) and
+  // price-range filtering. Both combine with the filters above (single query shape,
+  // filtered/ranked differently), not a separate search endpoint.
+  q: z.string().trim().min(1).max(200).optional(),
+  minPrice: moneyAmountSchema.optional(),
+  maxPrice: moneyAmountSchema.optional(),
 });
 export type ListProductsQuery = z.infer<typeof listProductsQuerySchema>;
 
@@ -229,6 +235,21 @@ export const rejectRefundSchema = z.object({
   reason: z.string().min(1),
 });
 export type RejectRefundInput = z.infer<typeof rejectRefundSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Notifications
+// ════════════════════════════════════════════════════════════
+
+/** GET /v1/notifications query params. */
+export const listNotificationsQuerySchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  unreadOnly: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((v) => (v === undefined ? undefined : v === "true")),
+});
+export type ListNotificationsQuery = z.infer<typeof listNotificationsQuerySchema>;
 
 // ════════════════════════════════════════════════════════════
 // Response schemas — the frontend's shared source of truth for what the real
@@ -528,3 +549,25 @@ export type OrderCancelResponse = z.infer<typeof orderCancelResponseSchema>;
 /** GET /v1/wallet/balance — the only wallet read endpoint that exists today. */
 export const walletBalanceSchema = moneySchema;
 export type WalletBalanceResponse = z.infer<typeof walletBalanceSchema>;
+
+// ─── Notifications ─────────────────────────────────────────
+
+export const notificationSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string().uuid(),
+  type: z.string(),
+  title: z.string(),
+  body: z.string(),
+  referenceType: z.string().nullable(),
+  referenceId: z.string().nullable(),
+  readAt: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type NotificationResponse = z.infer<typeof notificationSchema>;
+
+export const notificationListResponseSchema = z.object({
+  data: z.array(notificationSchema),
+  pageInfo: pageInfoSchema,
+  unreadCount: z.number().int().nonnegative(),
+});
+export type NotificationListResponse = z.infer<typeof notificationListResponseSchema>;

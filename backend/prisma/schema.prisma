@@ -182,6 +182,15 @@ model Product {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz
   version   Int       @default(0)
 
+  // Full-text search (Batch B) — a Postgres GENERATED ALWAYS AS ... STORED column
+  // over title+description, kept in sync by Postgres itself on every write, never
+  // written to from application code. `Unsupported` because Prisma's schema DSL has
+  // no first-class way to express a generated-column expression; the actual column
+  // + GIN index are created by raw SQL in the migration (see
+  // 20260810_add_product_search_vector). Excluded from Prisma's typed client by
+  // design — queried via $queryRaw in CatalogService's search path.
+  searchVector Unsupported("tsvector")? @map("search_vector")
+
   category   Category           @relation(fields: [categoryId], references: [id])
   brand      Brand?             @relation(fields: [brandId], references: [id])
   variants   Variant[]
@@ -416,6 +425,32 @@ model OutboxEvent {
 
   @@index([occurredAt])
   @@map("outbox_events")
+}
+
+// ============================================================
+// NOTIFICATIONS (Batch B)
+// In-app only this pass — push/email/SMS delivery is stubbed exactly like OTP was
+// (logged in development, // TODO: wire real provider). Rows are created by the
+// outbox relay (common/outbox/) consuming OutboxEvent, never by Orders/Payments
+// writing here directly — that would be the exact cross-module table write
+// backend/docs/00's ownership rule prohibits.
+// ============================================================
+
+model Notification {
+  id            String  @id @default(uuid())
+  userId        String  @map("user_id") // opaque reference to Identity's User
+  type          String // controlled vocabulary, e.g. "order.placed", "refund.rejected"
+  title         String
+  body          String
+  referenceType String? @map("reference_type") // e.g. "Order", "RefundRequest"
+  referenceId   String? @map("reference_id")
+  readAt        DateTime? @map("read_at") @db.Timestamptz
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@index([userId, createdAt])
+  @@map("notifications")
 }
 
 /// Generic idempotency-key dedupe store (backend/docs/02-api-standards.md). Scoped here

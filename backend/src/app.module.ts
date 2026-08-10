@@ -2,12 +2,14 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 
 import { AuditModule } from "./common/audit/audit.module";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
+import { OutboxModule } from "./common/outbox/outbox.module";
 import { PolicyModule } from "./common/policy/policy.module";
 import { RedisModule } from "./common/redis/redis.module";
 import { ConfigModule } from "./config/config.module";
 import { CartCheckoutModule } from "./modules/cart-checkout";
 import { CatalogModule } from "./modules/catalog";
 import { IdentityModule } from "./modules/identity";
+import { NotificationsModule } from "./modules/notifications";
 import { OrdersModule } from "./modules/orders";
 import { PaymentsWalletModule } from "./modules/payments-wallet";
 import { WishlistModule } from "./modules/wishlist";
@@ -27,12 +29,14 @@ import { PrismaModule } from "./prisma/prisma.module";
     RedisModule,
     PolicyModule,
     AuditModule,
+    OutboxModule,
     IdentityModule,
     CatalogModule,
     CartCheckoutModule,
     PaymentsWalletModule,
     OrdersModule,
     WishlistModule,
+    NotificationsModule,
   ],
 })
 export class AppModule implements NestModule {

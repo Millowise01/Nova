@@ -1,5 +1,5 @@
 import type { MongoAbility } from "@casl/ability";
-import type { Order, Product, Wishlist } from "@prisma/client";
+import type { Notification, Order, Product, Wishlist } from "@prisma/client";
 
 /**
  * Central RBAC/ABAC policy engine — Vol 3, B3 / Vol 2, B2 point 5 ("no module
@@ -27,6 +27,8 @@ export type PolicySubject =
   | "RefundRequest"
   | "Wishlist"
   | Wishlist
+  | "Notification"
+  | Notification
   | "all";
 
 export type AppAbility = MongoAbility<[PolicyAction, PolicySubject]>;
@@ -34,7 +36,15 @@ export type AppAbility = MongoAbility<[PolicyAction, PolicySubject]>;
 /** The string-only subset — what a route-level @RequirePermission decorator declares
  *  (it checks a subject TYPE, not a specific fetched row). */
 export type PolicySubjectTag =
-  "Product" | "Category" | "Brand" | "Order" | "Cart" | "RefundRequest" | "Wishlist" | "all";
+  | "Product"
+  | "Category"
+  | "Brand"
+  | "Order"
+  | "Cart"
+  | "RefundRequest"
+  | "Wishlist"
+  | "Notification"
+  | "all";
 
 export interface PolicyUser {
   id: string;

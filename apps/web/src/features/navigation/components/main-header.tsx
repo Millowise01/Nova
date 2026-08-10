@@ -1,13 +1,29 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
-import { Button, Input } from "@nova/ui";
+import { Bell } from "@nova/icons";
+import { Badge, Button, Input } from "@nova/ui";
+
+import { useNotificationsQuery } from "@/features/notifications/notifications.queries";
+import { useAuth } from "@/providers/auth-provider";
 
 export function MainHeader() {
   const t = useTranslations("navigation");
   const tCommon = useTranslations("common");
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const [searchValue, setSearchValue] = useState("");
+
+  // Cheap read — the response's unreadCount reflects the user's TOTAL unread count
+  // regardless of page size, so a 1-row page is enough for the badge (see
+  // notifications.queries.ts's comment). Same React Query cache the notifications
+  // page itself reads from, keyed separately since the params differ.
+  const notificationsQuery = useNotificationsQuery({ limit: 1 });
+  const unreadCount = notificationsQuery.data?.unreadCount ?? 0;
 
   const topLinks = [
     { href: "/categories", label: t("categories") },
@@ -15,6 +31,12 @@ export function MainHeader() {
     { href: "/deals", label: t("deals") },
     { href: "/seller-store", label: t("sellerStore") },
   ];
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const trimmed = searchValue.trim();
+    router.push(trimmed ? `/search?q=${encodeURIComponent(trimmed)}` : "/search");
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-[color:var(--ds-border)] bg-white/95 backdrop-blur">
@@ -28,12 +50,37 @@ export function MainHeader() {
         <Link className="text-xl font-semibold text-[color:var(--ds-text)]" href="/">
           {tCommon("appName")}
         </Link>
-        <Input
-          aria-label={t("searchAriaLabel")}
-          placeholder={t("searchPlaceholder")}
-          type="search"
-        />
+        <form onSubmit={handleSearchSubmit}>
+          <Input
+            aria-label={t("searchAriaLabel")}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            type="search"
+            value={searchValue}
+          />
+        </form>
         <div className="flex items-center gap-2">
+          {isAuthenticated ? (
+            <Link
+              aria-label={t("notifications")}
+              className="relative inline-flex"
+              href="/notifications"
+            >
+              <Button size="sm" variant="ghost">
+                <Bell aria-hidden="true" size={20} />
+              </Button>
+              {unreadCount > 0 ? (
+                <Badge
+                  className="absolute -right-1 -top-1 min-w-[1.25rem] justify-center px-1"
+                  size="sm"
+                  tone="error"
+                  variant="solid"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Badge>
+              ) : null}
+            </Link>
+          ) : null}
           <Button size="sm" variant="ghost">
             {t("account")}
           </Button>

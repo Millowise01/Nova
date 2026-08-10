@@ -130,9 +130,37 @@ export class RefundsService {
       );
     }
 
-    const updated = await this.prisma.refundRequest.update({
-      where: { id: refundRequestId },
-      data: { status: "rejected", approvedBy: rejectorId, rejectionReason: reason },
+    // Real gap found while wiring notifications (Batch B): this method previously
+    // never wrote an outbox event at all — every OTHER terminal RefundRequest
+    // transition does (RefundExecuted). Now wrapped in a transaction so the state
+    // change and the event write are atomic, same as executeRefund below.
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const intent = await tx.paymentIntent.findUniqueOrThrow({
+        where: { id: refundRequest.paymentIntentId },
+      });
+
+      const result = await tx.refundRequest.update({
+        where: { id: refundRequestId },
+        data: { status: "rejected", approvedBy: rejectorId, rejectionReason: reason },
+      });
+
+      await tx.outboxEvent.create({
+        data: {
+          aggregateType: "RefundRequest",
+          aggregateId: refundRequestId,
+          eventType: "RefundRejected",
+          eventVersion: 1,
+          payload: {
+            refundRequestId,
+            paymentIntentId: intent.id,
+            userId: intent.userId,
+            amount: { amount: refundRequest.amount.toFixed(2), currency: refundRequest.currency },
+            reason,
+          },
+        },
+      });
+
+      return result;
     });
 
     await this.audit.record({
@@ -201,6 +229,9 @@ export class RefundsService {
           payload: {
             refundRequestId,
             paymentIntentId: intent.id,
+            // userId added (Batch B) so Notification's handler has someone to notify —
+            // additive-only per backend/docs/04's payload-versioning policy.
+            userId: intent.userId,
             amount: { amount: refundRequest.amount.toFixed(2), currency: refundRequest.currency },
           },
         },

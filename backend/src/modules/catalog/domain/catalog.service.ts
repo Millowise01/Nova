@@ -15,6 +15,24 @@ import { IdentityPublicService } from "../../identity";
 
 const DEFAULT_PAGE_SIZE = 20;
 
+/** Builds a Postgres tsquery string that prefix-matches every word in `q`, e.g.
+ *  "wireless mo" -> "wireless:* & mo:*" — this is what makes partial words match
+ *  (searching "pho" finds "phone"), not just whole-word stemmed matches. Each term
+ *  is stripped to alphanumerics before being embedded in the tsquery syntax string,
+ *  since to_tsquery() parses operators (&, |, !, (, ), ') out of its input — an
+ *  unsanitized term containing one of those would throw a syntax error (not a SQL
+ *  injection risk either way, since the whole string is still passed as a bound
+ *  parameter to to_tsquery(), never concatenated into the SQL itself). Returns ""
+ *  for a query with no usable terms (e.g. all punctuation), which callers treat as
+ *  "no results" rather than sending an empty string to to_tsquery (which errors). */
+function toPrefixTsQuery(q: string): string {
+  const terms = q
+    .split(/\s+/)
+    .map((term) => term.replace(/[^\p{L}\p{N}]/gu, ""))
+    .filter((term) => term.length > 0);
+  return terms.map((term) => `${term}:*`).join(" & ");
+}
+
 @Injectable()
 export class CatalogService {
   constructor(
@@ -92,8 +110,13 @@ export class CatalogService {
   /** Cursor-paginated per backend/docs/02-api-standards.md's proposed format. Also
    *  backs the seller storefront's GET /v1/sellers/:id/products (via the sellerId
    *  filter) and the merchandising views (featured/flashSale/category/brand) — one
-   *  query shape, filtered differently, rather than a separate method per view. */
+   *  query shape, filtered differently, rather than a separate method per view.
+   *  When `q` is present, delegates to searchProducts() below (a genuinely different
+   *  query shape — ranked by relevance, not time — so it gets its own pagination
+   *  semantics rather than forcing relevance order through a createdAt cursor). */
   async listProducts(query: ListProductsQuery = {}) {
+    if (query.q) return this.searchProducts(query);
+
     const {
       cursor,
       limit = DEFAULT_PAGE_SIZE,
@@ -102,6 +125,8 @@ export class CatalogService {
       categoryId,
       brandId,
       sellerId,
+      minPrice,
+      maxPrice,
     } = query;
     const decoded = cursor ? decodeCursor(cursor) : null;
 
@@ -114,6 +139,19 @@ export class CatalogService {
         ...(categoryId ? { categoryId } : {}),
         ...(brandId ? { brandId } : {}),
         ...(sellerId ? { sellerId } : {}),
+        ...(minPrice || maxPrice
+          ? {
+              variants: {
+                some: {
+                  deletedAt: null,
+                  priceAmount: {
+                    ...(minPrice ? { gte: minPrice } : {}),
+                    ...(maxPrice ? { lte: maxPrice } : {}),
+                  },
+                },
+              },
+            }
+          : {}),
         ...(decoded ? { OR: [{ createdAt: { lt: new Date(decoded.sortValue) } }] } : {}),
       },
       include: { variants: { where: { deletedAt: null } } },
@@ -133,6 +171,98 @@ export class CatalogService {
           hasMore && last
             ? encodeCursor({ sortValue: last.createdAt.toISOString(), id: last.id })
             : null,
+      },
+    };
+  }
+
+  /** Full-text search (Batch B) — Postgres tsvector/tsquery over title+description
+   *  (see Product.searchVector's generated column), combined with the same
+   *  category/brand/seller/featured/flashSale/price-range filters listProducts()
+   *  supports. Ranked by ts_rank, not recency.
+   *
+   *  Two-step because `searchVector` is a Prisma `Unsupported` type (excluded from
+   *  the typed query builder by design — Prisma has no schema syntax for a generated
+   *  tsvector column): step 1 is a raw-SQL query for just (id, rank), fully
+   *  parameterized (no string concatenation of user input into SQL); step 2 re-fetches
+   *  those specific rows through the normal typed Prisma client (so `include: { variants }`
+   *  keeps working exactly like every other query), then restores step 1's rank order
+   *  since `WHERE id IN (...)` does not preserve it. */
+  private async searchProducts(query: ListProductsQuery) {
+    const {
+      q,
+      cursor,
+      limit = DEFAULT_PAGE_SIZE,
+      featured,
+      flashSale,
+      categoryId,
+      brandId,
+      sellerId,
+      minPrice,
+      maxPrice,
+    } = query;
+
+    const tsQuery = toPrefixTsQuery(q!);
+    if (!tsQuery) {
+      return { data: [], pageInfo: { hasMore: false, nextCursor: null } };
+    }
+
+    // Relevance order has no stable "less than X" cutoff the way createdAt does, so
+    // pagination here is plain offset-based — reusing encodeCursor/decodeCursor's
+    // shape (sortValue holds the stringified offset, `id` unused) rather than
+    // inventing a second cursor format for one query path.
+    const offset = cursor ? Number(decodeCursor(cursor).sortValue) || 0 : 0;
+
+    const ranked = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT p.id
+      FROM products p
+      WHERE p.deleted_at IS NULL
+        AND p.status = 'published'
+        AND p.search_vector @@ to_tsquery('english', ${tsQuery})
+        AND (${categoryId ?? null}::text IS NULL OR p.category_id = ${categoryId ?? null}::text)
+        AND (${brandId ?? null}::text IS NULL OR p.brand_id = ${brandId ?? null}::text)
+        AND (${sellerId ?? null}::text IS NULL OR p.seller_id = ${sellerId ?? null}::text)
+        AND (${featured ?? null}::boolean IS NULL OR p.is_featured = ${featured ?? null}::boolean)
+        AND (${flashSale ?? null}::boolean IS NULL OR p.is_flash_sale = ${flashSale ?? null}::boolean)
+        AND (
+          ${minPrice ?? null}::numeric IS NULL
+          OR EXISTS (
+            SELECT 1 FROM variants v
+            WHERE v.product_id = p.id AND v.deleted_at IS NULL
+              AND v.price_amount >= ${minPrice ?? null}::numeric
+          )
+        )
+        AND (
+          ${maxPrice ?? null}::numeric IS NULL
+          OR EXISTS (
+            SELECT 1 FROM variants v
+            WHERE v.product_id = p.id AND v.deleted_at IS NULL
+              AND v.price_amount <= ${maxPrice ?? null}::numeric
+          )
+        )
+      ORDER BY ts_rank(p.search_vector, to_tsquery('english', ${tsQuery})) DESC, p.id ASC
+      LIMIT ${limit + 1} OFFSET ${offset}
+    `;
+
+    const hasMore = ranked.length > limit;
+    const page = hasMore ? ranked.slice(0, limit) : ranked;
+    const ids = page.map((r) => r.id);
+
+    if (ids.length === 0) {
+      return { data: [], pageInfo: { hasMore: false, nextCursor: null } };
+    }
+
+    const rows = await this.prisma.product.findMany({
+      where: { id: { in: ids } },
+      include: { variants: { where: { deletedAt: null } } },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    const data = ids.map((id) => byId.get(id)).filter((r): r is (typeof rows)[number] => !!r);
+
+    return {
+      data,
+      pageInfo: {
+        hasMore,
+        nextCursor: hasMore ? encodeCursor({ sortValue: String(offset + limit), id: "" }) : null,
       },
     };
   }

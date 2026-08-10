@@ -177,7 +177,16 @@ export class OrdersService {
             aggregateId: order.id,
             eventType: "OrderCancelled",
             eventVersion: 1,
-            payload: { orderId: order.id, previousStatus: "placed", reason: "payment_failed" },
+            // userId added (Batch B) so Notification's handler has someone to notify —
+            // additive-only per backend/docs/04's payload-versioning policy, no version
+            // bump needed. Real gap found while wiring notifications: this payload never
+            // carried a target user before.
+            payload: {
+              orderId: order.id,
+              userId: order.userId,
+              previousStatus: "placed",
+              reason: "payment_failed",
+            },
           },
         });
       }
@@ -281,7 +290,13 @@ export class OrdersService {
           aggregateId: order.id,
           eventType: "OrderCancelled",
           eventVersion: 1,
-          payload: { orderId: order.id, previousStatus: currentStatus, reason: reason ?? null },
+          // userId added (Batch B) — see the other OrderCancelled write above for why.
+          payload: {
+            orderId: order.id,
+            userId: order.userId,
+            previousStatus: currentStatus,
+            reason: reason ?? null,
+          },
         },
       });
 

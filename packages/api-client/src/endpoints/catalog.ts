@@ -21,6 +21,11 @@ export interface ListProductsParams {
   categoryId?: string;
   brandId?: string;
   sellerId?: string;
+  /** Full-text search over title+description (Batch B) — Postgres tsvector/tsquery,
+   *  ranked by relevance. Combines with every filter above. */
+  q?: string;
+  minPrice?: string;
+  maxPrice?: string;
 }
 
 /** Query-string booleans must be the literal string "true"/"false" — the backend's

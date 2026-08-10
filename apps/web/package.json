@@ -11,6 +11,7 @@
     "@nova/constants": "workspace:*",
     "@nova/design-system": "workspace:*",
     "@nova/feature-flags": "workspace:*",
+    "@nova/icons": "workspace:*",
     "@nova/tailwind-config": "workspace:*",
     "@nova/types": "workspace:*",
     "@nova/ui": "workspace:*",

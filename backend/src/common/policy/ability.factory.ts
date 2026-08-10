@@ -44,6 +44,10 @@ export class AbilityFactory {
     // check this condition via subject() at the service layer (mirrors OrdersService's
     // getOrder/cancelOrder pattern exactly).
     can(["create", "read", "delete"], "Wishlist", { userId: user.id });
+    // Notifications: every authenticated user reads and marks-read only their own —
+    // same ABAC shape as Order/Wishlist above. Nobody creates one via the API (they're
+    // written by the outbox relay's event handlers, service-internal, not a user action).
+    can(["read", "update"], "Notification", { userId: user.id });
 
     return build();
   }
