@@ -1,5 +1,3 @@
-import type { Viewport } from "next";
-import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
@@ -9,25 +7,8 @@ import type { ReactNode } from "react";
 import { sessionSchema, type Session } from "@nova/auth";
 
 import { LOCALES, COOKIE_KEYS } from "@/config/app";
-import { buildMetadata } from "@/lib/metadata";
 import { AppProviders } from "@/providers";
 import type { Theme } from "@/providers/theme-provider";
-import "../globals.css";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono",
-});
-
-export const metadata = buildMetadata();
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  themeColor: "#126b4f",
-};
 
 interface LocaleLayoutProps {
   children: ReactNode;
@@ -56,24 +37,11 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     }
   }
 
-  const direction = locale === "ar" ? "rtl" : "ltr";
-
   return (
-    <html
-      lang={locale}
-      dir={direction}
-      className={rawTheme === "dark" ? "dark" : ""}
-      suppressHydrationWarning
-    >
-      <body
-        className={`${inter.variable} ${mono.variable} min-h-screen bg-[color:var(--ds-background)] font-sans text-[color:var(--ds-text)] antialiased`}
-      >
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <AppProviders initialSession={initialSession} initialTheme={rawTheme}>
-            {children}
-          </AppProviders>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages} locale={locale}>
+      <AppProviders initialSession={initialSession} initialTheme={rawTheme}>
+        {children}
+      </AppProviders>
+    </NextIntlClientProvider>
   );
 }

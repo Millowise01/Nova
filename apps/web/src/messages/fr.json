@@ -33,7 +33,14 @@
     "contact": "Contact"
   },
   "dashboard": {
-    "title": "Tableau de bord client"
+    "title": "Tableau de bord client",
+    "navAccount": "Compte",
+    "navOrders": "Commandes",
+    "navWallet": "Portefeuille",
+    "navWishlist": "Liste de souhaits",
+    "navNotifications": "Notifications",
+    "navSettings": "Paramètres",
+    "navSupport": "Assistance"
   },
   "errors": {
     "somethingWentWrong": "Quelque chose s'est mal passé",

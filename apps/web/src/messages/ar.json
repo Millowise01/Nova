@@ -33,7 +33,14 @@
     "contact": "اتصل بنا"
   },
   "dashboard": {
-    "title": "لوحة تحكم العميل"
+    "title": "لوحة تحكم العميل",
+    "navAccount": "الحساب",
+    "navOrders": "الطلبات",
+    "navWallet": "المحفظة",
+    "navWishlist": "قائمة الأمنيات",
+    "navNotifications": "الإشعارات",
+    "navSettings": "الإعدادات",
+    "navSupport": "الدعم"
   },
   "errors": {
     "somethingWentWrong": "حدث خطأ ما",

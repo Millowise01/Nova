@@ -34,7 +34,14 @@
     "contact": "Contact"
   },
   "dashboard": {
-    "title": "Customer Dashboard"
+    "title": "Customer Dashboard",
+    "navAccount": "Account",
+    "navOrders": "Orders",
+    "navWallet": "Wallet",
+    "navWishlist": "Wishlist",
+    "navNotifications": "Notifications",
+    "navSettings": "Settings",
+    "navSupport": "Support"
   },
   "errors": {
     "somethingWentWrong": "Something went wrong",
