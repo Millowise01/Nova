@@ -23,13 +23,13 @@
     "@nova/utils": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "lucide-react": "^0.542.0",
-    "react": "^19.0.0"
+    "react": "^19.2.8"
   },
   "devDependencies": {
-    "@storybook/addon-themes": "^10.5.6",
-    "@storybook/nextjs-vite": "^10.5.6",
-    "@storybook/react": "^10.5.6",
-    "storybook": "^10.5.6",
+    "@storybook/addon-themes": "^10.5.7",
+    "@storybook/nextjs-vite": "^10.5.7",
+    "@storybook/react": "^10.5.7",
+    "storybook": "^10.5.7",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.3",
