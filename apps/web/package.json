@@ -19,7 +19,7 @@
     "@nova/validation": "workspace:*",
     "@tanstack/react-query": "^5.85.0",
     "next": "^15.0.0",
-    "next-intl": "^3.26.3",
+    "next-intl": "^4.13.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.53.0"
