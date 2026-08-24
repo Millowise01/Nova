@@ -1,5 +1,5 @@
 import type { MongoAbility } from "@casl/ability";
-import type { Notification, Order, Product, Wishlist } from "@prisma/client";
+import type { Dispute, DeliveryJob, Notification, Order, Product, Wishlist } from "@prisma/client";
 
 /**
  * Central RBAC/ABAC policy engine — Vol 3, B3 / Vol 2, B2 point 5 ("no module
@@ -29,6 +29,14 @@ export type PolicySubject =
   | Wishlist
   | "Notification"
   | Notification
+  | "DeliveryZone"
+  | "DeliveryJob"
+  | DeliveryJob
+  | "SellerPayout"
+  | "KYCSubmission"
+  | "SellerSuspensionRequest"
+  | "Dispute"
+  | Dispute
   | "all";
 
 export type AppAbility = MongoAbility<[PolicyAction, PolicySubject]>;
@@ -44,6 +52,12 @@ export type PolicySubjectTag =
   | "RefundRequest"
   | "Wishlist"
   | "Notification"
+  | "DeliveryZone"
+  | "DeliveryJob"
+  | "SellerPayout"
+  | "KYCSubmission"
+  | "SellerSuspensionRequest"
+  | "Dispute"
   | "all";
 
 export interface PolicyUser {

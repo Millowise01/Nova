@@ -12,12 +12,12 @@ This is not a style preference — it's the property that makes the microservice
 
 This build order is the project's own phased plan for backend implementation, not a sequencing given verbatim in Vol 2 B1 (B1 lists the 12 contexts without attaching phase labels itself — the phasing below was specified directly for this documentation pass).
 
-| Phase                   | Contexts                                          | Status                                                                             |
-| ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **Phase 1**             | Identity, Catalog, Cart & Checkout, Orders        | **Built**                                                                          |
-| **Phase 2**             | Payments & Wallet                                 | **In progress** — see [09-payments-wallet-design.md](09-payments-wallet-design.md) |
-| **Phase 2** (remaining) | Logistics, Finance, Trust & Safety                | Deferred                                                                           |
-| **Phase 3+**            | Sustainability, Marketing, Analytics, AI Platform | Deferred                                                                           |
+| Phase                   | Contexts                                          | Status                                                                                                     |
+| ----------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Phase 1**             | Identity, Catalog, Cart & Checkout, Orders        | **Built**                                                                                                  |
+| **Phase 2**             | Payments & Wallet                                 | **Built** — see [09-payments-wallet-design.md](09-payments-wallet-design.md)                               |
+| **Phase 2** (remaining) | Logistics, Finance, Trust & Safety                | **Built** — see [10-logistics-finance-trust-safety-design.md](10-logistics-finance-trust-safety-design.md) |
+| **Phase 3+**            | Sustainability, Marketing, Analytics, AI Platform | Deferred                                                                                                   |
 
 ---
 

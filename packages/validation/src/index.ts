@@ -574,3 +574,88 @@ export const notificationListResponseSchema = z.object({
   unreadCount: z.number().int().nonnegative(),
 });
 export type NotificationListResponse = z.infer<typeof notificationListResponseSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Logistics
+// ════════════════════════════════════════════════════════════
+
+export const createDeliveryZoneSchema = z.object({
+  district: z.string().min(2),
+  standardFeeAmount: moneyAmountSchema,
+  expressFeeAmount: moneyAmountSchema,
+  currency: currencyCodeSchema,
+});
+export type CreateDeliveryZoneInput = z.infer<typeof createDeliveryZoneSchema>;
+
+export const assignDeliveryJobSchema = z.object({
+  subOrderId: z.string().uuid(),
+  riderId: z.string().uuid(),
+});
+export type AssignDeliveryJobInput = z.infer<typeof assignDeliveryJobSchema>;
+
+export const deliverJobSchema = z.object({
+  recipientName: z.string().min(1),
+  note: z.string().optional(),
+});
+export type DeliverJobInput = z.infer<typeof deliverJobSchema>;
+
+export const failDeliveryJobSchema = z.object({
+  reason: z.string().min(1),
+});
+export type FailDeliveryJobInput = z.infer<typeof failDeliveryJobSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Finance
+// ════════════════════════════════════════════════════════════
+
+export const proposeSellerPayoutSchema = z.object({
+  sellerId: z.string().uuid(),
+  amount: moneyAmountSchema,
+  currency: currencyCodeSchema,
+  reason: z.string().min(1),
+});
+export type ProposeSellerPayoutInput = z.infer<typeof proposeSellerPayoutSchema>;
+
+export const rejectSellerPayoutSchema = z.object({
+  reason: z.string().min(1),
+});
+export type RejectSellerPayoutInput = z.infer<typeof rejectSellerPayoutSchema>;
+
+// ════════════════════════════════════════════════════════════
+// Trust & Safety
+// ════════════════════════════════════════════════════════════
+
+export const submitKycSchema = z.object({
+  subjectId: z.string().uuid(),
+  subjectType: z.enum(["seller", "rider"]),
+  documentReference: z.string().min(1),
+});
+export type SubmitKycInput = z.infer<typeof submitKycSchema>;
+
+export const proposeKycDecisionSchema = z.object({
+  decision: z.enum(["approve", "reject"]),
+  reason: z.string().optional(),
+});
+export type ProposeKycDecisionInput = z.infer<typeof proposeKycDecisionSchema>;
+
+export const suspendSellerSchema = z.object({
+  reason: z.string().min(1),
+});
+export type SuspendSellerInput = z.infer<typeof suspendSellerSchema>;
+
+export const openDisputeSchema = z.object({
+  orderId: z.string().uuid().optional(),
+  reviewId: z.string().uuid().optional(),
+  reason: z.string().min(1),
+});
+export type OpenDisputeInput = z.infer<typeof openDisputeSchema>;
+
+export const addDisputeEventSchema = z.object({
+  note: z.string().min(1),
+});
+export type AddDisputeEventInput = z.infer<typeof addDisputeEventSchema>;
+
+export const resolveDisputeSchema = z.object({
+  resolution: z.string().min(1),
+});
+export type ResolveDisputeInput = z.infer<typeof resolveDisputeSchema>;

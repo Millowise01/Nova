@@ -44,6 +44,11 @@ model User {
   // login-time gate (already enforced — see AuthService) starts allowing seller/admin
   // logins instead of blocking them.
   mfaEnabled     Boolean  @default(false) @map("mfa_enabled")
+  // Vol 3, B4 "seller suspension" (backend/docs/10) — toggled through Trust & Safety's
+  // dual-authorized propose/confirm flow, never written directly by any other module.
+  // Checked by Catalog's createProduct (a suspended seller can't list new products);
+  // existing listings aren't touched by this flag alone.
+  sellerSuspended Boolean @default(false) @map("seller_suspended")
 
   createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
@@ -499,8 +504,9 @@ model AuditLog {
 
 // ============================================================
 // PAYMENTS & WALLET (Phase 2 — backend/docs/09-payments-wallet-design.md)
-// Settlement/SellerPayout are Finance's entities, not built here. Logistics'
-// CODReconciliation is not built here either. See the design doc's Scope section.
+// Settlement/SellerPayout are Finance's entities — see LOGISTICS/FINANCE/TRUST & SAFETY
+// below (backend/docs/10). Logistics' CODReconciliation is still not built anywhere —
+// see that design doc's Scope section for why.
 // ============================================================
 
 model WalletAccount {
@@ -588,4 +594,228 @@ model RefundRequest {
   @@index([paymentIntentId])
   @@index([status])
   @@map("refund_requests")
+}
+
+// ============================================================
+// LOGISTICS (Phase 2 — backend/docs/10-logistics-finance-trust-safety-design.md)
+// CODReconciliation is not built here — no COD payment method exists to reconcile
+// against (same reasoning as Payments & Wallet's COD deferral). Dispatch/routing
+// algorithms are out of scope — DeliveryJob assignment is an explicit admin action.
+// ============================================================
+
+/// Admin-managed, starts empty — no per-district rate is seeded with an invented
+/// number. CheckoutService's LogisticsFeeZoneLookup falls back to flat defaults when
+/// no zone matches a district (backend/docs/10).
+model DeliveryZone {
+  id                String  @id @default(uuid())
+  district          String  @unique
+  standardFeeAmount Decimal @map("standard_fee_amount") @db.Decimal(14, 2)
+  expressFeeAmount  Decimal @map("express_fee_amount") @db.Decimal(14, 2)
+  currency          String
+  countryCode       String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  deliveryJobs DeliveryJob[]
+
+  @@index([district])
+  @@map("delivery_zones")
+}
+
+/// subOrderId/riderId are opaque references (Orders/Identity own those tables — Vol 2,
+/// B1's "no other module reads or writes another module's tables directly"). Created
+/// only by an explicit assignment call, never automatically from OrderPlaced (Vol 5,
+/// Part E's dispatch/routing isn't specified in enough detail to automate — see the
+/// design doc).
+model DeliveryJob {
+  id             String  @id @default(uuid())
+  subOrderId     String  @unique @map("sub_order_id")
+  riderId        String  @map("rider_id")
+  deliveryZoneId String? @map("delivery_zone_id")
+  status         String  @default("assigned") // assigned|picked_up|in_transit|delivered|failed
+  countryCode    String  @default("SL") @map("country_code")
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  deliveryZone     DeliveryZone?     @relation(fields: [deliveryZoneId], references: [id])
+  proofOfDelivery  ProofOfDelivery?
+
+  @@index([riderId])
+  @@index([status])
+  @@map("delivery_jobs")
+}
+
+/// One per successfully delivered DeliveryJob — created on the delivered transition.
+model ProofOfDelivery {
+  id             String  @id @default(uuid())
+  deliveryJobId  String  @unique @map("delivery_job_id")
+  recipientName  String  @map("recipient_name")
+  note           String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  deliveryJob DeliveryJob @relation(fields: [deliveryJobId], references: [id])
+
+  @@map("proofs_of_delivery")
+}
+
+// ============================================================
+// FINANCE (Phase 2 — backend/docs/10-logistics-finance-trust-safety-design.md)
+// Chart of accounts is minimal and code-defined (seller_payable, platform_cash) — no
+// revenue/commission/tax accounts, because nothing in this pass posts to them (no
+// commission math exists anywhere yet — see the design doc's Scope Boundary note).
+// ============================================================
+
+model LedgerAccount {
+  id       String @id @default(uuid())
+  code     String @unique // "seller_payable" | "platform_cash"
+  name     String
+  currency String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  entries LedgerEntry[]
+
+  @@map("ledger_accounts")
+}
+
+/// Append-only double-entry — every SellerPayout execution posts a balanced pair
+/// (debitAmount on one row, creditAmount on the other, same amount, same currency).
+/// One of debitAmount/creditAmount is always 0.00 on a given row (the standard
+/// T-account representation) — never both nonzero, never negative.
+model LedgerEntry {
+  id              String  @id @default(uuid())
+  ledgerAccountId String  @map("ledger_account_id")
+  debitAmount     Decimal @default(0.00) @map("debit_amount") @db.Decimal(14, 2)
+  creditAmount    Decimal @default(0.00) @map("credit_amount") @db.Decimal(14, 2)
+  currency        String
+  referenceType   String  @map("reference_type") // e.g. "SellerPayout"
+  referenceId     String  @map("reference_id")
+  description     String
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  ledgerAccount LedgerAccount @relation(fields: [ledgerAccountId], references: [id])
+
+  @@index([ledgerAccountId])
+  @@index([referenceType, referenceId])
+  @@map("ledger_entries")
+}
+
+/// Vol 3, B4 dual authorization — mirrors RefundRequest exactly (backend/docs/10).
+/// sellerId is an opaque reference to Identity's User. amount is proposer-supplied,
+/// not derived from any computed "available balance" — see the design doc's Scope
+/// Boundary note for why that calculation doesn't exist yet.
+model SellerPayout {
+  id              String  @id @default(uuid())
+  sellerId        String  @map("seller_id")
+  amount          Decimal @map("amount") @db.Decimal(14, 2)
+  currency        String
+  reason          String
+  status          String  @default("proposed") // proposed|approved|rejected|executed
+  proposedBy      String  @map("proposed_by")
+  approvedBy      String? @map("approved_by")
+  rejectionReason String? @map("rejection_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("seller_payouts")
+}
+
+// ============================================================
+// TRUST & SAFETY (Phase 2 — backend/docs/10-logistics-finance-trust-safety-design.md)
+// AuditLog already exists (Phase 1 — backend/docs/05-security-baseline.md). Fraud
+// scoring, velocity checks, and the human review queue remain deferred.
+// ============================================================
+
+/// Vol 3, B4's "seller approval" made real. documentReference is a plain string — a
+/// stubbed integration point (no OCR/third-party verification), same posture as the
+/// OTP and PSP stubs. Dual-authorized with NO threshold exception (unlike refunds/
+/// payouts) — Vol 3, B4 names seller approval/suspension without a value qualifier.
+model KYCSubmission {
+  id                 String  @id @default(uuid())
+  subjectId          String  @map("subject_id") // opaque reference to Identity's User
+  subjectType        String  @map("subject_type") // "seller" | "rider"
+  documentReference  String  @map("document_reference")
+  status             String  @default("pending") // pending|approved|rejected
+  reviewProposedBy   String? @map("review_proposed_by")
+  proposedDecision   String? @map("proposed_decision") // "approve" | "reject"
+  reviewConfirmedBy  String? @map("review_confirmed_by")
+  rejectionReason    String? @map("rejection_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([subjectId])
+  @@index([status])
+  @@map("kyc_submissions")
+}
+
+/// Exactly one of orderId/reviewId is set — enforced at the service layer (same
+/// reasoning as RefundRequest's proposedBy != approvedBy: not easily a DB CHECK
+/// across two nullable columns without more complexity than this pass needs).
+model Dispute {
+  id       String  @id @default(uuid())
+  orderId  String? @map("order_id") // opaque reference to Orders
+  reviewId String? @map("review_id") // opaque reference to Catalog
+  openedBy String  @map("opened_by") // opaque reference to Identity's User
+  reason   String
+  status   String  @default("open") // open|resolved|closed
+  resolution String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  events DisputeEvent[]
+
+  @@index([orderId])
+  @@index([reviewId])
+  @@index([status])
+  @@map("disputes")
+}
+
+/// Append-only timeline — same shape as AuditLog/WalletLedgerEntry, applied to a
+/// non-financial domain. No update/delete method exists on it anywhere in this module.
+model DisputeEvent {
+  id        String  @id @default(uuid())
+  disputeId String  @map("dispute_id")
+  actorId   String  @map("actor_id") // opaque reference to Identity's User
+  eventType String  @map("event_type") // "opened" | "comment" | "status_changed" | "resolved"
+  note      String?
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  dispute Dispute @relation(fields: [disputeId], references: [id])
+
+  @@index([disputeId])
+  @@map("dispute_events")
+}
+
+/// The other half of Vol 3, B4's "seller approval/suspension" — same dual-auth shape as
+/// KYCSubmission and RefundRequest, no threshold exception. Writes to User.sellerSuspended
+/// go through IdentityPublicService.setSellerSuspended() on execution, never a direct
+/// cross-module table write (backend/docs/10).
+model SellerSuspensionRequest {
+  id              String  @id @default(uuid())
+  sellerId        String  @map("seller_id") // opaque reference to Identity's User
+  action          String // "suspend" | "reinstate"
+  reason          String
+  status          String  @default("proposed") // proposed|approved|rejected|executed
+  proposedBy      String  @map("proposed_by")
+  approvedBy      String? @map("approved_by")
+  rejectionReason String? @map("rejection_reason")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@index([sellerId])
+  @@index([status])
+  @@map("seller_suspension_requests")
 }

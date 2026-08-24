@@ -8,7 +8,7 @@ import type {
 } from "@nova/validation";
 
 import { AuditLogger, type RequestContext } from "../../../common/audit/audit-logger.service";
-import { ConflictError, NotFoundError } from "../../../common/errors/api-error";
+import { ConflictError, ForbiddenError, NotFoundError } from "../../../common/errors/api-error";
 import { decodeCursor, encodeCursor } from "../../../common/pagination/cursor";
 import { PrismaService } from "../../../prisma/prisma.service";
 import { IdentityPublicService } from "../../identity";
@@ -58,6 +58,16 @@ export class CatalogService {
    *  from the authenticated caller's JWT (backend/docs/05: authorization is never a
    *  client-supplied value). */
   async createProduct(sellerId: string, input: CreateProductInput, ctx: RequestContext) {
+    // Vol 3, B4 "seller suspension" (backend/docs/10) — checked through Identity's
+    // public service, never a direct read of User.sellerSuspended from this module.
+    // Existing listings aren't touched by suspension alone; this only blocks new ones.
+    if (await this.identity.isSellerSuspended(sellerId)) {
+      throw new ForbiddenError(
+        "SELLER_SUSPENDED",
+        "This seller account is suspended and cannot list new products.",
+      );
+    }
+
     const existing = await this.prisma.product.findUnique({ where: { slug: input.slug } });
     if (existing)
       throw new ConflictError("PRODUCT_SLUG_TAKEN", "This product slug is already in use.");

@@ -48,6 +48,18 @@ export class AbilityFactory {
     // same ABAC shape as Order/Wishlist above. Nobody creates one via the API (they're
     // written by the outbox relay's event handlers, service-internal, not a user action).
     can(["read", "update"], "Notification", { userId: user.id });
+    // Logistics (backend/docs/10): no separate "rider" role exists in Identity's model
+    // (same shallow-role precedent as "seller" — a User.roles string, no dedicated
+    // profile table). Any authenticated user can read/transition a DeliveryJob ONLY
+    // when they're the assigned rider — the ABAC condition itself is what actually
+    // restricts this, same pattern as Order's userId condition above. Assignment
+    // (creating the job) is admin-only, gated at the route via RequirePermission.
+    can(["read", "update"], "DeliveryJob", { riderId: user.id });
+    // Trust & Safety (backend/docs/10): every authenticated user can open and read
+    // their own disputes; adding a comment (an "update" — a new DisputeEvent) is
+    // allowed on a dispute they opened too. Status changes beyond that are admin-only
+    // (covered by admin's manage-all above, not granted here).
+    can(["create", "read", "update"], "Dispute", { openedBy: user.id });
 
     return build();
   }

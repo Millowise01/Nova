@@ -37,4 +37,18 @@ export class IdentityPublicService {
     if (!user) throw new NotFoundError("SELLER_NOT_FOUND", "No seller found for this ID.");
     return { id: user.id, name: user.name, memberSince: user.createdAt };
   }
+
+  /** Backs Catalog's createProduct check (backend/docs/10) — Catalog never reads
+   *  User.sellerSuspended directly, only through this method. */
+  async isSellerSuspended(userId: string): Promise<boolean> {
+    const user = await this.prisma.user.findFirst({ where: { id: userId, deletedAt: null } });
+    return user?.sellerSuspended ?? false;
+  }
+
+  /** The ONLY code path that writes User.sellerSuspended — called by Trust & Safety's
+   *  SellerSuspensionService after its dual-authorized propose/confirm flow completes,
+   *  never written directly from outside Identity (Vol 2, B1's single-schema-owner rule). */
+  async setSellerSuspended(userId: string, suspended: boolean): Promise<void> {
+    await this.prisma.user.update({ where: { id: userId }, data: { sellerSuspended: suspended } });
+  }
 }
