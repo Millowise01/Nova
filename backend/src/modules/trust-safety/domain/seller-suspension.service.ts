@@ -20,6 +20,16 @@ export class SellerSuspensionService {
     private readonly audit: AuditLogger,
   ) {}
 
+  /** GET /v1/trust-safety/suspension-requests — admin review queue (a gap found while
+   *  building apps/admin — see backend/docs/10's disclosed-addition note). Unpaginated,
+   *  same reasoning as RefundsService.listByStatus. */
+  async listByStatus(status?: string) {
+    return this.prisma.sellerSuspensionRequest.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   async propose(
     sellerId: string,
     action: SuspensionAction,

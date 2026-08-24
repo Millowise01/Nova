@@ -26,6 +26,16 @@ export class SellerPayoutService {
     private readonly audit: AuditLogger,
   ) {}
 
+  /** GET /v1/finance/payouts — admin review queue (a gap found while building
+   *  apps/admin — see backend/docs/10's disclosed-addition note). Unpaginated, same
+   *  reasoning as RefundsService.listByStatus. */
+  async listByStatus(status?: string) {
+    return this.prisma.sellerPayout.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   async proposePayout(input: ProposeSellerPayoutInput, proposedBy: string, ctx: RequestContext) {
     const requiresApproval = Number(input.amount) > SELLER_PAYOUT_DUAL_AUTH_THRESHOLD;
 

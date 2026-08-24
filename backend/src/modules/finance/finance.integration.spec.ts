@@ -193,4 +193,30 @@ describe("Finance (integration)", () => {
       "seller_payout.execute",
     ]);
   });
+
+  it("GET /finance/payouts — admin review queue, filtered by status, admin-only", async () => {
+    const buyer = await signUpAndPromote("finance-queue-buyer", []);
+
+    const proposed = await request(app.getHttpServer())
+      .post("/v1/finance/payouts")
+      .set("Authorization", `Bearer ${adminAToken}`)
+      .send({ sellerId, amount: "700.00", currency: "SLE", reason: "Queue listing check" })
+      .expect(201);
+    expect(proposed.body.data.status).toBe("proposed");
+
+    const denied = await request(app.getHttpServer())
+      .get("/v1/finance/payouts?status=proposed")
+      .set("Authorization", `Bearer ${buyer.token}`)
+      .expect(403);
+    expect(denied.body.error.code).toBe("PERMISSION_DENIED");
+
+    const queue = await request(app.getHttpServer())
+      .get("/v1/finance/payouts?status=proposed")
+      .set("Authorization", `Bearer ${adminAToken}`)
+      .expect(200);
+    expect(queue.body.data.some((p: { id: string }) => p.id === proposed.body.data.id)).toBe(true);
+    for (const payout of queue.body.data as { status: string }[]) {
+      expect(payout.status).toBe("proposed");
+    }
+  });
 });

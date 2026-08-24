@@ -17,6 +17,16 @@ export class KycService {
     private readonly audit: AuditLogger,
   ) {}
 
+  /** GET /v1/trust-safety/kyc — admin review queue (a gap found while building
+   *  apps/admin — see backend/docs/10's disclosed-addition note). Unpaginated, same
+   *  reasoning as RefundsService.listByStatus. */
+  async listByStatus(status?: string) {
+    return this.prisma.kYCSubmission.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   async submit(input: SubmitKycInput, submittedBy: string, ctx: RequestContext) {
     const submission = await this.prisma.kYCSubmission.create({
       data: {

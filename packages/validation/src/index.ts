@@ -236,6 +236,15 @@ export const rejectRefundSchema = z.object({
 });
 export type RejectRefundInput = z.infer<typeof rejectRefundSchema>;
 
+/** GET /v1/wallet/refunds — admin review queue (backend/docs/10's disclosed addition,
+ *  built alongside apps/admin). Unpaginated by design, same as GET /v1/categories —
+ *  a small, bounded admin queue, not an unbounded list per backend/docs/02's
+ *  pagination rule. */
+export const listRefundsQuerySchema = z.object({
+  status: z.enum(["proposed", "approved", "rejected", "executed"]).optional(),
+});
+export type ListRefundsQuery = z.infer<typeof listRefundsQuerySchema>;
+
 // ════════════════════════════════════════════════════════════
 // Notifications
 // ════════════════════════════════════════════════════════════
@@ -621,6 +630,13 @@ export const rejectSellerPayoutSchema = z.object({
 });
 export type RejectSellerPayoutInput = z.infer<typeof rejectSellerPayoutSchema>;
 
+/** GET /v1/finance/payouts — admin review queue, same shape/rationale as
+ *  listRefundsQuerySchema above. */
+export const listSellerPayoutsQuerySchema = z.object({
+  status: z.enum(["proposed", "approved", "rejected", "executed"]).optional(),
+});
+export type ListSellerPayoutsQuery = z.infer<typeof listSellerPayoutsQuerySchema>;
+
 // ════════════════════════════════════════════════════════════
 // Trust & Safety
 // ════════════════════════════════════════════════════════════
@@ -643,6 +659,19 @@ export const suspendSellerSchema = z.object({
 });
 export type SuspendSellerInput = z.infer<typeof suspendSellerSchema>;
 
+/** GET /v1/trust-safety/kyc — admin review queue, same shape/rationale as
+ *  listRefundsQuerySchema above. */
+export const listKycQuerySchema = z.object({
+  status: z.enum(["pending", "approved", "rejected"]).optional(),
+});
+export type ListKycQuery = z.infer<typeof listKycQuerySchema>;
+
+/** GET /v1/trust-safety/suspension-requests — admin review queue, same shape. */
+export const listSuspensionRequestsQuerySchema = z.object({
+  status: z.enum(["proposed", "executed", "rejected"]).optional(),
+});
+export type ListSuspensionRequestsQuery = z.infer<typeof listSuspensionRequestsQuerySchema>;
+
 export const openDisputeSchema = z.object({
   orderId: z.string().uuid().optional(),
   reviewId: z.string().uuid().optional(),
@@ -659,3 +688,107 @@ export const resolveDisputeSchema = z.object({
   resolution: z.string().min(1),
 });
 export type ResolveDisputeInput = z.infer<typeof resolveDisputeSchema>;
+
+/** GET /v1/trust-safety/disputes — admin-only "all disputes" queue (backend/docs/10's
+ *  disclosed addition; the existing GET /disputes/:id ABAC read stays opener-or-admin,
+ *  unrelated to this admin list). */
+export const listDisputesQuerySchema = z.object({
+  status: z.enum(["open", "resolved", "closed"]).optional(),
+});
+export type ListDisputesQuery = z.infer<typeof listDisputesQuerySchema>;
+
+// ════════════════════════════════════════════════════════════
+// apps/admin response shapes — flat Prisma-row shapes, same convention as
+// checkoutSessionSchema. Added alongside the review-queue endpoints above
+// (backend/docs/10's disclosed addition) since apps/admin is their first real
+// consumer.
+// ════════════════════════════════════════════════════════════
+
+export const refundRequestSchema = z.object({
+  id: z.string().uuid(),
+  paymentIntentId: z.string().uuid(),
+  amount: moneyAmountSchema,
+  currency: currencyCodeSchema,
+  reason: z.string(),
+  status: z.enum(["proposed", "approved", "rejected", "executed"]),
+  proposedBy: z.string().uuid(),
+  approvedBy: z.string().uuid().nullable(),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type RefundRequestResponse = z.infer<typeof refundRequestSchema>;
+
+export const sellerPayoutSchema = z.object({
+  id: z.string().uuid(),
+  sellerId: z.string().uuid(),
+  amount: moneyAmountSchema,
+  currency: currencyCodeSchema,
+  reason: z.string(),
+  status: z.enum(["proposed", "approved", "rejected", "executed"]),
+  proposedBy: z.string().uuid(),
+  approvedBy: z.string().uuid().nullable(),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type SellerPayoutResponse = z.infer<typeof sellerPayoutSchema>;
+
+export const kycSubmissionSchema = z.object({
+  id: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  subjectType: z.enum(["seller", "rider"]),
+  documentReference: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  reviewProposedBy: z.string().uuid().nullable(),
+  proposedDecision: z.enum(["approve", "reject"]).nullable(),
+  reviewConfirmedBy: z.string().uuid().nullable(),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type KycSubmissionResponse = z.infer<typeof kycSubmissionSchema>;
+
+export const sellerSuspensionRequestSchema = z.object({
+  id: z.string().uuid(),
+  sellerId: z.string().uuid(),
+  action: z.enum(["suspend", "reinstate"]),
+  reason: z.string(),
+  status: z.enum(["proposed", "approved", "rejected", "executed"]),
+  proposedBy: z.string().uuid(),
+  approvedBy: z.string().uuid().nullable(),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type SellerSuspensionRequestResponse = z.infer<typeof sellerSuspensionRequestSchema>;
+
+export const disputeEventSchema = z.object({
+  id: z.string().uuid(),
+  disputeId: z.string().uuid(),
+  actorId: z.string().uuid(),
+  eventType: z.enum(["opened", "comment", "status_changed", "resolved"]),
+  note: z.string().nullable(),
+  createdAt: z.string(),
+});
+export type DisputeEventResponse = z.infer<typeof disputeEventSchema>;
+
+export const disputeSchema = z.object({
+  id: z.string().uuid(),
+  orderId: z.string().uuid().nullable(),
+  reviewId: z.string().uuid().nullable(),
+  openedBy: z.string().uuid(),
+  reason: z.string(),
+  status: z.enum(["open", "resolved", "closed"]),
+  resolution: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type DisputeResponse = z.infer<typeof disputeSchema>;
+
+/** GET /v1/trust-safety/disputes/:id — the flat Dispute row plus its DisputeEvent
+ *  timeline (DisputeService.getForRequester spreads both into one object). */
+export const disputeDetailSchema = disputeSchema.extend({
+  events: z.array(disputeEventSchema),
+});
+export type DisputeDetailResponse = z.infer<typeof disputeDetailSchema>;

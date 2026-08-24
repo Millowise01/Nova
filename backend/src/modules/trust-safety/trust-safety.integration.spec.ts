@@ -123,6 +123,32 @@ describe("Trust & Safety (integration)", () => {
         .expect(200);
       expect(confirmed.body.data.status).toBe("rejected");
     });
+
+    it("GET /trust-safety/kyc — admin review queue, filtered by status, admin-only", async () => {
+      const seller = await signUpAndPromote("ts-kyc-queue-seller", ["seller"]);
+      const submitted = await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .set("Authorization", `Bearer ${seller.token}`)
+        .send({ subjectId: seller.userId, subjectType: "seller", documentReference: "REG-QUEUE" })
+        .expect(201);
+
+      const denied = await request(app.getHttpServer())
+        .get("/v1/trust-safety/kyc?status=pending")
+        .set("Authorization", `Bearer ${seller.token}`)
+        .expect(403);
+      expect(denied.body.error.code).toBe("PERMISSION_DENIED");
+
+      const queue = await request(app.getHttpServer())
+        .get("/v1/trust-safety/kyc?status=pending")
+        .set("Authorization", `Bearer ${adminAToken}`)
+        .expect(200);
+      expect(queue.body.data.some((s: { id: string }) => s.id === submitted.body.data.id)).toBe(
+        true,
+      );
+      for (const submission of queue.body.data as { status: string }[]) {
+        expect(submission.status).toBe("pending");
+      }
+    });
   });
 
   describe("Seller suspension — the other named half of Vol 3, B4, enforced by Catalog", () => {
@@ -230,6 +256,32 @@ describe("Trust & Safety (integration)", () => {
       const user = await prisma.user.findUniqueOrThrow({ where: { id: seller.userId } });
       expect(user.sellerSuspended).toBe(false);
     });
+
+    it("GET /trust-safety/suspension-requests — admin review queue, filtered by status, admin-only", async () => {
+      const seller = await signUpAndPromote("ts-suspend-queue", ["seller"]);
+      const suspendReq = await request(app.getHttpServer())
+        .post(`/v1/trust-safety/sellers/${seller.userId}/suspend`)
+        .set("Authorization", `Bearer ${adminAToken}`)
+        .send({ reason: "Queue listing check" })
+        .expect(201);
+
+      const denied = await request(app.getHttpServer())
+        .get("/v1/trust-safety/suspension-requests?status=proposed")
+        .set("Authorization", `Bearer ${seller.token}`)
+        .expect(403);
+      expect(denied.body.error.code).toBe("PERMISSION_DENIED");
+
+      const queue = await request(app.getHttpServer())
+        .get("/v1/trust-safety/suspension-requests?status=proposed")
+        .set("Authorization", `Bearer ${adminAToken}`)
+        .expect(200);
+      expect(queue.body.data.some((r: { id: string }) => r.id === suspendReq.body.data.id)).toBe(
+        true,
+      );
+      for (const req of queue.body.data as { status: string }[]) {
+        expect(req.status).toBe("proposed");
+      }
+    });
   });
 
   describe("Disputes — not dual-authorized", () => {
@@ -306,5 +358,37 @@ describe("Trust & Safety (integration)", () => {
         .expect(400);
       expect(both.body.error.code).toBe("DISPUTE_TARGET_AMBIGUOUS");
     });
+
+    it(
+      "GET /trust-safety/disputes — admin-only 'all disputes' queue, gated by 'manage' " +
+        "(not the conditioned 'read' every user has on their own disputes)",
+      async () => {
+        const buyer = await signUpAndPromote("ts-dispute-queue-buyer", []);
+        const opened = await request(app.getHttpServer())
+          .post("/v1/trust-safety/disputes")
+          .set("Authorization", `Bearer ${buyer.token}`)
+          .send({ orderId: randomUUID(), reason: "Queue listing check" })
+          .expect(201);
+
+        // The opener has real "read" on their OWN dispute (GET /disputes/:id already
+        // covers that) but must NOT pass the coarse route guard for the list-all queue.
+        const denied = await request(app.getHttpServer())
+          .get("/v1/trust-safety/disputes?status=open")
+          .set("Authorization", `Bearer ${buyer.token}`)
+          .expect(403);
+        expect(denied.body.error.code).toBe("PERMISSION_DENIED");
+
+        const queue = await request(app.getHttpServer())
+          .get("/v1/trust-safety/disputes?status=open")
+          .set("Authorization", `Bearer ${adminAToken}`)
+          .expect(200);
+        expect(queue.body.data.some((d: { id: string }) => d.id === opened.body.data.id)).toBe(
+          true,
+        );
+        for (const dispute of queue.body.data as { status: string }[]) {
+          expect(dispute.status).toBe("open");
+        }
+      },
+    );
   });
 });

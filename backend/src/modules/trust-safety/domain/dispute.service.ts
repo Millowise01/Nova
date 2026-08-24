@@ -21,6 +21,20 @@ export class DisputeService {
     private readonly abilityFactory: AbilityFactory,
   ) {}
 
+  /** GET /v1/trust-safety/disputes — admin-only "all disputes" queue (a gap found
+   *  while building apps/admin — see backend/docs/10's disclosed-addition note).
+   *  Deliberately separate from getForRequester's opener-or-admin ABAC read — this one
+   *  lists across every opener, so it's gated by "manage" at the route (RequirePermission
+   *  in the controller), the same admin-only technique resolve() below already uses,
+   *  not the conditioned "read" rule every authenticated user has on their own disputes.
+   *  Unpaginated, same reasoning as RefundsService.listByStatus. */
+  async listByStatus(status?: string) {
+    return this.prisma.dispute.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   async open(input: OpenDisputeInput, openedBy: string, ctx: RequestContext) {
     if (!input.orderId && !input.reviewId) {
       throw new BadRequestError(

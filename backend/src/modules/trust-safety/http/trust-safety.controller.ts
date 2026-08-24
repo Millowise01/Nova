@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
@@ -14,12 +15,18 @@ import { ApiTags } from "@nestjs/swagger";
 
 import {
   addDisputeEventSchema,
+  listDisputesQuerySchema,
+  listKycQuerySchema,
+  listSuspensionRequestsQuerySchema,
   openDisputeSchema,
   proposeKycDecisionSchema,
   resolveDisputeSchema,
   submitKycSchema,
   suspendSellerSchema,
   type AddDisputeEventInput,
+  type ListDisputesQuery,
+  type ListKycQuery,
+  type ListSuspensionRequestsQuery,
   type OpenDisputeInput,
   type ProposeKycDecisionInput,
   type ResolveDisputeInput,
@@ -48,6 +55,16 @@ export class TrustSafetyController {
   ) {}
 
   // --- KYC (Vol 3, B4 "seller approval") ---
+
+  // Admin review queue (backend/docs/10's disclosed addition) — same admin-only
+  // posture as propose/confirm-decision below.
+  @Get("kyc")
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePermission("read", "KYCSubmission")
+  async listKyc(@Query(new ZodValidationPipe(listKycQuerySchema)) query: ListKycQuery) {
+    const submissions = await this.kyc.listByStatus(query.status);
+    return { data: submissions };
+  }
 
   @Post("kyc")
   @UseGuards(JwtAuthGuard)
@@ -91,6 +108,19 @@ export class TrustSafetyController {
   }
 
   // --- Seller suspension (Vol 3, B4's other named half) ---
+
+  // Admin review queue (backend/docs/10's disclosed addition) — same admin-only
+  // posture as suspend/reinstate/confirm/reject below.
+  @Get("suspension-requests")
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePermission("read", "SellerSuspensionRequest")
+  async listSuspensionRequests(
+    @Query(new ZodValidationPipe(listSuspensionRequestsQuerySchema))
+    query: ListSuspensionRequestsQuery,
+  ) {
+    const requests = await this.suspension.listByStatus(query.status);
+    return { data: requests };
+  }
 
   @Post("sellers/:sellerId/suspend")
   @UseGuards(JwtAuthGuard, PolicyGuard)
@@ -151,6 +181,22 @@ export class TrustSafetyController {
   }
 
   // --- Disputes (not dual-authorized — see dispute.service.ts) ---
+
+  // Admin-only "all disputes" queue (backend/docs/10's disclosed addition) — gated by
+  // "manage" (only admin's unconditional manage-all satisfies it), NOT "read", since
+  // every authenticated user already has a conditioned "read" rule on their OWN
+  // disputes (ability.factory.ts) that a coarse RequirePermission("read", ...) check
+  // can't distinguish from "read every dispute." Same technique DisputeService.resolve
+  // already uses.
+  @Get("disputes")
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePermission("manage", "Dispute")
+  async listDisputes(
+    @Query(new ZodValidationPipe(listDisputesQuerySchema)) query: ListDisputesQuery,
+  ) {
+    const disputes = await this.disputes.listByStatus(query.status);
+    return { data: disputes };
+  }
 
   @Post("disputes")
   @UseGuards(JwtAuthGuard)

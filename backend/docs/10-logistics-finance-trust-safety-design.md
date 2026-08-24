@@ -75,6 +75,22 @@ All three contexts are built and verified — real integration tests against a r
 | Commission-rate-driven ledger postings from Orders   | Not built                        | No commission percentage is specified anywhere in the blueprint read so far — see Finance's Scope Boundary note.                                                                                            |
 | `subOrderId` validation on delivery-job assignment   | Not built (disclosed limitation) | Would require Logistics to depend on Orders, closing a cycle with Cart & Checkout — see Cross-module wiring above.                                                                                          |
 
+## Admin review queue endpoints — a gap found while building apps/admin, not a silent scope change
+
+None of the three contexts above shipped a "list the pending ones" endpoint — every propose/approve flow was built and tested by creating one request and acting on it by ID, never by asking "what's waiting for review right now." That gap only became visible once `apps/admin`'s queue screens needed exactly that question answered, so five endpoints were added:
+
+| Endpoint                                           | Backs                               | Service method                         |
+| -------------------------------------------------- | ----------------------------------- | -------------------------------------- |
+| `GET /v1/wallet/refunds?status=`                   | Refunds & Payouts queue screen      | `RefundsService.listByStatus`          |
+| `GET /v1/finance/payouts?status=`                  | Refunds & Payouts queue screen      | `SellerPayoutService.listByStatus`     |
+| `GET /v1/trust-safety/kyc?status=`                 | Seller Approval & Suspension screen | `KycService.listByStatus`              |
+| `GET /v1/trust-safety/suspension-requests?status=` | Seller Approval & Suspension screen | `SellerSuspensionService.listByStatus` |
+| `GET /v1/trust-safety/disputes?status=`            | Dispute Resolution screen           | `DisputeService.listByStatus`          |
+
+All five are admin-only, `status` is an optional filter (omitted = every status), and **none of them paginate** — each queue is a small, bounded admin review list (the same category `GET /v1/categories`/`GET /v1/brands` already treat as unpaginated), not the unbounded-list shape `backend/docs/02-api-standards.md` reserves cursor pagination for. If a real deployment's queue depth ever makes that assumption wrong, that's a real future change, not something guessed at here.
+
+**One RBAC subtlety worth flagging**: the disputes queue could **not** reuse the `"read"` permission tag the other four use, because every authenticated user already holds a conditioned `can("read", "Dispute", { openedBy: user.id })` rule (so they can read their own disputes) — `PolicyGuard`'s coarse, route-level check can't distinguish "read my own" from "read every dispute in the system" when both are checked as the same bare action+subject pair. `GET /v1/trust-safety/disputes` is gated by `"manage"` instead, the same technique `DisputeService.resolve` already used for the identical reason — only admin's unconditional `can("manage", "all")` ever satisfies it.
+
 ## Known risks in this area for Nova specifically
 
 - **The payout threshold is a guess, same as the refund threshold it's copied from** — don't treat either as final without real business confirmation.

@@ -291,6 +291,46 @@ describe("Payments & Wallet (integration)", () => {
     expect(response.body.error.code).toBe("PERMISSION_DENIED");
   });
 
+  it("GET /wallet/refunds — admin review queue, filtered by status, admin-only", async () => {
+    const buyer = await signUpAndPromote("refund-queue-buyer", []);
+    const order = await placeOrder(buyer.token, "card");
+    expect(order.status).toBe(201);
+
+    const proposed = await request(app.getHttpServer())
+      .post("/v1/wallet/refunds")
+      .set("Authorization", `Bearer ${sellerToken}`)
+      .send({
+        paymentIntentId: order.body.data.paymentIntentId,
+        amount: "600.00",
+        reason: "Queue listing check",
+      })
+      .expect(201);
+    expect(proposed.body.data.status).toBe("proposed"); // above threshold, not yet executed
+
+    const denied = await request(app.getHttpServer())
+      .get("/v1/wallet/refunds?status=proposed")
+      .set("Authorization", `Bearer ${buyer.token}`)
+      .expect(403);
+    expect(denied.body.error.code).toBe("PERMISSION_DENIED");
+
+    const queue = await request(app.getHttpServer())
+      .get("/v1/wallet/refunds?status=proposed")
+      .set("Authorization", `Bearer ${sellerToken}`)
+      .expect(200);
+    expect(
+      queue.body.data.some((r: { id: string; status: string }) => r.id === proposed.body.data.id),
+    ).toBe(true);
+    for (const refund of queue.body.data as { status: string }[]) {
+      expect(refund.status).toBe("proposed");
+    }
+
+    const unfiltered = await request(app.getHttpServer())
+      .get("/v1/wallet/refunds")
+      .set("Authorization", `Bearer ${sellerToken}`)
+      .expect(200);
+    expect(unfiltered.body.data.length).toBeGreaterThanOrEqual(queue.body.data.length);
+  });
+
   it("a funded wallet can then successfully pay for a new order by wallet", async () => {
     const buyer = await signUpAndPromote("funded-buyer", []);
 

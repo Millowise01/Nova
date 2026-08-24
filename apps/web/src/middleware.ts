@@ -31,6 +31,17 @@ function parseSession(raw: string | undefined) {
   }
 }
 
+/** Lives at src/middleware.ts, NOT apps/web/middleware.ts — a real, verified-live
+ *  finding (found while building apps/admin, backend/docs/10's admin-portal work):
+ *  Next.js's dev-mode middleware discovery computes its search directory as
+ *  path.join(appDir, '..') (next/dist/server/lib/router-utils/setup-dev-bundler.js),
+ *  and appDir is src/app here, so a middleware.ts at the project root was silently
+ *  never discovered — middleware-manifest.json stayed `{}` with no error and no
+ *  warning. This means BOTH the auth-redirect guard below AND next-intl's locale
+ *  routing/detection had never actually been executing. Confirmed via a diagnostic
+ *  console.log watched in real dev-server stdout, and by elimination against an
+ *  isolated non-monorepo Next.js app (which DOES discover a root-level middleware.ts,
+ *  because its app/ has no src/ ancestor). */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const pathnameWithoutLocale = stripLocale(pathname);
@@ -50,18 +61,11 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // Role-based guard: seller/admin routes redirect customers to forbidden
-    const isSellerRoute = pathnameWithoutLocale.startsWith("/seller");
-    const isAdminRoute = pathnameWithoutLocale.startsWith("/admin");
-    const roles: string[] = session.roles ?? [];
-
-    if (isSellerRoute && !roles.includes("seller") && !roles.includes("admin")) {
-      return NextResponse.redirect(new URL(`/${locale}${ROUTES.forbidden}`, request.url));
-    }
-
-    if (isAdminRoute && !roles.includes("admin")) {
-      return NextResponse.redirect(new URL(`/${locale}${ROUTES.forbidden}`, request.url));
-    }
+    // A role-based /seller and /admin guard used to live here. Removed — confirmed dead
+    // code: apps/web/src/config/routes.ts has no seller/admin entries and there's no
+    // such route tree under apps/web/src/app/[locale]/. Seller and admin experiences
+    // are their own separate Next.js apps (apps/seller, apps/admin), each with its own
+    // middleware, not sub-routes of apps/web.
   }
 
   // Inject RTL hint header for server components

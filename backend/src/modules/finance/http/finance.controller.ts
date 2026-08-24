@@ -1,19 +1,23 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import {
+  listSellerPayoutsQuerySchema,
   proposeSellerPayoutSchema,
   rejectSellerPayoutSchema,
+  type ListSellerPayoutsQuery,
   type ProposeSellerPayoutInput,
   type RejectSellerPayoutInput,
 } from "@nova/validation";
@@ -33,6 +37,18 @@ type FinanceRequest = AuthenticatedRequest & RequestWithCorrelationId;
 @Controller("finance")
 export class FinanceController {
   constructor(private readonly payouts: SellerPayoutService) {}
+
+  // Admin review queue (backend/docs/10's disclosed addition) — same admin-only
+  // posture as propose/approve/reject below.
+  @Get("payouts")
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePermission("read", "SellerPayout")
+  async listPayouts(
+    @Query(new ZodValidationPipe(listSellerPayoutsQuerySchema)) query: ListSellerPayoutsQuery,
+  ) {
+    const payouts = await this.payouts.listByStatus(query.status);
+    return { data: payouts };
+  }
 
   @Post("payouts")
   @UseGuards(JwtAuthGuard, PolicyGuard)

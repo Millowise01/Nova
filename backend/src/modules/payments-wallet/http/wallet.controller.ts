@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
 import {
+  listRefundsQuerySchema,
   proposeRefundSchema,
   rejectRefundSchema,
+  type ListRefundsQuery,
   type ProposeRefundInput,
   type RejectRefundInput,
 } from "@nova/validation";
@@ -31,6 +33,16 @@ export class WalletController {
   async getBalance(@Req() req: AuthenticatedRequest) {
     const balance = await this.wallet.getBalance(req.user.sub, "SLE");
     return { data: { amount: balance, currency: "SLE" } };
+  }
+
+  // Admin review queue (backend/docs/10's disclosed addition) — same admin-only
+  // posture as propose/approve/reject below.
+  @Get("wallet/refunds")
+  @UseGuards(JwtAuthGuard, PolicyGuard)
+  @RequirePermission("read", "RefundRequest")
+  async listRefunds(@Query(new ZodValidationPipe(listRefundsQuerySchema)) query: ListRefundsQuery) {
+    const refunds = await this.refunds.listByStatus(query.status);
+    return { data: refunds };
   }
 
   // Refund propose/approve/reject are admin-only (backend/docs/09's proposed approver

@@ -18,6 +18,17 @@ export class RefundsService {
     private readonly audit: AuditLogger,
   ) {}
 
+  /** GET /v1/wallet/refunds — admin review queue (a gap found while building
+   *  apps/admin, not part of the original Payments & Wallet scope — see
+   *  backend/docs/10's disclosed-addition note). Unpaginated: a small, bounded admin
+   *  queue, not the unbounded-list shape backend/docs/02 reserves cursor pagination for. */
+  async listByStatus(status?: string) {
+    return this.prisma.refundRequest.findMany({
+      where: status ? { status } : undefined,
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
   /**
    * Vol 3, B4's dual authorization, made real for the first time in this codebase.
    * At or below the threshold: proposer's action executes immediately. Above it: a
