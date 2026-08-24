@@ -8,9 +8,12 @@ export const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().min(1),
-  JWT_ACCESS_SECRET: z.string().min(16),
+  // RS256 keypair, base64-encoded PEM (backend/docs/05-security-baseline.md: any module —
+  // and eventually any extracted microservice — verifies a token with the public key alone,
+  // without holding the private signing key).
+  JWT_ACCESS_PRIVATE_KEY: z.string().min(1),
+  JWT_ACCESS_PUBLIC_KEY: z.string().min(1),
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
-  JWT_REFRESH_SECRET: z.string().min(16),
   JWT_REFRESH_EXPIRY: z.string().default("30d"),
   PII_ENCRYPTION_KEY: z.string().min(1),
   // Comma-separated allowlist — Vol 3, C1's application-layer complement to the

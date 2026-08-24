@@ -17,27 +17,40 @@ export interface AccessTokenPayload {
  * what makes "any session can be force-terminated immediately" possible: revoking a
  * session is deleting/marking that one row, not something a stateless JWT can do.
  *
- * backend/docs/05-security-baseline.md proposes RS256 for the access token; this pass
- * uses HS256 shared secrets for simplicity (see the .env.example comment) — swap the
- * signing strategy before this leaves local development.
+ * backend/docs/05-security-baseline.md's RS256 proposal is now implemented: the access
+ * token is signed with an RSA private key and verified with the matching public key, so
+ * any future module or extracted microservice (Vol 2, Part F) can verify a token holding
+ * only the public key, never the private signing key.
  */
 @Injectable()
 export class TokenService {
+  private readonly privateKey: string;
+  private readonly publicKey: string;
+
   constructor(
     private readonly jwt: JwtService,
     private readonly config: AppConfigService,
-  ) {}
+  ) {
+    this.privateKey = Buffer.from(this.config.get("JWT_ACCESS_PRIVATE_KEY"), "base64").toString(
+      "utf8",
+    );
+    this.publicKey = Buffer.from(this.config.get("JWT_ACCESS_PUBLIC_KEY"), "base64").toString(
+      "utf8",
+    );
+  }
 
   issueAccessToken(payload: AccessTokenPayload): string {
     return this.jwt.sign(payload, {
-      secret: this.config.get("JWT_ACCESS_SECRET"),
+      privateKey: this.privateKey,
+      algorithm: "RS256",
       expiresIn: this.config.get("JWT_ACCESS_EXPIRY"),
     });
   }
 
   verifyAccessToken(token: string): AccessTokenPayload {
     return this.jwt.verify<AccessTokenPayload>(token, {
-      secret: this.config.get("JWT_ACCESS_SECRET"),
+      publicKey: this.publicKey,
+      algorithms: ["RS256"],
     });
   }
 

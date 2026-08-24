@@ -295,7 +295,9 @@ describe("Payments & Wallet (integration)", () => {
     const buyer = await signUpAndPromote("funded-buyer", []);
 
     // Fund the wallet via a real refund on a prior order (the only wallet-crediting
-    // path this pass implements — Vol 5, C2).
+    // path this pass implements — Vol 5, C2). 115.00 = 100.00 product subtotal + 15.00
+    // flat "standard" shipping stub (backend/src/modules/cart-checkout/domain/pricing/),
+    // matching what placeOrder's checkout session actually charges — a full refund.
     const fundingOrder = await placeOrder(buyer.token, "card");
     expect(fundingOrder.status).toBe(201);
     await request(app.getHttpServer())
@@ -303,7 +305,7 @@ describe("Payments & Wallet (integration)", () => {
       .set("Authorization", `Bearer ${sellerToken}`)
       .send({
         paymentIntentId: fundingOrder.body.data.paymentIntentId,
-        amount: "100.00",
+        amount: "115.00",
         reason: "Funding for test",
       })
       .expect(201);
@@ -312,7 +314,7 @@ describe("Payments & Wallet (integration)", () => {
       .get("/v1/wallet/balance")
       .set("Authorization", `Bearer ${buyer.token}`)
       .expect(200);
-    expect(balance.body.data.amount).toBe("100.00");
+    expect(balance.body.data.amount).toBe("115.00");
 
     // Now pay for a new order BY WALLET, using exactly the funded balance.
     const walletOrder = await placeOrder(buyer.token, "wallet");

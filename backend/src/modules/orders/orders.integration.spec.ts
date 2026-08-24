@@ -149,7 +149,9 @@ describe("Orders (integration) — including idempotent checkout orchestration",
       // is now a transient, never-externally-observable intermediate state.
       expect(first.body.data.status).toBe("confirmed");
       expect(first.body.data.paymentIntentId).toEqual(expect.any(String));
-      expect(first.body.data.total.amount).toBe("50.00"); // 25.00 * 2
+      // 25.00 * 2 subtotal + 15.00 flat "standard" shipping stub (backend/src/modules/
+      // cart-checkout/domain/pricing/) — no promo code applied.
+      expect(first.body.data.total.amount).toBe("65.00");
       expect(first.body.data.subOrders).toHaveLength(1);
 
       // The outbox row — written in the same transaction as the Order (backend/docs/04).
@@ -161,8 +163,7 @@ describe("Orders (integration) — including idempotent checkout orchestration",
         },
       });
       expect(outboxRow).not.toBeNull();
-      expect(outboxRow?.publishedAt).toBeNull(); // no relay/consumer exists yet — correct per this pass's scope
-      expect((outboxRow?.payload as { total: { amount: string } }).total.amount).toBe("50.00");
+      expect((outboxRow?.payload as { total: { amount: string } }).total.amount).toBe("65.00");
 
       // THE RETRY — same key, same body. This is the actual proof, not just an assertion
       // about the mechanism: verify no duplicate Order was created in the database.

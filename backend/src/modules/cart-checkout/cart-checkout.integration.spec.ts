@@ -91,7 +91,7 @@ describe("Cart & Checkout (integration)", () => {
     expect(response.body.error.code).toBe("VARIANT_NOT_FOUND");
   });
 
-  it("creates a checkout session from a cart with the shared @nova/validation checkoutSchema shape", async () => {
+  it("creates a checkout session from a cart with the shared @nova/validation checkoutSchema shape, total = subtotal + shipping (no promo code)", async () => {
     const cart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
     const cartId = cart.body.data.cartId;
     await request(app.getHttpServer())
@@ -112,7 +112,102 @@ describe("Cart & Checkout (integration)", () => {
       .expect(201);
 
     expect(session.body.data.status).toBe("pending");
-    expect(session.body.data.totalAmount).toBe("100.00");
+    expect(session.body.data.subtotalAmount).toBe("100.00"); // 50.00 * 2
+    expect(session.body.data.shippingFeeAmount).toBe("15.00"); // stub flat "standard" rate
+    expect(session.body.data.discountAmount).toBe("0.00");
+    expect(session.body.data.totalAmount).toBe("115.00"); // 100.00 - 0.00 + 15.00
+  });
+
+  it("charges no shipping fee for pickup, and a higher flat fee for express", async () => {
+    const cart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+    const cartId = cart.body.data.cartId;
+    await request(app.getHttpServer())
+      .post(`/v1/cart/${cartId}/lines`)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    const pickup = await request(app.getHttpServer())
+      .post(`/v1/carts/${cartId}/checkout/session`)
+      .send({
+        addressLine: "1 Siaka Stevens St",
+        city: "Freetown",
+        district: "Western Area",
+        phone: "+23276000000",
+        deliveryMethod: "pickup",
+        paymentMethod: "wallet",
+      })
+      .expect(201);
+    expect(pickup.body.data.shippingFeeAmount).toBe("0.00");
+    expect(pickup.body.data.totalAmount).toBe("50.00");
+
+    const cart2 = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+    const cartId2 = cart2.body.data.cartId;
+    await request(app.getHttpServer())
+      .post(`/v1/cart/${cartId2}/lines`)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    const express = await request(app.getHttpServer())
+      .post(`/v1/carts/${cartId2}/checkout/session`)
+      .send({
+        addressLine: "1 Siaka Stevens St",
+        city: "Freetown",
+        district: "Western Area",
+        phone: "+23276000000",
+        deliveryMethod: "express",
+        paymentMethod: "wallet",
+      })
+      .expect(201);
+    expect(express.body.data.shippingFeeAmount).toBe("35.00");
+    expect(express.body.data.totalAmount).toBe("85.00");
+  });
+
+  it("applies a valid promo code as a discount and rejects an invalid one", async () => {
+    const validCart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+    const validCartId = validCart.body.data.cartId;
+    await request(app.getHttpServer())
+      .post(`/v1/cart/${validCartId}/lines`)
+      .send({ variantId, quantity: 2 })
+      .expect(201);
+
+    // Stub validator (backend/src/modules/cart-checkout/domain/pricing/) recognizes
+    // exactly one dev code, 10% off, pending a real Marketing campaign context.
+    const applied = await request(app.getHttpServer())
+      .post(`/v1/carts/${validCartId}/checkout/session`)
+      .send({
+        addressLine: "1 Siaka Stevens St",
+        city: "Freetown",
+        district: "Western Area",
+        phone: "+23276000000",
+        deliveryMethod: "pickup",
+        paymentMethod: "wallet",
+        promoCode: "welcome10",
+      })
+      .expect(201);
+    expect(applied.body.data.promoCode).toBe("welcome10");
+    expect(applied.body.data.discountAmount).toBe("10.00"); // 10% of 100.00
+    expect(applied.body.data.totalAmount).toBe("90.00"); // 100.00 - 10.00 + 0.00 shipping
+
+    const invalidCart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+    const invalidCartId = invalidCart.body.data.cartId;
+    await request(app.getHttpServer())
+      .post(`/v1/cart/${invalidCartId}/lines`)
+      .send({ variantId, quantity: 1 })
+      .expect(201);
+
+    const rejected = await request(app.getHttpServer())
+      .post(`/v1/carts/${invalidCartId}/checkout/session`)
+      .send({
+        addressLine: "1 Siaka Stevens St",
+        city: "Freetown",
+        district: "Western Area",
+        phone: "+23276000000",
+        deliveryMethod: "pickup",
+        paymentMethod: "wallet",
+        promoCode: "NOT-A-REAL-CODE",
+      })
+      .expect(400);
+    expect(rejected.body.error.code).toBe("PROMO_CODE_INVALID");
   });
 
   it("rejects a checkout session for an empty cart", async () => {

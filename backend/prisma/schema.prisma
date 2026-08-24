@@ -102,20 +102,10 @@ model Session {
   @@map("sessions")
 }
 
-/// Stubbed OTP delivery (confirmed decision — see backend's otp module): a code is
-/// generated and hashed here; in development it is logged, never actually sent.
-model OtpCode {
-  id              String    @id @default(uuid())
-  destinationHash String    @map("destination_hash") // hash of the phone/email it was sent to
-  codeHash        String    @map("code_hash")
-  expiresAt       DateTime  @map("expires_at") @db.Timestamptz
-  consumedAt      DateTime? @map("consumed_at") @db.Timestamptz
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
-
-  @@index([destinationHash])
-  @@map("otp_codes")
-}
+// OTP codes are Redis-backed (backend/src/modules/identity/domain/otp.service.ts), not a
+// Postgres table — a 10-minute one-time code is transient session state, matching this
+// file's own storage-topology note that Redis, not Postgres, owns that category of data.
+// (Formerly modeled here as OtpCode / otp_codes; migrated off Postgres, not left stubbed.)
 
 // ============================================================
 // CATALOG
@@ -344,8 +334,17 @@ model CheckoutSession {
 
   subtotalAmount   Decimal @map("subtotal_amount") @db.Decimal(14, 2)
   subtotalCurrency String  @map("subtotal_currency")
-  totalAmount      Decimal @map("total_amount") @db.Decimal(14, 2)
-  totalCurrency    String  @map("total_currency")
+
+  // Stubbed pending Logistics/Marketing (backend/docs/00-bounded-contexts.md) — see
+  // backend/src/modules/cart-checkout/domain/pricing/. promoCode is null when none was
+  // submitted; discountAmount/shippingFeeAmount default to 0.00 so total = subtotal for
+  // every pre-existing row and every checkout that doesn't use these yet.
+  promoCode         String? @map("promo_code")
+  discountAmount    Decimal @default(0.00) @map("discount_amount") @db.Decimal(14, 2)
+  shippingFeeAmount Decimal @default(0.00) @map("shipping_fee_amount") @db.Decimal(14, 2)
+
+  totalAmount   Decimal @map("total_amount") @db.Decimal(14, 2)
+  totalCurrency String  @map("total_currency")
 
   status     String    @default("pending") // pending | consumed | expired
   consumedAt DateTime? @map("consumed_at") @db.Timestamptz

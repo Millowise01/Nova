@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import { Logger } from "@nestjs/common";
 import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
@@ -161,8 +162,9 @@ describe("Identity — auth flow (e2e)", () => {
     expect(response.body.error.code).toBe("VALIDATION_FAILED");
   });
 
-  it("OTP: requesting a code never returns it in the response, and it can be verified once", async () => {
+  it("OTP: requesting a code never returns it in the response, and it can be verified exactly once", async () => {
     const destination = `otp-test-${randomUUID().slice(0, 8)}@example.test`;
+    const debugSpy = jest.spyOn(Logger.prototype, "debug");
 
     const requestResponse = await request(app.getHttpServer())
       .post("/v1/auth/otp")
@@ -170,11 +172,27 @@ describe("Identity — auth flow (e2e)", () => {
       .expect(202);
     expect(JSON.stringify(requestResponse.body)).not.toMatch(/\d{6}/); // no 6-digit code leaked
 
-    const row = await prisma.otpCode.findFirstOrThrow({
-      where: { destinationHash: { not: undefined } },
-      orderBy: { createdAt: "desc" },
-    });
-    expect(row.codeHash).toBeDefined();
+    // The stub logs the code (Volume 5 SMS integration doesn't exist yet) — recover it the
+    // same way a real test double for an SMS provider would, to prove the Redis-backed
+    // round trip actually works end to end, not just that a 202 was returned.
+    const loggedLine = debugSpy.mock.calls
+      .map((call) => String(call[0]))
+      .find((line) => line.includes(destination));
+    const code = loggedLine?.match(/code for .*: (\d{6})/)?.[1];
+    expect(code).toBeDefined();
+    debugSpy.mockRestore();
+
+    await request(app.getHttpServer())
+      .post("/v1/auth/otp/verify")
+      .send({ destination, code })
+      .expect(200);
+
+    // Single-use: Redis DEL on success means the same code can never be replayed.
+    const replay = await request(app.getHttpServer())
+      .post("/v1/auth/otp/verify")
+      .send({ destination, code })
+      .expect(400);
+    expect(replay.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
   });
 
   it("writes an audit log entry for both successful and failed login attempts", async () => {

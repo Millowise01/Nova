@@ -111,7 +111,7 @@ This repo uses [Turborepo](https://turborepo.com) to run scripts (`build`, `lint
 `backend/` is a real NestJS + Prisma + PostgreSQL API — the first working slice, covering Phase 1's four bounded contexts (Identity, Catalog, Cart & Checkout, Orders; see [backend/docs/00-bounded-contexts.md](backend/docs/00-bounded-contexts.md) for the full build order and what's still deferred). It's a separate pnpm workspace member (`backend`, not under `apps/` — see [pnpm-workspace.yaml](pnpm-workspace.yaml)) with its own CommonJS `tsconfig.json`, since NestJS's decorator/DI model isn't compatible with the rest of the repo's ESM/bundler TypeScript config.
 
 - `docker compose up -d` — starts local Postgres (port **5433**, not 5432 — see the comment in [docker-compose.yml](docker-compose.yml) about a native Postgres install already using the default port on some machines) and Redis.
-- `cp backend/.env.example backend/.env`, fill in the secrets (`PII_ENCRYPTION_KEY`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` — generation commands are in the file's comments).
+- `cp backend/.env.example backend/.env`, fill in the secrets (`PII_ENCRYPTION_KEY`, `JWT_ACCESS_PRIVATE_KEY`/`JWT_ACCESS_PUBLIC_KEY` — generation commands are in the file's comments).
 - `pnpm --filter @nova/backend prisma:generate` then `pnpm --filter @nova/backend prisma:migrate` — applies the schema to your local database.
 - `pnpm --filter @nova/backend dev` — runs the API on <http://localhost:4000/v1>, with live Swagger/OpenAPI docs at `/docs` and the spec written to `backend/openapi.json` on every boot.
 - `pnpm --filter @nova/backend test` — the module test suites (unit + integration against the real dockerized Postgres, not mocks).
