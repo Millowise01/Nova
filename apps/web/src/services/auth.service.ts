@@ -67,3 +67,9 @@ export function getMe() {
 export function updateMe(input: UpdateMeInput) {
   return getApiClient().auth.updateMe(input);
 }
+
+/** Confirms a destination + code — doesn't log the caller in or return a session,
+ *  see @nova/api-client's verifyOtp for why. */
+export function verifyOtp(destination: string, code: string) {
+  return getApiClient().auth.verifyOtp(destination, code);
+}

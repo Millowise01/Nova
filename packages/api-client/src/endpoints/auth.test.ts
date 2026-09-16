@@ -76,3 +76,36 @@ describe("refresh", () => {
     expect(result).toEqual({ accessToken: "access-3", refreshToken: "refresh-3" });
   });
 });
+
+describe("OTP — requestOtp / verifyOtp", () => {
+  it("requestOtp posts { destination } and parses the sent status, no session fields", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/otp`, async ({ request }) => {
+        expect(await request.json()).toEqual({ destination: "shopper@example.com" });
+        return HttpResponse.json({ data: { status: "sent" } });
+      }),
+    );
+
+    const endpoints = createAuthEndpoints(createApiClient(BASE_URL));
+    const result = await endpoints.requestOtp("shopper@example.com");
+
+    expect(result).toEqual({ status: "sent" });
+  });
+
+  it("verifyOtp posts { destination, code } and parses the verified status, no session fields", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/otp/verify`, async ({ request }) => {
+        expect(await request.json()).toEqual({
+          destination: "shopper@example.com",
+          code: "123456",
+        });
+        return HttpResponse.json({ data: { status: "verified" } });
+      }),
+    );
+
+    const endpoints = createAuthEndpoints(createApiClient(BASE_URL));
+    const result = await endpoints.verifyOtp("shopper@example.com", "123456");
+
+    expect(result).toEqual({ status: "verified" });
+  });
+});

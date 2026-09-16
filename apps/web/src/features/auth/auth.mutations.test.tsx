@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError } from "@nova/api-client";
 
-import { signup } from "@/services/auth.service";
+import { signup, verifyOtp } from "@/services/auth.service";
 import { createTestQueryClient, withQueryClientAndToast } from "@/test-utils/query-client";
 
-import { useSignupMutation } from "./auth.mutations";
+import { useSignupMutation, useVerifyOtpMutation } from "./auth.mutations";
 
 // vi.mock() calls are hoisted above every import above by Vitest regardless
 // of where they're written, so this ordering (imports first, mocks after) is
@@ -24,10 +24,12 @@ vi.mock("@/providers/auth-provider", () => ({
 
 vi.mock("@/services/auth.service", () => ({
   signup: vi.fn(),
+  verifyOtp: vi.fn(),
 }));
 
 beforeEach(() => {
   vi.mocked(signup).mockReset();
+  vi.mocked(verifyOtp).mockReset();
   routerPushMock.mockReset();
 });
 
@@ -133,5 +135,49 @@ describe("useSignupMutation error mapping", () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(setError).not.toHaveBeenCalled();
+  });
+});
+
+// Contract test: POST /v1/auth/otp/verify doesn't issue a session (see
+// packages/api-client/src/endpoints/auth.ts), so success must route to login
+// rather than setting a session the way login/signup do.
+describe("useVerifyOtpMutation", () => {
+  it("calls verifyOtp with the given destination and code, then redirects to login on success", async () => {
+    vi.mocked(verifyOtp).mockResolvedValue({ status: "verified" });
+
+    const queryClient = createTestQueryClient();
+    const { result } = renderHook(() => useVerifyOtpMutation("shopper@example.com"), {
+      wrapper: withQueryClientAndToast(queryClient),
+    });
+
+    act(() => {
+      result.current.mutate("123456");
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(verifyOtp).toHaveBeenCalledWith("shopper@example.com", "123456");
+    expect(routerPushMock).toHaveBeenCalledWith("/auth/login");
+  });
+
+  it("does not redirect when verification fails", async () => {
+    vi.mocked(verifyOtp).mockRejectedValue(
+      new ApiError({
+        code: "OTP_INVALID",
+        message: "Invalid or expired code",
+        correlationId: "corr-3",
+      }),
+    );
+
+    const queryClient = createTestQueryClient();
+    const { result } = renderHook(() => useVerifyOtpMutation("shopper@example.com"), {
+      wrapper: withQueryClientAndToast(queryClient),
+    });
+
+    act(() => {
+      result.current.mutate("000000");
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(routerPushMock).not.toHaveBeenCalled();
   });
 });

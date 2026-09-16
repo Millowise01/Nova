@@ -75,6 +75,14 @@ export const otpVerifySchema = z.object({
 });
 export type OtpVerifyInput = z.infer<typeof otpVerifySchema>;
 
+/** POST /v1/auth/otp and /v1/auth/otp/verify share this response shape — neither
+ *  endpoint issues a session; verifying only confirms the destination, it doesn't
+ *  log the caller in (see backend/src/modules/identity/http/auth.controller.ts). */
+export const otpStatusResponseSchema = z.object({
+  status: z.enum(["sent", "verified"]),
+});
+export type OtpStatusResponse = z.infer<typeof otpStatusResponseSchema>;
+
 export const refreshTokenSchema = z.object({
   refreshToken: z.string().min(1),
 });

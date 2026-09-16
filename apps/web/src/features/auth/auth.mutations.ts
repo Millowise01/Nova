@@ -10,7 +10,11 @@ import type { LoginInput, RegisterInput } from "@nova/validation";
 
 import { useAuth } from "@/providers/auth-provider";
 import { useToast } from "@/providers/toast-provider";
-import { login as loginRequest, signup as signupRequest } from "@/services/auth.service";
+import {
+  login as loginRequest,
+  signup as signupRequest,
+  verifyOtp as verifyOtpRequest,
+} from "@/services/auth.service";
 
 /** Maps the backend's { error: { code, message, details.fieldErrors } } shape onto a
  *  react-hook-form form so field-level validation errors surface next to the right
@@ -51,6 +55,29 @@ export function useLoginMutation(setError: UseFormSetError<LoginInput>) {
       router.push("/");
     },
     onError: handleError,
+  });
+
+  return { ...mutation, isRedirecting: redirecting };
+}
+
+/** POST /v1/auth/otp/verify — confirms destination+code only; doesn't issue a
+ *  session (see @nova/api-client's verifyOtp), so success routes to login
+ *  rather than setting a session the way login/signup do. */
+export function useVerifyOtpMutation(destination: string) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [redirecting, setRedirecting] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (code: string) => verifyOtpRequest(destination, code),
+    onSuccess: () => {
+      toast.success("Verified. You can now log in.");
+      setRedirecting(true);
+      router.push("/auth/login");
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof ApiError ? error.message : "Verification failed. Try again.");
+    },
   });
 
   return { ...mutation, isRedirecting: redirecting };
