@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Button, Card, Input } from "@nova/ui";
+import { Alert, Button, Card, Input } from "@nova/ui";
 import { emailSchema } from "@nova/validation";
 
 const schema = z.object({
@@ -14,6 +15,7 @@ const schema = z.object({
 type NewsletterForm = z.infer<typeof schema>;
 
 export function NewsletterSection() {
+  const [submitted, setSubmitted] = useState(false);
   const form = useForm<NewsletterForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -21,9 +23,11 @@ export function NewsletterSection() {
     },
   });
 
-  const onSubmit = (data: NewsletterForm) => {
-    // TODO: Implement newsletter subscription
-    console.log(data);
+  // No newsletter/marketing-capture endpoint exists on the backend — this form
+  // can't actually subscribe anyone. Say so instead of silently doing nothing
+  // while looking like it succeeded.
+  const onSubmit = () => {
+    setSubmitted(true);
   };
 
   return (
@@ -37,21 +41,29 @@ export function NewsletterSection() {
           </p>
         </div>
 
-        <form
-          className="flex w-full max-w-md gap-2"
-          onSubmit={(event) => {
-            void form.handleSubmit(onSubmit)(event);
-          }}
-        >
-          <Input
-            aria-label="Email"
-            placeholder="you@example.com"
-            type="email"
-            {...form.register("email")}
-          />
+        <div className="w-full max-w-md space-y-2">
+          <form
+            className="flex gap-2"
+            onSubmit={(event) => {
+              void form.handleSubmit(onSubmit)(event);
+            }}
+          >
+            <Input
+              aria-label="Email"
+              placeholder="you@example.com"
+              type="email"
+              {...form.register("email")}
+            />
 
-          <Button type="submit">Subscribe</Button>
-        </form>
+            <Button type="submit">Subscribe</Button>
+          </form>
+
+          {submitted && (
+            <Alert tone="neutral">
+              Newsletter signups aren&apos;t available yet — check back soon.
+            </Alert>
+          )}
+        </div>
       </Card>
     </section>
   );

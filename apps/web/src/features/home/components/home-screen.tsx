@@ -35,6 +35,9 @@ export function HomeScreen() {
   const productsQuery = useProductsQuery();
   const featuredProducts = (featuredQuery.data?.pages[0]?.data ?? []).map(adaptProduct);
   const products = (productsQuery.data?.pages[0]?.data ?? []).map(adaptProduct);
+  // Real seller behind a real featured product — the closest thing to a
+  // genuine "spotlight" signal the backend has (no explicit featured-seller flag).
+  const spotlightSellerId = featuredProducts[0]?.sellerId ?? products[0]?.sellerId;
 
   if (productsQuery.isLoading) {
     return (
@@ -64,7 +67,7 @@ export function HomeScreen() {
         title="Best Sellers"
       />
       <BrandsSection brands={brands} />
-      <SellerSpotlightSection />
+      <SellerSpotlightSection sellerId={spotlightSellerId} />
       <RecommendationsSection products={products.slice(0, 4)} />
       <EcoBannerSection />
       <DownloadAppSection />

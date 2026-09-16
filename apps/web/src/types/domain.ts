@@ -19,6 +19,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   images: CommerceImage[];
+  sellerId: ID;
   sellerName: string;
   inStock: boolean;
   ecoScore?: "A" | "B" | "C" | "D";

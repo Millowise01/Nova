@@ -26,6 +26,7 @@ export function adaptProduct(product: ProductResponse): Product {
     reviewCount: 0,
     // No image storage/CDN wired up yet.
     images: [],
+    sellerId: product.sellerId as Product["sellerId"],
     // GET /products doesn't join to a seller name, only sellerId.
     sellerName: "Nova Seller",
     inStock: (variant?.stockQuantity ?? 0) > 0,
