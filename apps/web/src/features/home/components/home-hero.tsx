@@ -27,23 +27,35 @@ export function HomeHero() {
               </Link>
             </div>
           </div>
+          {/* Backend has no discount/price-drop field (see /deals's own honest
+              "Curated picks" framing) and no sustainability or AI backend at
+              all — this used to claim "Up to 35% off", "1.8t CO2 Saved", and
+              a live "Personalized shopping concierge", none of which exist.
+              Matches the Coming soon standard already applied to /sustainability
+              and /ai-assistant. */}
           <div className="grid gap-3 sm:grid-cols-2">
             <Card className="bg-white/90">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Flash Deals</p>
-              <p className="mt-2 text-2xl font-semibold">Up to 35% off</p>
+              <p className="text-xs uppercase tracking-wide text-slate-500">Featured Picks</p>
+              <p className="mt-2 text-2xl font-semibold">Curated by Nova</p>
               <p className="mt-1 text-sm text-slate-600">
-                Daily curated discounts with limited inventory alerts.
+                Featured products from Nova&apos;s catalog, updated as sellers list them.
               </p>
             </Card>
             <Card className="bg-white/90">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Eco Impact</p>
-              <p className="mt-2 text-2xl font-semibold">1.8t CO2 Saved</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Eco Impact</p>
+                <Badge tone="info">Coming soon</Badge>
+              </div>
+              <p className="mt-2 text-2xl font-semibold">Carbon tracking</p>
               <p className="mt-1 text-sm text-slate-600">
-                Track your environmental footprint across every order.
+                We&apos;re building environmental footprint tracking into every order.
               </p>
             </Card>
             <Card className="bg-white/90 sm:col-span-2">
-              <p className="text-xs uppercase tracking-wide text-slate-500">AI Assistant</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs uppercase tracking-wide text-slate-500">AI Assistant</p>
+                <Badge tone="info">Coming soon</Badge>
+              </div>
               <p className="mt-2 text-2xl font-semibold">Personalized shopping concierge</p>
               <p className="mt-1 text-sm text-slate-600">
                 Compare options, build gift lists, and discover products faster.
