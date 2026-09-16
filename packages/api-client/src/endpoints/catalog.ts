@@ -3,11 +3,14 @@ import {
   categoryListResponseSchema,
   productDetailSchema,
   productListResponseSchema,
+  productSchema,
   sellerPublicProfileSchema,
   type BrandListResponse,
   type CategoryListResponse,
+  type CreateProductInput,
   type ProductDetailResponse,
   type ProductListResponse,
+  type ProductResponse,
   type SellerPublicProfileResponse,
 } from "@nova/validation";
 
@@ -49,6 +52,16 @@ export function createCatalogEndpoints(client: NovaHttpClient) {
     async getProductBySlug(slug: string): Promise<ProductDetailResponse> {
       const response = await client.get<ApiEnvelope>(`/products/${slug}`);
       return productDetailSchema.parse(response.data.data);
+    },
+
+    /** POST /v1/products — seller-scoped (apps/seller's S-4): sellerId is derived
+     *  server-side from the authenticated caller (CatalogService.createProduct),
+     *  never sent in the body. Response shape is the flat product+variants, NOT
+     *  productDetailSchema — the create path only does `include: { variants: true }`,
+     *  no category/brand join, confirmed by reading catalog.service.ts directly. */
+    async createProduct(input: CreateProductInput): Promise<ProductResponse> {
+      const response = await client.post<ApiEnvelope>("/products", input);
+      return productSchema.parse(response.data.data);
     },
 
     async listCategories(): Promise<CategoryListResponse> {

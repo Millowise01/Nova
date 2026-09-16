@@ -23,6 +23,10 @@ const NAV_SECTIONS: { label: string; items: { href: string; label: string }[] }[
     label: "Account",
     items: [{ href: "/kyc", label: "Verification (KYC)" }],
   },
+  {
+    label: "Catalog",
+    items: [{ href: "/catalog", label: "Products" }],
+  },
 ];
 
 /** Mirrors apps/admin/src/app/(dashboard)/layout.tsx's shell exactly. Section
