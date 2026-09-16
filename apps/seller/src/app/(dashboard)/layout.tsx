@@ -18,7 +18,12 @@ import { useAuth } from "@/providers/auth-provider";
 // Grows as each S-3..S-8 ticket adds a real route — kept empty of links to
 // pages that don't exist yet, same discipline as not linking to unbuilt
 // screens anywhere else in this build.
-const NAV_SECTIONS: { label: string; items: { href: string; label: string }[] }[] = [];
+const NAV_SECTIONS: { label: string; items: { href: string; label: string }[] }[] = [
+  {
+    label: "Account",
+    items: [{ href: "/kyc", label: "Verification (KYC)" }],
+  },
+];
 
 /** Mirrors apps/admin/src/app/(dashboard)/layout.tsx's shell exactly. Section
  *  headers (once NAV_SECTIONS is filled in) are information architecture only,

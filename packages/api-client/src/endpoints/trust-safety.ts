@@ -6,6 +6,7 @@ import {
   disputeSchema,
   kycSubmissionSchema,
   sellerSuspensionRequestSchema,
+  submitKycSchema,
   type AddDisputeEventInput,
   type DisputeDetailResponse,
   type DisputeEventResponse,
@@ -16,19 +17,40 @@ import {
   type ListSuspensionRequestsQuery,
   type ProposeKycDecisionInput,
   type SellerSuspensionRequestResponse,
+  type SubmitKycInput,
 } from "@nova/validation";
 
 import type { ApiEnvelope, NovaHttpClient } from "../http-client";
 
-/** apps/admin-only — KYC/seller-suspension dual-authorization queues and dispute
- *  resolution (backend/docs/10). Unlike Refunds & Payouts, KYC and suspension DO
- *  expose propose actions here — the Seller Approval & Suspension screen is the
- *  place those decisions get made, not just reviewed. */
+/** KYC review queues, seller-suspension dual-authorization, and dispute
+ *  resolution (backend/docs/10) are apps/admin-only. submitKyc below is the one
+ *  seller-facing exception — apps/seller's S-3 KYC onboarding. There is
+ *  deliberately NO listMyKyc/getMyKycStatus here: GET /v1/trust-safety/kyc is
+ *  admin-only at both the route (RequirePermission("read", "KYCSubmission"))
+ *  and ability-policy level (ability.factory.ts grants no KYCSubmission rule to
+ *  "seller" at all) — confirmed by reading both directly, not assumed. Logged
+ *  as a backend follow-up in backend/docs/10, not built around with a guess. */
 export function createTrustSafetyEndpoints(client: NovaHttpClient) {
   return {
     async listKyc(params: ListKycQuery = {}): Promise<KycSubmissionResponse[]> {
       const response = await client.get<ApiEnvelope>("/trust-safety/kyc", { params });
       return z.array(kycSubmissionSchema).parse(response.data.data);
+    },
+
+    /** POST /v1/trust-safety/kyc — seller-facing (backend/docs/10's disclosed
+     *  addition). Real, disclosed backend gap: the persisted `subjectId` comes
+     *  straight from the request body (kyc.service.ts's submit()), NOT from the
+     *  authenticated caller — nothing stops one seller from submitting a KYC
+     *  record naming a different subjectId. Not fixed here (backend work, out
+     *  of scope for apps/seller); apps/seller's own submission form never
+     *  exposes subjectId as an editable field for exactly this reason — it's
+     *  always the logged-in seller's own ID. */
+    async submitKyc(input: SubmitKycInput): Promise<KycSubmissionResponse> {
+      const response = await client.post<ApiEnvelope>(
+        "/trust-safety/kyc",
+        submitKycSchema.parse(input),
+      );
+      return kycSubmissionSchema.parse(response.data.data);
     },
 
     async proposeKycDecision(
