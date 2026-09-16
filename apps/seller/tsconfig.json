@@ -20,15 +20,20 @@
     "src/**/*.tsx",
     "next.config.ts",
     "tailwind.config.ts",
+    "middleware.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
     ".next/types/**/*.ts"
   ],
   "references": [
-    {
-      "path": "../../packages/ui"
-    },
-    {
-      "path": "../../packages/utils"
-    }
+    { "path": "../../packages/types" },
+    { "path": "../../packages/utils" },
+    { "path": "../../packages/config" },
+    { "path": "../../packages/validation" },
+    { "path": "../../packages/auth" },
+    { "path": "../../packages/api-client" },
+    { "path": "../../packages/design-system" },
+    { "path": "../../packages/ui" }
   ],
   "exclude": ["node_modules"]
 }
