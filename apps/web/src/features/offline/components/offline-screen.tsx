@@ -1,5 +1,9 @@
+import { Badge } from "@nova/ui";
+
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
+// None of these have a backend yet — plans, not shipped features. The badge
+// and subtitle exist so this page doesn't read as a finished capability.
 const offlineModules = [
   { title: "Offline Page", description: "Dedicated offline fallback route." },
   { title: "Retry Actions", description: "Retry UX for failed network requests." },
@@ -11,7 +15,8 @@ const offlineModules = [
 export function OfflineScreen() {
   return (
     <ModuleShell
-      subtitle="Offline resilience architecture for unstable connectivity scenarios."
+      actions={<Badge tone="info">Coming soon</Badge>}
+      subtitle="We're planning offline resilience for Nova — none of this is built yet."
       title="Offline Experience"
     >
       <FeatureGrid items={offlineModules} />

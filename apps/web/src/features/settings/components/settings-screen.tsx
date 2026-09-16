@@ -1,3 +1,5 @@
+import { Badge } from "@nova/ui";
+
 import { ProfileCard } from "@/features/account/components/profile-card";
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
@@ -23,7 +25,13 @@ export function SettingsScreen() {
     >
       <div className="space-y-6">
         <ProfileCard />
-        <FeatureGrid items={settingsModules} />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-slate-700">More settings</h2>
+            <Badge tone="info">Coming soon</Badge>
+          </div>
+          <FeatureGrid items={settingsModules} />
+        </div>
       </div>
     </ModuleShell>
   );
