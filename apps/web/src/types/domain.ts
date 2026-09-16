@@ -21,6 +21,8 @@ export interface Product {
   images: CommerceImage[];
   sellerId: ID;
   sellerName: string;
+  // Undefined when the product has no variant to buy at all — see adaptProduct.
+  variantId?: ID;
   inStock: boolean;
   ecoScore?: "A" | "B" | "C" | "D";
   category: string;

@@ -29,6 +29,7 @@ export function adaptProduct(product: ProductResponse): Product {
     sellerId: product.sellerId as Product["sellerId"],
     // GET /products doesn't join to a seller name, only sellerId.
     sellerName: "Nova Seller",
+    variantId: variant?.id as Product["variantId"],
     inStock: (variant?.stockQuantity ?? 0) > 0,
     // No eco-scoring backend yet.
     ecoScore: undefined,

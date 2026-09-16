@@ -2,8 +2,45 @@ import Link from "next/link";
 
 import { Badge, Button, Card } from "@nova/ui";
 
+import { useAddToCartMutation } from "@/features/cart/cart.mutations";
 import { SectionTitle } from "@/features/shared/components";
 import type { Product } from "@/types/domain";
+
+function ProductCardTile({ product }: { product: Product }) {
+  const addToCart = useAddToCartMutation();
+
+  return (
+    <Card className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <Badge tone="neutral">{product.category}</Badge>
+        {product.ecoScore ? <Badge tone="success">Eco {product.ecoScore}</Badge> : null}
+      </div>
+      <Link href={`/product/${product.slug}`}>
+        <h3 className="text-base font-semibold text-[color:var(--ds-text)] hover:underline">
+          {product.title}
+        </h3>
+      </Link>
+      <p className="text-sm text-slate-600">{product.sellerName}</p>
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-base font-semibold">{product.price.formatted}</p>
+        <Button
+          disabled={!product.variantId || !product.inStock || addToCart.isPending}
+          onClick={() => {
+            if (!product.variantId) return;
+            addToCart.mutate({
+              variantId: product.variantId,
+              quantity: 1,
+              unitPrice: { amount: product.price.amount, currency: product.price.currency },
+            });
+          }}
+          size="sm"
+        >
+          {addToCart.isPending ? "Adding..." : "Add"}
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 export function ProductSection({
   title,
@@ -24,18 +61,7 @@ export function ProductSection({
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {products.map((product) => (
-          <Card className="space-y-3" key={product.id}>
-            <div className="flex items-center justify-between gap-2">
-              <Badge tone="neutral">{product.category}</Badge>
-              {product.ecoScore ? <Badge tone="success">Eco {product.ecoScore}</Badge> : null}
-            </div>
-            <h3 className="text-base font-semibold text-[color:var(--ds-text)]">{product.title}</h3>
-            <p className="text-sm text-slate-600">{product.sellerName}</p>
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-base font-semibold">{product.price.formatted}</p>
-              <Button size="sm">Add</Button>
-            </div>
-          </Card>
+          <ProductCardTile key={product.id} product={product} />
         ))}
       </div>
     </section>
