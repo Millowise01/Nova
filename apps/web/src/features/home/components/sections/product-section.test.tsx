@@ -19,7 +19,7 @@ const VARIANT_ID = "22222222-2222-2222-2222-222222222222";
 
 function product(overrides: Partial<Product> = {}): Product {
   return {
-    id: "33333333-3333-3333-3333-333333333333",
+    id: "33333333-3333-3333-3333-333333333333" as Product["id"],
     slug: "test-product",
     title: "Test Product",
     description: "",
@@ -27,9 +27,9 @@ function product(overrides: Partial<Product> = {}): Product {
     rating: 0,
     reviewCount: 0,
     images: [],
-    sellerId: "44444444-4444-4444-4444-444444444444",
+    sellerId: "44444444-4444-4444-4444-444444444444" as Product["sellerId"],
     sellerName: "Nova Seller",
-    variantId: VARIANT_ID,
+    variantId: VARIANT_ID as Product["variantId"],
     inStock: true,
     category: "cat",
     tags: [],
