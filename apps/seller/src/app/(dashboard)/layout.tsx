@@ -27,6 +27,10 @@ const NAV_SECTIONS: { label: string; items: { href: string; label: string }[] }[
     label: "Catalog",
     items: [{ href: "/catalog", label: "Products" }],
   },
+  {
+    label: "Insights",
+    items: [{ href: "/analytics", label: "Analytics" }],
+  },
 ];
 
 /** Mirrors apps/admin/src/app/(dashboard)/layout.tsx's shell exactly. Section
