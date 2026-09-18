@@ -22,6 +22,15 @@ export const envSchema = z.object({
   // O-1 structured logging (backend/src/common/logging/). "info" in every real
   // environment; only ever raised locally to debug a specific issue.
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
+  // O-2 error tracking. Optional — instrument.ts only calls Sentry.init() when
+  // this is set, so a local dev machine or a test run with no DSN configured
+  // just never reports anywhere, rather than needing a real project to boot.
+  // Read directly from process.env in instrument.ts (documented exception to
+  // "ConfigService is the only place that reads process.env" — see that
+  // file's own comment for why); listed here too so it's validated and
+  // documented the same way every other env var is.
+  SENTRY_DSN: z.string().optional(),
+  SENTRY_ENVIRONMENT: z.string().default("development"),
 });
 
 export type Env = z.infer<typeof envSchema>;

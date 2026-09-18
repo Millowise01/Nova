@@ -1,3 +1,8 @@
+// O-2 — must be the very first import in the process, ahead of even
+// reflect-metadata below: Sentry.init() (instrument.ts) needs to run before
+// any other package is first required, so it can patch them for
+// instrumentation. See that file's own comment for the full reasoning.
+import "./instrument";
 import "reflect-metadata";
 import { writeFileSync } from "node:fs";
 

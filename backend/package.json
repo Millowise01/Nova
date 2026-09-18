@@ -27,6 +27,7 @@
     "@nova/types": "workspace:*",
     "@nova/validation": "workspace:*",
     "@prisma/client": "^5.22.0",
+    "@sentry/nestjs": "^10.75.0",
     "bcrypt": "^5.1.1",
     "ioredis": "^5.4.2",
     "nestjs-pino": "4.4.0",

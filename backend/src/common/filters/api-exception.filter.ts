@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Logger,
 } from "@nestjs/common";
+import * as Sentry from "@sentry/nestjs";
 import type { Response } from "express";
 
 import { ApiError } from "../errors/api-error";
@@ -48,6 +49,13 @@ export class ApiExceptionFilter implements ExceptionFilter {
     }
 
     this.logger.error(exception instanceof Error ? exception.stack : exception);
+    // O-2 — only genuinely unexpected exceptions reach here (ApiError and
+    // HttpException, this filter's other two branches, are expected control
+    // flow — a validation 400 or a not-found 404 isn't a bug to page anyone
+    // about). Sentry.captureException is a no-op if instrument.ts never
+    // called Sentry.init() (no SENTRY_DSN configured), so this is always
+    // safe to call unconditionally.
+    Sentry.captureException(exception, { tags: { correlationId } });
     response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       error: {
         code: "INTERNAL_SERVER_ERROR",
