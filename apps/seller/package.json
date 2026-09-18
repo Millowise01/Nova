@@ -13,6 +13,7 @@
     "@nova/ui": "workspace:*",
     "@nova/utils": "workspace:*",
     "@nova/validation": "workspace:*",
+    "@sentry/nextjs": "^10.75.0",
     "@tanstack/react-query": "^5.85.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
@@ -20,7 +21,6 @@
     "react-hook-form": "^7.53.0"
   },
   "devDependencies": {
-    "autoprefixer": "^10.4.21",
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -29,6 +29,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9.31.0",
     "jsdom": "^25.0.1",
     "msw": "^2.15.0",
