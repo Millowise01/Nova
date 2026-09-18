@@ -3,6 +3,7 @@ import { writeFileSync } from "node:fs";
 
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { Logger } from "nestjs-pino";
 
 import { AppModule } from "./app.module";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
@@ -34,7 +35,12 @@ export function buildOpenApiDocument(app: Awaited<ReturnType<typeof NestFactory.
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // bufferLogs: true holds every log Nest emits during bootstrap (before
+  // app.useLogger() below runs) instead of dropping it — nothing before the
+  // real logger is wired is lost, it's just flushed through Pino once it is.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
+
   app.setGlobalPrefix("v1");
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalInterceptors(new MoneySerializationInterceptor());

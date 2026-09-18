@@ -19,6 +19,9 @@ export const envSchema = z.object({
   // Comma-separated allowlist — Vol 3, C1's application-layer complement to the
   // Cloudflare edge (which is infrastructure, out of scope this pass). Never "*".
   CORS_ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
+  // O-1 structured logging (backend/src/common/logging/). "info" in every real
+  // environment; only ever raised locally to debug a specific issue.
+  LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
 });
 
 export type Env = z.infer<typeof envSchema>;

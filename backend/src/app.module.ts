@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 
 import { AuditModule } from "./common/audit/audit.module";
+import { LoggingModule } from "./common/logging/logging.module";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
 import { OutboxModule } from "./common/outbox/outbox.module";
 import { PolicyModule } from "./common/policy/policy.module";
@@ -27,6 +28,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 @Module({
   imports: [
     ConfigModule,
+    LoggingModule,
     PrismaModule,
     RedisModule,
     PolicyModule,
@@ -45,6 +47,19 @@ import { PrismaModule } from "./prisma/prisma.module";
   ],
 })
 export class AppModule implements NestModule {
+  // O-1 — registered here (not just in main.ts) because integration tests
+  // bootstrap via `Test.createTestingModule({ imports: [AppModule] })` and
+  // never run main.ts's bootstrap() at all — a real regression found and
+  // fixed this pass: moving this registration out of AppModule entirely (to
+  // guarantee it ran before nestjs-pino's own request-logging middleware)
+  // left req.correlationId unset for every integration test, which broke
+  // AuditLogger.record()'s required correlationId column on every audited
+  // action (signup, login, product/order creation — see
+  // common/audit/audit-logger.service.ts). Empirically verified (both via a
+  // live curl request and the full integration suite) that Nest applies a
+  // root module's own configure() before an imported module's — this runs
+  // ahead of LoggingModule's pino-http middleware without needing the raw
+  // main.ts app.use() workaround at all.
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(CorrelationIdMiddleware).forRoutes("*");
   }
