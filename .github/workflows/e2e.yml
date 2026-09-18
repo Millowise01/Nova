@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "apps/web/**"
+      - "apps/seller/**"
       - "backend/**"
       - "packages/**"
       - ".github/workflows/e2e.yml"
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - "apps/web/**"
+      - "apps/seller/**"
       - "backend/**"
       - "packages/**"
 
@@ -127,4 +129,115 @@ jobs:
         with:
           name: playwright-report
           path: apps/web/playwright-report/
+          retention-days: 14
+
+  seller-onboarding:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nova
+          POSTGRES_PASSWORD: nova_dev_password
+          POSTGRES_DB: nova
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nova -d nova"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_dev_password
+      POSTGRES_DB: nova
+      REDIS_URL: redis://localhost:6379
+      PORT: 4000
+      NODE_ENV: development
+      # Only apps/seller's own origin — this job never boots apps/web.
+      CORS_ALLOWED_ORIGINS: http://localhost:3001
+      NEXT_PUBLIC_APP_NAME: Nova Seller
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      NEXT_PUBLIC_DEFAULT_LOCALE: en
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/v1
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Compose DATABASE_URL
+        run: echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> "$GITHUB_ENV"
+
+      - name: Generate ephemeral backend secrets
+        working-directory: backend
+        run: |
+          node -e "
+          const { generateKeyPairSync } = require('crypto');
+          const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+            modulusLength: 2048,
+            privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+            publicKeyEncoding: { type: 'spki', format: 'pem' },
+          });
+          const fs = require('fs');
+          const lines = [
+            'JWT_ACCESS_PRIVATE_KEY=' + Buffer.from(privateKey).toString('base64'),
+            'JWT_ACCESS_PUBLIC_KEY=' + Buffer.from(publicKey).toString('base64'),
+            'PII_ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('base64'),
+          ];
+          fs.appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n');
+          "
+
+      - name: Apply database migrations
+        working-directory: backend
+        run: |
+          pnpm run prisma:generate
+          pnpm run prisma:migrate:deploy
+
+      - name: Build and start backend
+        run: |
+          pnpm --filter @nova/backend build
+          (cd backend && node dist/main.js &)
+          npx wait-on http://localhost:4000/v1/categories --timeout 60000
+
+      - name: Build seller
+        run: pnpm --filter @nova/seller build
+
+      - name: Install Playwright browsers
+        working-directory: apps/seller
+        run: pnpm exec playwright install --with-deps chromium
+
+      # global-setup.ts runs its own Prisma-based role/MFA promotion script
+      # with backend/ as its cwd (see that file's doc comment for why) — needs
+      # backend's node_modules, already installed above via the root
+      # `pnpm install`.
+      - name: Run seller-onboarding E2E test
+        working-directory: apps/seller
+        run: pnpm exec playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-seller
+          path: apps/seller/playwright-report/
           retention-days: 14
