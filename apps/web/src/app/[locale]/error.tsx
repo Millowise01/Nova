@@ -1,11 +1,17 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
 import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
 import { Button, ErrorState } from "@nova/ui";
 
-export default function Error({ reset }: { error: Error; reset: () => void }) {
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   const t = useTranslations("errors");
+
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 py-16 md:px-6">
