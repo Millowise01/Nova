@@ -1,5 +1,8 @@
+import { randomInt } from "node:crypto";
+
 import type { INestApplication } from "@nestjs/common";
 import type { TestingModule } from "@nestjs/testing";
+import type { NextFunction, Request, Response } from "express";
 
 import { ApiExceptionFilter } from "../common/filters/api-exception.filter";
 import { MoneySerializationInterceptor } from "../common/interceptors/money-serialization.interceptor";
@@ -21,6 +24,16 @@ import { AppConfigService } from "../config/config.service";
 export async function createTestApp(moduleRef: TestingModule): Promise<INestApplication> {
   const app = moduleRef.createNestApplication();
   applySecurityHeaders(app);
+
+  // Rate limits are keyed by req.ip, and jest runs spec files in parallel workers against one
+  // Redis, so with a shared 127.0.0.1 every suite drew from the same counters (signup: 20 per
+  // 60s) and adding tests made unrelated ones flake with 429. Each test app therefore gets its
+  // own client address: the limiter stays fully real, but suites no longer share its budget.
+  const clientIp = `10.${randomInt(0, 256)}.${randomInt(0, 256)}.${randomInt(1, 255)}`;
+  app.use((req: Request, _res: Response, next: NextFunction) => {
+    Object.defineProperty(req, "ip", { value: clientIp, configurable: true });
+    next();
+  });
 
   app.setGlobalPrefix("v1", { exclude: ["metrics"] });
   app.useGlobalFilters(new ApiExceptionFilter());
