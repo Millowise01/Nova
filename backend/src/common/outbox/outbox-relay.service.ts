@@ -35,20 +35,39 @@ interface OutboxRow {
 export class OutboxRelayService implements OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(OutboxRelayService.name);
   private readonly handlers: OutboxEventHandler[] = [];
-  private timer?: ReturnType<typeof setInterval>;
+  private timer?: ReturnType<typeof setTimeout>;
+  private stopped = false;
 
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit() {
-    this.timer = setInterval(() => {
-      this.processPendingEvents().catch((err: unknown) => {
-        this.logger.error("Outbox relay poll failed", err instanceof Error ? err.stack : err);
-      });
-    }, POLL_INTERVAL_MS);
+    this.scheduleNextPoll();
   }
 
   onApplicationShutdown() {
-    if (this.timer) clearInterval(this.timer);
+    this.stopped = true;
+    if (this.timer) clearTimeout(this.timer);
+  }
+
+  // A fixed setInterval fires unconditionally every POLL_INTERVAL_MS even if
+  // the previous poll's $transaction is still in flight — under real
+  // concurrent load, one slow poll then overlaps the next, both competing
+  // for Prisma's connection pool, and "Unable to start a transaction in the
+  // given time" cascades from there (the actual cause behind this session's
+  // "one random flaky integration test" pattern: every affected test is an
+  // outbox consumer). Self-rescheduling with setTimeout instead guarantees
+  // at most one poll in flight — the next one is only scheduled once the
+  // current one (success or failure) has fully settled.
+  private scheduleNextPoll() {
+    this.timer = setTimeout(() => {
+      this.processPendingEvents()
+        .catch((err: unknown) => {
+          this.logger.error("Outbox relay poll failed", err instanceof Error ? err.stack : err);
+        })
+        .finally(() => {
+          if (!this.stopped) this.scheduleNextPoll();
+        });
+    }, POLL_INTERVAL_MS);
   }
 
   registerHandler(handler: OutboxEventHandler): void {
