@@ -3,7 +3,7 @@
   "paths": {
     "/metrics": {
       "get": {
-        "operationId": "PrometheusController_index",
+        "operationId": "ProtectedMetricsController_index",
         "parameters": [],
         "responses": {
           "200": {

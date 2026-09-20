@@ -19,7 +19,7 @@ import { AppConfigService } from "../config/config.service";
  *  that detail. */
 export async function createTestApp(moduleRef: TestingModule): Promise<INestApplication> {
   const app = moduleRef.createNestApplication();
-  app.setGlobalPrefix("v1");
+  app.setGlobalPrefix("v1", { exclude: ["metrics"] });
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalInterceptors(new MoneySerializationInterceptor());
 

@@ -31,6 +31,14 @@ export const envSchema = z.object({
   // documented the same way every other env var is.
   SENTRY_DSN: z.string().optional(),
   SENTRY_ENVIRONMENT: z.string().default("development"),
+  // O-3 /metrics protection (backend/src/common/metrics/metrics-auth.guard.ts).
+  // When set, GET /metrics requires "Authorization: Bearer <token>" — min 32 chars
+  // so it can't be a guessable value. When unset it is open outside production and
+  // disabled (404) in production. A blank value counts as unset.
+  METRICS_TOKEN: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(32).optional(),
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -59,6 +59,16 @@ This backend build inherits an already-enforced version of this rule at the repo
 
 Service-to-service identities — the backend calling itself in CI, background jobs authenticating to Redis or Postgres — use scoped, short-lived, workload-specific credentials issued through the secrets manager (Vol 3, D2), never a shared human's credentials and never a long-lived static key where the infrastructure supports rotation.
 
+## Metrics endpoint (O-3)
+
+`GET /metrics` (Prometheus, served at the root path outside the `/v1` prefix) exposes matched route patterns and process internals, so it is protected by `MetricsAuthGuard` and **fails closed**:
+
+- `METRICS_TOKEN` set (min 32 chars): every request needs `Authorization: Bearer <token>`, in every environment. The token is compared in constant time (SHA-256 digests through `timingSafeEqual`); a missing or wrong token is a 401.
+- `METRICS_TOKEN` unset in production: the route answers 404, as if it did not exist. Metrics are simply off until a token is configured.
+- `METRICS_TOKEN` unset outside production: open, so local development and tests need no setup.
+
+The token is a secret like any other (see Secrets handling above): it belongs in the secrets manager, never in source control. Network-level restriction (allow-listing the scraper) is still worth adding at the edge once infrastructure exists; the token is the application-layer control.
+
 ## Explicitly deferred — not applicable to Phase 1
 
 The following Volume 3 requirements are real, correctly specified, and **not being skipped** — they apply once the bounded contexts they govern actually enter the build order (see [00-bounded-contexts.md](00-bounded-contexts.md)'s phase table). Listing them here is intentional, so Phase 1 work doesn't get gold-plated with controls that have nothing to protect yet:

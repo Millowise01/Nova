@@ -3,6 +3,7 @@ import { APP_INTERCEPTOR } from "@nestjs/core";
 import { makeHistogramProvider, PrometheusModule } from "@willsoto/nestjs-prometheus";
 
 import { HttpMetricsInterceptor } from "./http-metrics.interceptor";
+import { ProtectedMetricsController } from "./metrics.controller";
 
 /**
  * O-3 — minimal request metrics. backend/docs/06-testing-strategy.md names
@@ -27,7 +28,9 @@ import { HttpMetricsInterceptor } from "./http-metrics.interceptor";
   imports: [
     PrometheusModule.register({
       // main.ts excludes "metrics" from the global "v1" prefix so this is
-      // served at the conventional root /metrics path scrapers expect.
+      // served at the conventional root /metrics path scrapers expect. The
+      // controller is guarded by METRICS_TOKEN (see metrics-auth.guard.ts).
+      controller: ProtectedMetricsController,
       defaultMetrics: { enabled: true },
     }),
   ],
