@@ -33,7 +33,7 @@ export function ProfileCard() {
 
   if (meQuery.isLoading) {
     return (
-      <Card className="flex items-center justify-center gap-3 py-12">
+      <Card className="flex items-center justify-center gap-3 rounded-xl py-12 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading profile...
       </Card>
     );
@@ -53,9 +53,9 @@ export function ProfileCard() {
   const dirty = name !== (me.name ?? "") || locale !== me.locale;
 
   return (
-    <Card className="space-y-4">
+    <Card className="space-y-4 rounded-xl p-6">
       <div>
-        <h2 className="text-base font-semibold">Profile</h2>
+        <h2 className="text-base font-bold text-[color:var(--color-foreground)]">Profile</h2>
         <p className="text-sm text-[color:var(--color-foreground-muted)]">
           Personal profile and contact details.
         </p>

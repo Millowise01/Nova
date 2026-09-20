@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { Image as ImageIcon } from "@nova/icons";
 import { Avatar, Button, Card, EmptyState, ErrorState, Spinner } from "@nova/ui";
 import { formatMoney } from "@nova/utils";
 
@@ -18,7 +19,7 @@ export function SellerStoreScreen({ sellerId }: { sellerId: string }) {
 
   if (profileQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading storefront...
       </div>
     );
@@ -41,15 +42,17 @@ export function SellerStoreScreen({ sellerId }: { sellerId: string }) {
       <div className="flex items-center gap-4">
         <Avatar name={seller.name ?? "Seller"} size="lg" />
         <div>
-          <h1 className="text-2xl font-semibold">{seller.name ?? "Nova Seller"}</h1>
-          <p className="text-sm text-slate-600">
+          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+            {seller.name ?? "Nova Seller"}
+          </h1>
+          <p className="mt-1 text-sm text-[color:var(--color-foreground-muted)]">
             Member since {new Date(seller.memberSince).toLocaleDateString()}
           </p>
         </div>
       </div>
 
       {productsQuery.isLoading ? (
-        <div className="flex items-center justify-center gap-3 py-12 text-sm text-slate-600">
+        <div className="flex items-center justify-center gap-3 py-12 text-sm text-[color:var(--color-foreground-muted)]">
           <Spinner className="h-4 w-4" /> Loading products...
         </div>
       ) : products.length === 0 ? (
@@ -59,20 +62,27 @@ export function SellerStoreScreen({ sellerId }: { sellerId: string }) {
           {products.map((product) => {
             const variant = product.variants[0];
             return (
-              <Link href={`/product/${product.slug}`} key={product.id}>
-                <Card className="h-full space-y-2 transition hover:shadow-md">
-                  <div className="flex aspect-square items-center justify-center rounded-lg bg-slate-50 text-xs text-slate-400">
-                    No image
+              <Link href={`/product/${product.slug}`} key={product.id} className="group">
+                <Card
+                  className="overflow-hidden rounded-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+                  padding="none"
+                >
+                  <div className="flex aspect-[4/3] items-center justify-center bg-[color:var(--color-muted)] text-[color:var(--color-foreground-subtle)]">
+                    <ImageIcon aria-hidden="true" size={32} strokeWidth={1.5} />
                   </div>
-                  <p className="line-clamp-2 text-sm font-semibold">{product.title}</p>
-                  {variant && (
-                    <p className="text-sm font-semibold text-[color:var(--ds-primary)]">
-                      {formatMoney({
-                        amount: variant.priceAmount,
-                        currency: variant.priceCurrency,
-                      })}
+                  <div className="p-4">
+                    <p className="line-clamp-2 text-sm font-semibold text-[color:var(--color-foreground)] group-hover:text-[color:var(--color-primary)]">
+                      {product.title}
                     </p>
-                  )}
+                    {variant && (
+                      <p className="mt-1.5 text-base font-bold text-[color:var(--color-primary)]">
+                        {formatMoney({
+                          amount: variant.priceAmount,
+                          currency: variant.priceCurrency,
+                        })}
+                      </p>
+                    )}
+                  </div>
                 </Card>
               </Link>
             );
@@ -81,7 +91,7 @@ export function SellerStoreScreen({ sellerId }: { sellerId: string }) {
       )}
 
       {productsQuery.hasNextPage && (
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-4">
           <Button
             disabled={productsQuery.isFetchingNextPage}
             onClick={() => void productsQuery.fetchNextPage()}

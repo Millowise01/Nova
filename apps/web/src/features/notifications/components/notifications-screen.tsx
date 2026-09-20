@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge, Button, Card, EmptyState, ErrorState, Spinner } from "@nova/ui";
+import { Badge, Button, EmptyState, ErrorState, Spinner } from "@nova/ui";
 import type { NotificationResponse } from "@nova/validation";
 
 import { useAuth } from "@/providers/auth-provider";
@@ -23,12 +23,14 @@ function NotificationRow({
   const isUnread = !notification.readAt;
 
   return (
-    <Card
-      className={`flex items-start justify-between gap-4 ${isUnread ? "border-l-4 border-l-[color:var(--ds-primary)]" : ""}`}
+    <div
+      className={`flex items-start justify-between gap-4 rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-sm ${isUnread ? "border-l-4 border-l-[color:var(--color-primary)]" : ""}`}
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <span className="font-semibold">{notification.title}</span>
+          <span className="font-semibold text-[color:var(--color-foreground)]">
+            {notification.title}
+          </span>
           {isUnread ? (
             <Badge size="sm" tone="info">
               New
@@ -50,7 +52,7 @@ function NotificationRow({
           Mark read
         </Button>
       ) : null}
-    </Card>
+    </div>
   );
 }
 
@@ -66,7 +68,7 @@ export function NotificationsScreen() {
 
   if (query.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading notifications...
       </div>
     );
@@ -89,8 +91,10 @@ export function NotificationsScreen() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Notifications</h1>
-          <p className="text-sm text-slate-600">
+          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+            Notifications
+          </h1>
+          <p className="mt-1 text-sm text-[color:var(--color-foreground-muted)]">
             {unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up"}
           </p>
         </div>

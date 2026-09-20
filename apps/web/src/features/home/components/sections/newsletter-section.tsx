@@ -32,24 +32,28 @@ export function NewsletterSection() {
 
   return (
     <section className="mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8">
-      <Card className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+      <Card className="grid gap-4 rounded-xl md:grid-cols-[1fr_auto] md:items-end">
         <div>
-          <h2 className="text-2xl font-semibold">Stay ahead of every deal</h2>
+          <h2 className="text-2xl font-semibold text-[color:var(--color-foreground)]">
+            Stay ahead of every deal
+          </h2>
 
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-[color:var(--color-foreground-muted)]">
             Receive campaign launches, sustainability rewards, and personalized suggestions.
           </p>
         </div>
 
         <div className="w-full max-w-md space-y-2">
           <form
-            className="flex gap-2"
+            className="flex items-start gap-2"
             onSubmit={(event) => {
               void form.handleSubmit(onSubmit)(event);
             }}
           >
             <Input
-              aria-label="Email"
+              error={form.formState.errors.email?.message}
+              hideLabel
+              label="Email"
               placeholder="you@example.com"
               type="email"
               {...form.register("email")}

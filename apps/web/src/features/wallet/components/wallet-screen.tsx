@@ -29,7 +29,9 @@ export function WalletScreen() {
   if (!isAuthenticated) {
     return (
       <div className="mx-auto max-w-md space-y-4 px-4 py-16 text-center">
-        <h1 className="text-xl font-semibold">Sign in to view your wallet</h1>
+        <h1 className="text-xl font-bold text-[color:var(--color-foreground)]">
+          Sign in to view your wallet
+        </h1>
         <Link href="/auth/login">
           <Button>Login</Button>
         </Link>
@@ -39,10 +41,12 @@ export function WalletScreen() {
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6 px-4 py-8 md:px-6 lg:px-8">
-      <h1 className="text-2xl font-semibold">Nova Wallet</h1>
+      <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+        Nova Wallet
+      </h1>
 
-      <Card className="space-y-2">
-        <p className="text-sm text-slate-500">Balance</p>
+      <div className="space-y-2 rounded-xl bg-[color:var(--color-surface-nav)] p-6 text-white shadow-md">
+        <p className="text-xs font-semibold text-white/60">Balance</p>
         {query.isLoading ? (
           <Spinner className="h-5 w-5" />
         ) : query.isError || !query.data ? (
@@ -52,15 +56,20 @@ export function WalletScreen() {
             title="Something went wrong"
           />
         ) : (
-          <p className="text-3xl font-semibold">{formatMoney(query.data)}</p>
+          <p className="text-4xl font-bold tracking-tight">{formatMoney(query.data)}</p>
         )}
-      </Card>
+      </div>
 
       <div className="space-y-2">
-        <p className="text-sm font-semibold text-slate-500">Not yet available</p>
+        <p className="text-xs font-semibold text-[color:var(--color-foreground-subtle)]">
+          Not yet available
+        </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {UNAVAILABLE_FEATURES.map((feature) => (
-            <Card className="text-sm text-slate-400" key={feature}>
+            <Card
+              className="rounded-xl p-4 text-sm font-medium text-[color:var(--color-foreground-subtle)]"
+              key={feature}
+            >
               {feature}
             </Card>
           ))}

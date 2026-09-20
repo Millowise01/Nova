@@ -13,6 +13,7 @@ export function MainFooter() {
         { href: "/categories", label: t("categories") },
         { href: "/deals", label: t("dailyDeals") },
         { href: "/new-arrivals", label: t("newArrivals") },
+        { href: "/flash-sales", label: "Flash Sales" },
       ],
     },
     {
@@ -21,44 +22,76 @@ export function MainFooter() {
         { href: "/account", label: t("dashboard") },
         { href: "/orders", label: t("orders") },
         { href: "/wallet", label: t("wallet") },
+        { href: "/wishlist", label: "Wishlist" },
       ],
     },
     {
       title: t("support"),
       links: [
-        { href: "/support/help-center", label: t("helpCenter") },
-        { href: "/support/faqs", label: t("faqs") },
-        { href: "/support/contact", label: t("contact") },
+        { href: "/support", label: t("helpCenter") },
+        { href: "/support", label: t("faqs") },
+        { href: "/support", label: t("contact") },
       ],
     },
   ];
 
   return (
-    <footer className="border-t border-[color:var(--ds-border)] bg-[color:var(--ds-surface)]">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-10 md:grid-cols-4 md:px-6 lg:px-8">
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold">Nova</h3>
-          <p className="text-sm text-slate-600">{t("tagline")}</p>
-        </div>
-        {footerColumns.map((column) => (
-          <div key={column.title}>
-            <h4 className="text-sm font-semibold uppercase tracking-wide text-slate-900">
-              {column.title}
-            </h4>
-            <ul className="mt-3 space-y-2">
-              {column.links.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    className="text-sm text-slate-600 hover:text-[color:var(--ds-primary)]"
-                    href={link.href}
-                  >
-                    {link.label}
-                  </Link>
-                </li>
+    <footer className="bg-[color:var(--color-surface-footer)] text-white">
+      <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-6 lg:px-8">
+        <div className="grid gap-10 md:grid-cols-4">
+          {/* Brand column */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color:var(--color-accent)] text-sm font-bold text-white">
+                N
+              </span>
+              <span className="text-lg font-bold">Nova</span>
+            </div>
+            <p className="text-sm text-white/50">{t("tagline")}</p>
+            <div className="flex gap-3">
+              {["𝕏", "in", "f"].map((icon) => (
+                <span
+                  key={icon}
+                  className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-white/10 text-xs text-white/50 transition-colors hover:border-white/30 hover:text-white"
+                >
+                  {icon}
+                </span>
               ))}
-            </ul>
+            </div>
           </div>
-        ))}
+
+          {/* Link columns */}
+          {footerColumns.map((column) => (
+            <div key={column.title}>
+              <h4 className="mb-4 text-sm font-semibold text-white/40">{column.title}</h4>
+              <ul className="space-y-2.5">
+                {column.links.map((link) => (
+                  <li key={`${link.href}-${link.label}`}>
+                    <Link
+                      className="text-sm text-white/60 transition-colors hover:text-white"
+                      href={link.href}
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+          <p className="text-xs text-white/30">
+            © {new Date().getFullYear()} Nova. All rights reserved.
+          </p>
+          <div className="flex gap-4">
+            {["Privacy Policy", "Terms of Service"].map((label) => (
+              <Link key={label} href="#" className="text-xs text-white/30 hover:text-white/60">
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </footer>
   );

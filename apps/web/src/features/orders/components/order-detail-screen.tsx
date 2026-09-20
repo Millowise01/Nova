@@ -18,7 +18,7 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
 
   if (query.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading order...
       </div>
     );
@@ -40,22 +40,24 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
     <div className="mx-auto w-full max-w-3xl space-y-4 px-4 py-8 md:px-6 lg:px-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Order #{order.id.slice(0, 8)}</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+            Order #{order.id.slice(0, 8)}
+          </h1>
+          <p className="mt-1 text-sm text-[color:var(--color-foreground-muted)]">
             Placed {new Date(order.createdAt).toLocaleString()}
           </p>
         </div>
         <Badge tone={order.status === "cancelled" ? "error" : "success"}>{order.status}</Badge>
       </div>
 
-      <Card className="space-y-3">
-        <h2 className="text-sm font-semibold">Sub-orders</h2>
+      <Card className="space-y-3 rounded-xl p-5">
+        <h2 className="text-base font-bold text-[color:var(--color-foreground)]">Sub-orders</h2>
         {order.subOrders.map((subOrder) => (
           <div className="flex items-center justify-between text-sm" key={subOrder.id}>
-            <span>
+            <span className="text-[color:var(--color-foreground-muted)]">
               Seller {subOrder.sellerId.slice(0, 8)} — {subOrder.status}
             </span>
-            <span className="font-semibold">
+            <span className="font-bold text-[color:var(--color-foreground)]">
               {formatMoney({
                 amount: subOrder.subtotalAmount,
                 currency: subOrder.subtotalCurrency,
@@ -65,9 +67,9 @@ export function OrderDetailScreen({ orderId }: { orderId: string }) {
         ))}
       </Card>
 
-      <Card className="flex items-center justify-between">
-        <p className="text-sm font-semibold">Total</p>
-        <p className="text-lg font-semibold">
+      <Card className="flex items-center justify-between rounded-xl p-5">
+        <p className="text-base font-bold text-[color:var(--color-foreground)]">Total</p>
+        <p className="text-lg font-bold text-[color:var(--color-foreground)]">
           {formatMoney({ amount: order.totalAmount, currency: order.totalCurrency })}
         </p>
       </Card>

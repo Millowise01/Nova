@@ -61,7 +61,7 @@ describe("ProductSection", () => {
       wrapper: withQueryClientAndToast(queryClient),
     });
 
-    screen.getByRole("button", { name: "Add" }).click();
+    screen.getByRole("button", { name: /^Add .* to cart$/ }).click();
 
     await waitFor(() =>
       expect(addLine).toHaveBeenCalledWith(CART_ID, { variantId: VARIANT_ID, quantity: 1 }),
@@ -79,6 +79,6 @@ describe("ProductSection", () => {
       { wrapper: withQueryClientAndToast(queryClient) },
     );
 
-    expect(screen.getByRole("button", { name: "Add" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Add .* to cart$/ })).toBeDisabled();
   });
 });

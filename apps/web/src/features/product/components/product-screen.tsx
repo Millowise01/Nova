@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart, ShoppingCart, Image as ImageIcon } from "@nova/icons";
 import { Badge, Button, ErrorState, Spinner } from "@nova/ui";
 import { formatMoney } from "@nova/utils";
 
@@ -22,7 +23,7 @@ export function ProductScreen({ slug }: { slug: string }) {
 
   if (query.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading product...
       </div>
     );
@@ -41,40 +42,53 @@ export function ProductScreen({ slug }: { slug: string }) {
   const product = query.data;
   const variant = product.variants[0];
   const wishlistItem = wishlistQuery.data?.items.find((item) => item.productId === product.id);
+  const inStock = variant && variant.stockQuantity > 0;
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-8 md:px-6 lg:px-8">
-      <div className="grid gap-8 md:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center rounded-2xl border border-[color:var(--ds-border)] bg-slate-50 text-sm text-slate-400">
-          No product image available
+    <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-6 lg:px-8">
+      <div className="grid gap-10 md:grid-cols-2">
+        {/* Image */}
+        <div className="flex aspect-square items-center justify-center rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-muted)] text-[color:var(--color-foreground-subtle)]">
+          <div className="flex flex-col items-center gap-2">
+            <ImageIcon aria-hidden="true" size={48} strokeWidth={1.5} />
+            <span className="text-sm">No image available</span>
+          </div>
         </div>
 
-        <div className="space-y-4">
+        {/* Details */}
+        <div className="flex flex-col gap-5">
           <div>
-            <p className="text-sm text-slate-500">{product.category.name}</p>
-            <h1 className="text-2xl font-semibold">{product.title}</h1>
+            <p className="text-xs font-semibold text-[color:var(--color-foreground-subtle)]">
+              {product.category.name}
+            </p>
+            <h1 className="mt-1 text-3xl font-bold leading-tight text-[color:var(--color-foreground)]">
+              {product.title}
+            </h1>
           </div>
 
           {variant && (
-            <p className="text-2xl font-semibold text-[color:var(--ds-primary)]">
+            <p className="text-3xl font-bold text-[color:var(--color-primary)]">
               {formatMoney({ amount: variant.priceAmount, currency: variant.priceCurrency })}
             </p>
           )}
 
-          {product.description && <p className="text-sm text-slate-600">{product.description}</p>}
-
           <div className="flex flex-wrap gap-2">
-            {product.brand && <Badge>{product.brand.name}</Badge>}
-            <Badge tone={variant && variant.stockQuantity > 0 ? "success" : "error"}>
-              {variant && variant.stockQuantity > 0
-                ? `${variant.stockQuantity} in stock`
-                : "Out of stock"}
+            {product.brand && <Badge className="rounded-full">{product.brand.name}</Badge>}
+            <Badge tone={inStock ? "success" : "error"} className="rounded-full">
+              {inStock ? `${variant.stockQuantity} in stock` : "Out of stock"}
             </Badge>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          {product.description && (
+            <p className="text-sm leading-relaxed text-[color:var(--color-foreground-muted)]">
+              {product.description}
+            </p>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap gap-3 pt-2">
             <Button
-              disabled={!variant || variant.stockQuantity === 0 || addToCart.isPending}
+              disabled={!variant || !inStock || addToCart.isPending}
               onClick={() => {
                 if (!variant) return;
                 addToCart.mutate({
@@ -83,6 +97,9 @@ export function ProductScreen({ slug }: { slug: string }) {
                   unitPrice: { amount: variant.priceAmount, currency: variant.priceCurrency },
                 });
               }}
+              size="lg"
+              icon={<ShoppingCart size={16} />}
+              className="flex-1"
             >
               {addToCart.isPending ? "Adding..." : "Add to Cart"}
             </Button>
@@ -105,19 +122,26 @@ export function ProductScreen({ slug }: { slug: string }) {
                   }
                 }}
                 variant="outline"
+                size="lg"
+                icon={<Heart size={16} />}
               >
-                {wishlistItem ? "Remove from Wishlist" : "Add to Wishlist"}
+                {wishlistItem ? "Saved" : "Save"}
               </Button>
             )}
           </div>
 
           {product.variants.length > 1 && (
-            <div className="space-y-2 pt-2">
-              <p className="text-sm font-semibold">Other variants</p>
-              <ul className="space-y-1 text-sm text-slate-600">
+            <div className="rounded-xl border border-[color:var(--color-border)] p-4">
+              <p className="mb-2 text-sm font-semibold text-[color:var(--color-foreground-muted)]">
+                Other variants
+              </p>
+              <ul className="space-y-1.5">
                 {product.variants.map((v) => (
-                  <li key={v.id}>
-                    {v.name} — {formatMoney({ amount: v.priceAmount, currency: v.priceCurrency })}
+                  <li key={v.id} className="flex items-center justify-between text-sm">
+                    <span className="text-[color:var(--color-foreground-muted)]">{v.name}</span>
+                    <span className="font-semibold text-[color:var(--color-foreground)]">
+                      {formatMoney({ amount: v.priceAmount, currency: v.priceCurrency })}
+                    </span>
                   </li>
                 ))}
               </ul>

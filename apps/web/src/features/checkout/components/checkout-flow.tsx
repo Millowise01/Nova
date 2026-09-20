@@ -63,14 +63,14 @@ export function CheckoutFlow() {
 
   return (
     <div className="space-y-5">
-      <ol className="grid gap-2 rounded-2xl border border-[color:var(--ds-border)] bg-white p-3 md:grid-cols-5">
+      <ol className="grid gap-2 rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-3 shadow-sm md:grid-cols-5">
         {steps.map((item, index) => (
           <li
             key={item}
-            className={`rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wide ${
+            className={`rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
               index === step
-                ? "bg-[color:var(--ds-primary)] text-white"
-                : "bg-slate-100 text-slate-600"
+                ? "bg-[color:var(--color-primary)] text-white shadow-sm"
+                : "bg-[color:var(--color-muted)] text-[color:var(--color-foreground-muted)]"
             }`}
           >
             {index + 1}. {item}
@@ -78,8 +78,10 @@ export function CheckoutFlow() {
         ))}
       </ol>
 
-      <Card className="space-y-4">
-        <h2 className="text-xl font-semibold">{stepName}</h2>
+      <Card className="space-y-4 rounded-xl p-6">
+        <h2 className="text-xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+          {stepName}
+        </h2>
 
         <form
           className="grid gap-3 md:grid-cols-2"

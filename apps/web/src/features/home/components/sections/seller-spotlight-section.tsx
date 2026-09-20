@@ -23,7 +23,7 @@ export function SellerSpotlightSection({ sellerId }: { sellerId?: string }) {
   if (profileQuery.isLoading || !profileQuery.data) {
     return (
       <section className="mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8">
-        <div className="flex items-center gap-3 text-sm text-slate-600">
+        <div className="flex items-center gap-3 text-sm text-[color:var(--color-foreground-muted)]">
           <Spinner className="h-4 w-4" /> Loading seller spotlight...
         </div>
       </section>
@@ -38,19 +38,27 @@ export function SellerSpotlightSection({ sellerId }: { sellerId?: string }) {
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-4 px-4 md:px-6 lg:px-8">
-      <SectionTitle description="A verified seller from Nova's catalog." title="Seller Spotlight" />
-      <Card className="grid gap-5 md:grid-cols-3">
+      <SectionTitle description="A seller from Nova's catalog." title="Seller Spotlight" />
+      <Card className="grid gap-5 rounded-xl p-6 md:grid-cols-3">
         <div>
-          <p className="text-sm text-slate-500">Seller</p>
-          <p className="mt-1 text-xl font-semibold">{seller.name ?? "Verified Seller"}</p>
+          <p className="text-xs font-medium text-[color:var(--color-foreground-subtle)]">Seller</p>
+          <p className="mt-1 text-xl font-bold text-[color:var(--color-foreground)]">
+            {seller.name ?? "Nova seller"}
+          </p>
         </div>
         <div>
-          <p className="text-sm text-slate-500">Member since</p>
-          <p className="mt-1 text-xl font-semibold">{memberSinceYear}</p>
+          <p className="text-xs font-medium text-[color:var(--color-foreground-subtle)]">
+            Member since
+          </p>
+          <p className="mt-1 text-xl font-bold text-[color:var(--color-foreground)]">
+            {memberSinceYear}
+          </p>
         </div>
         <div>
-          <p className="text-sm text-slate-500">Listed products</p>
-          <p className="mt-1 text-xl font-semibold">
+          <p className="text-xs font-medium text-[color:var(--color-foreground-subtle)]">
+            Listed products
+          </p>
+          <p className="mt-1 text-xl font-bold text-[color:var(--color-foreground)]">
             {hasMoreProducts ? `${productCount}+` : productCount}
           </p>
         </div>

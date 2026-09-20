@@ -20,9 +20,12 @@ function WishlistProductRow({
   removing: boolean;
 }) {
   return (
-    <Card className="flex items-center justify-between gap-4">
+    <Card className="flex items-center justify-between gap-4 rounded-xl p-4">
       {item.product ? (
-        <Link className="font-semibold hover:underline" href={`/product/${item.product.slug}`}>
+        <Link
+          className="font-semibold text-[color:var(--color-foreground)] transition-colors hover:text-[color:var(--color-primary)]"
+          href={`/product/${item.product.slug}`}
+        >
           {item.product.title}
         </Link>
       ) : (
@@ -48,7 +51,7 @@ export function WishlistScreen() {
 
   if (query.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading wishlist...
       </div>
     );
@@ -69,8 +72,12 @@ export function WishlistScreen() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold">Wishlist</h1>
-        <p className="text-sm text-slate-600">Products you've saved for later.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[color:var(--color-foreground)]">
+          Wishlist
+        </h1>
+        <p className="mt-1 text-sm text-[color:var(--color-foreground-muted)]">
+          Products you&apos;ve saved for later.
+        </p>
       </div>
 
       {items.length === 0 ? (

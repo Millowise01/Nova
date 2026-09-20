@@ -18,7 +18,6 @@ import { NewsletterSection } from "./sections/newsletter-section";
 import { ProductSection } from "./sections/product-section";
 import { RecommendationsSection } from "./sections/recommendations-section";
 import { SellerSpotlightSection } from "./sections/seller-spotlight-section";
-import { TestimonialsSection } from "./sections/testimonials-section";
 
 export function HomeScreen() {
   const categoriesQuery = useCategoriesQuery();
@@ -41,7 +40,7 @@ export function HomeScreen() {
 
   if (productsQuery.isLoading) {
     return (
-      <div className="flex items-center justify-center gap-3 py-24 text-sm text-slate-600">
+      <div className="flex items-center justify-center gap-3 py-24 text-sm text-[color:var(--color-foreground-muted)]">
         <Spinner className="h-4 w-4" /> Loading...
       </div>
     );
@@ -62,7 +61,7 @@ export function HomeScreen() {
         title="Trending Products"
       />
       <ProductSection
-        description="Available items from verified sellers."
+        description="Available items from Nova sellers."
         products={products}
         title="Best Sellers"
       />
@@ -71,7 +70,9 @@ export function HomeScreen() {
       <RecommendationsSection products={products.slice(0, 4)} />
       <EcoBannerSection />
       <DownloadAppSection />
-      <TestimonialsSection />
+      {/* Customer testimonials are intentionally not rendered: there is no reviews/testimonials
+          backend yet and invented quotes would misrepresent real customers. Re-add from real
+          review data (see NOVA_UI_UX_DESIGN_SYSTEM.md §64, §67). */}
       <NewsletterSection />
     </div>
   );
