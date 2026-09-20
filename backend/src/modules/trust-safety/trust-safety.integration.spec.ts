@@ -124,6 +124,50 @@ describe("Trust & Safety (integration)", () => {
       expect(confirmed.body.data.status).toBe("rejected");
     });
 
+    it("a caller cannot file KYC for a different subject — ownership comes from the token, not the body", async () => {
+      const attacker = await signUpAndPromote("ts-kyc-attacker", ["seller"]);
+      const victim = await signUpAndPromote("ts-kyc-victim", ["seller"]);
+
+      const denied = await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .set("Authorization", `Bearer ${attacker.token}`)
+        .send({ subjectId: victim.userId, subjectType: "seller", documentReference: "FORGED" })
+        .expect(403);
+      expect(denied.body.error.code).toBe("KYC_SUBJECT_MUST_BE_CALLER");
+
+      // Rejected before anything is persisted or attributed to the victim.
+      expect(await prisma.kYCSubmission.count({ where: { subjectId: victim.userId } })).toBe(0);
+    });
+
+    it("the same ownership rule applies to riders and to admins (an admin reviews, never files for others)", async () => {
+      const otherUser = await signUpAndPromote("ts-kyc-other", []);
+
+      await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .set("Authorization", `Bearer ${adminAToken}`)
+        .send({ subjectId: otherUser.userId, subjectType: "seller", documentReference: "X" })
+        .expect(403);
+
+      const rider = await signUpAndPromote("ts-kyc-rider", []);
+      await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .set("Authorization", `Bearer ${rider.token}`)
+        .send({ subjectId: otherUser.userId, subjectType: "rider", documentReference: "X" })
+        .expect(403);
+      await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .set("Authorization", `Bearer ${rider.token}`)
+        .send({ subjectId: rider.userId, subjectType: "rider", documentReference: "RIDER-1" })
+        .expect(201);
+    });
+
+    it("POST /trust-safety/kyc requires authentication", async () => {
+      await request(app.getHttpServer())
+        .post("/v1/trust-safety/kyc")
+        .send({ subjectId: randomUUID(), subjectType: "seller", documentReference: "X" })
+        .expect(401);
+    });
+
     it("GET /trust-safety/kyc — admin review queue, filtered by status, admin-only", async () => {
       const seller = await signUpAndPromote("ts-kyc-queue-seller", ["seller"]);
       const submitted = await request(app.getHttpServer())

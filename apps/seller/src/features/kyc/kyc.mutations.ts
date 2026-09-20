@@ -9,11 +9,9 @@ import { useToast } from "@/providers/toast-provider";
 import { getApiClient } from "@/services/api";
 
 /** subjectType is always "seller" here — apps/seller has no rider concept —
- *  and subjectId is always the caller's own userId, passed in by the caller
- *  (see submitKyc's own doc comment in @nova/api-client for why this isn't
- *  left editable: the backend doesn't enforce it against the authenticated
- *  caller, so this form never gives a seller the option to submit on behalf
- *  of a different subjectId). */
+ *  and subjectId is always the caller's own userId, passed in by the caller.
+ *  The backend enforces that subjectId matches the authenticated caller
+ *  (403 KYC_SUBJECT_MUST_BE_CALLER), and this form never makes it editable. */
 export function useSubmitKycMutation() {
   const { toast } = useToast();
   const onError = useMutationErrorToast();

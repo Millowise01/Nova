@@ -66,6 +66,119 @@ describe("Cart & Checkout (integration)", () => {
     await app.close();
   });
 
+  describe("ownership — a cart that has an owner is only usable by that owner", () => {
+    const checkoutBody = {
+      addressLine: "1 Siaka Stevens St",
+      city: "Freetown",
+      district: "Western Area",
+      phone: "+23276000000",
+      deliveryMethod: "standard",
+      paymentMethod: "card",
+    };
+
+    async function signUpCustomer(prefix: string) {
+      const suffix = randomUUID().slice(0, 8);
+      const signup = await request(app.getHttpServer())
+        .post("/v1/auth/signup")
+        .send({
+          firstName: prefix,
+          lastName: "Test",
+          email: `${prefix}-${suffix}@example.test`,
+          phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
+          password: "correct-horse-battery-staple",
+          confirmPassword: "correct-horse-battery-staple",
+        });
+      return { token: signup.body.data.accessToken as string };
+    }
+
+    async function ownedCartWithLine(ownerToken: string) {
+      const cart = await request(app.getHttpServer())
+        .post("/v1/cart")
+        .set("Authorization", `Bearer ${ownerToken}`)
+        .expect(201);
+      const cartId = cart.body.data.cartId as string;
+      await request(app.getHttpServer())
+        .post(`/v1/cart/${cartId}/lines`)
+        .set("Authorization", `Bearer ${ownerToken}`)
+        .send({ variantId, quantity: 1 })
+        .expect(201);
+      return cartId;
+    }
+
+    it("lets the owner read the cart, add lines and create a checkout session", async () => {
+      const owner = await signUpCustomer("cart-owner");
+      const cartId = await ownedCartWithLine(owner.token);
+
+      await request(app.getHttpServer())
+        .get(`/v1/cart/${cartId}`)
+        .set("Authorization", `Bearer ${owner.token}`)
+        .expect(200);
+      await request(app.getHttpServer())
+        .post(`/v1/carts/${cartId}/checkout/session`)
+        .set("Authorization", `Bearer ${owner.token}`)
+        .send(checkoutBody)
+        .expect(201);
+    });
+
+    it("rejects an anonymous caller (401, so a client with an expired token refreshes and retries)", async () => {
+      const owner = await signUpCustomer("cart-owner-anon");
+      const cartId = await ownedCartWithLine(owner.token);
+
+      await request(app.getHttpServer()).get(`/v1/cart/${cartId}`).expect(401);
+      await request(app.getHttpServer())
+        .post(`/v1/cart/${cartId}/lines`)
+        .send({ variantId, quantity: 1 })
+        .expect(401);
+      await request(app.getHttpServer())
+        .post(`/v1/carts/${cartId}/checkout/session`)
+        .send(checkoutBody)
+        .expect(401);
+    });
+
+    it("rejects a different authenticated user (403) for read, add-line and checkout", async () => {
+      const owner = await signUpCustomer("cart-owner-x");
+      const intruder = await signUpCustomer("cart-intruder");
+      const cartId = await ownedCartWithLine(owner.token);
+
+      const read = await request(app.getHttpServer())
+        .get(`/v1/cart/${cartId}`)
+        .set("Authorization", `Bearer ${intruder.token}`)
+        .expect(403);
+      expect(read.body.error.code).toBe("CART_ACCESS_DENIED");
+      await request(app.getHttpServer())
+        .post(`/v1/cart/${cartId}/lines`)
+        .set("Authorization", `Bearer ${intruder.token}`)
+        .send({ variantId, quantity: 1 })
+        .expect(403);
+      await request(app.getHttpServer())
+        .post(`/v1/carts/${cartId}/checkout/session`)
+        .set("Authorization", `Bearer ${intruder.token}`)
+        .send(checkoutBody)
+        .expect(403);
+
+      // Nothing the intruder attempted changed the owner's cart.
+      const after = await request(app.getHttpServer())
+        .get(`/v1/cart/${cartId}`)
+        .set("Authorization", `Bearer ${owner.token}`)
+        .expect(200);
+      expect(after.body.data.lines).toHaveLength(1);
+    });
+
+    it("keeps guest carts usable without a token — the unguessable cart ID is their credential", async () => {
+      const guest = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+      const cartId = guest.body.data.cartId as string;
+      await request(app.getHttpServer())
+        .post(`/v1/cart/${cartId}/lines`)
+        .send({ variantId, quantity: 1 })
+        .expect(201);
+      const someone = await signUpCustomer("cart-guest-reader");
+      await request(app.getHttpServer())
+        .get(`/v1/cart/${cartId}`)
+        .set("Authorization", `Bearer ${someone.token}`)
+        .expect(200);
+    });
+  });
+
   it("creates a guest cart, adds a line (synchronously confirmed against Catalog), and totals correctly", async () => {
     const cart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
     const cartId = cart.body.data.cartId;

@@ -27,7 +27,19 @@ export class KycService {
     });
   }
 
+  /** A KYC submission is always FOR the authenticated caller — never for whoever the
+   *  request body names. subjectId is client input and must not be trusted as an
+   *  ownership claim: without this check any authenticated user could file (and so
+   *  attribute a document to) another seller's or rider's identity. Admins are held to
+   *  the same rule — they review submissions, they don't file them for others. */
   async submit(input: SubmitKycInput, submittedBy: string, ctx: RequestContext) {
+    if (input.subjectId !== submittedBy) {
+      throw new ForbiddenError(
+        "KYC_SUBJECT_MUST_BE_CALLER",
+        "A KYC submission can only be filed for your own account.",
+      );
+    }
+
     const submission = await this.prisma.kYCSubmission.create({
       data: {
         subjectId: input.subjectId,

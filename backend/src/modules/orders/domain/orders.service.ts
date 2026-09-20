@@ -78,6 +78,16 @@ export class OrdersService {
 
     const session = await this.cartCheckout.getSessionWithLines(checkoutSessionId);
 
+    // A session that belongs to a user can only be turned into an order by that user —
+    // otherwise anyone holding a session ID could place an order in the owner's name.
+    // Guest sessions (no userId) are unowned; the order then belongs to the caller.
+    if (session.userId && session.userId !== userId) {
+      throw new ForbiddenError(
+        "CHECKOUT_SESSION_ACCESS_DENIED",
+        "You do not have access to this checkout session.",
+      );
+    }
+
     const lineSnapshots = await Promise.all(
       session.lines.map(async (line) => ({
         ...(await this.catalog.confirmPriceAndStock(line.variantId, line.quantity)),

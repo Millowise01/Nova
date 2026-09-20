@@ -48,6 +48,24 @@ describe("RateLimitGuard (integration)", () => {
     expect(sixth.body.error.code).toBe("RATE_LIMIT_EXCEEDED");
   });
 
+  it("limits OTP verification attempts so a 6-digit code cannot be brute-forced", async () => {
+    const destination = `ratelimit-verify-${randomUUID().slice(0, 8)}@example.test`;
+
+    for (let i = 0; i < 5; i++) {
+      const guess = await request(app.getHttpServer())
+        .post("/v1/auth/otp/verify")
+        .send({ destination, code: "000000" })
+        .expect(400);
+      expect(guess.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
+    }
+
+    const sixth = await request(app.getHttpServer())
+      .post("/v1/auth/otp/verify")
+      .send({ destination, code: "000000" })
+      .expect(429);
+    expect(sixth.body.error.code).toBe("RATE_LIMIT_EXCEEDED");
+  });
+
   it("scopes limits per-endpoint — hitting the OTP limit doesn't affect signup", async () => {
     const destination = `ratelimit-scope-test-${randomUUID().slice(0, 8)}@example.test`;
     for (let i = 0; i < 5; i++) {

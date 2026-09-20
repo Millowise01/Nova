@@ -4,6 +4,7 @@ import type { TestingModule } from "@nestjs/testing";
 import { ApiExceptionFilter } from "../common/filters/api-exception.filter";
 import { MoneySerializationInterceptor } from "../common/interceptors/money-serialization.interceptor";
 import { RedisService } from "../common/redis/redis.service";
+import { applySecurityHeaders } from "../common/security/security-headers";
 import { AppConfigService } from "../config/config.service";
 
 /** Mirrors main.ts's bootstrap wiring exactly, so integration tests exercise the same
@@ -19,6 +20,8 @@ import { AppConfigService } from "../config/config.service";
  *  that detail. */
 export async function createTestApp(moduleRef: TestingModule): Promise<INestApplication> {
   const app = moduleRef.createNestApplication();
+  applySecurityHeaders(app);
+
   app.setGlobalPrefix("v1", { exclude: ["metrics"] });
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalInterceptors(new MoneySerializationInterceptor());

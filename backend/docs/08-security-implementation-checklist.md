@@ -24,6 +24,8 @@ Each item states: **Generic checklist says** → **Volume 3 actually requires** 
 - **Authoritative version:** Two models, deliberately layered — RBAC answers "can this role ever do this," ABAC answers "can this specific actor do this to this specific object, given the current context." A pure-RBAC implementation cannot express "a customer may cancel their own order but not anyone else's" without either a role explosion (one role per customer) or an inline `if` check outside the authorization system — which is exactly the "no module implements ad hoc permission checks" violation Vol 2, B2 (point 5) and Vol 3, B3 ("authorization is enforced centrally by a policy engine... individual controllers never implement their own ad hoc permission checks") both prohibit.
 - **Phase 1 status:** Implemented as a central policy engine (CASL) this pass — see below. Replaces an inline `if (order.userId !== requesterId) throw Forbidden` that existed in `OrdersService` from the previous implementation pass — a real, small instance of exactly the ad hoc pattern Vol 3 prohibits, caught and fixed as part of this work.
 
+- **Authorization audit, 2026-09-20:** every route was reviewed. Ownership gaps in KYC submission and in cart/checkout-session use were fixed and tested; the remaining open findings are listed in [05-security-baseline.md](05-security-baseline.md#ownership-checks-and-abuse-controls-authorization-audit-2026-09-20).
+
 ### 1.3 Dual authorization for sensitive operations ⚠️ _(a distinct control, absent from the generic checklist entirely)_
 
 - **Generic checklist says:** Nothing — most generic checklists stop at "authorization," treating RBAC/ABAC as sufficient for every operation.
@@ -100,6 +102,8 @@ Each item states: **Generic checklist says** → **Volume 3 actually requires** 
 - **Authoritative version:** Two layers again — edge and application. The edge layer (Cloudflare) is infrastructure, out of scope for this phase (see below). The **application layer, Redis-backed, per-account/per-endpoint**, is in scope now.
 - **Phase 1 status:** **Implemented and verified this pass** — see [Implementation Report](#implementation-report).
 
+- **Update, 2026-09-20:** OTP verification is now rate limited too (5 per 60 seconds), not just OTP requests.
+
 ### 4.2 CORS
 
 - **Generic checklist says:** "Configure CORS."
@@ -116,6 +120,10 @@ Each item states: **Generic checklist says** → **Volume 3 actually requires** 
 - **Phase 1 status:** **Implemented and verified** (prior pass) — `POST /v1/orders`. See `backend/docs/02-api-standards.md`'s worked example and the Phase 1 implementation report's idempotency proof.
 
 ---
+
+### 4.5 Security headers
+
+- **Status:** **Implemented 2026-09-20** for the backend (Helmet) and, in a reduced form, for the Next.js apps. See [05-security-baseline.md](05-security-baseline.md#security-headers) for the policy, what is deliberately not set, and how it is tested.
 
 ## 5. Infrastructure
 

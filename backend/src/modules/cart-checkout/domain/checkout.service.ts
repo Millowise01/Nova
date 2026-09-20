@@ -25,8 +25,8 @@ export class CheckoutService {
    *  turning a session into an Order, which is Orders' job (backend/docs/02's worked
    *  example: POST /v1/orders, Idempotency-Key required) — see completeCheckout below
    *  for how this module's CheckoutSession design makes that safe. */
-  async createSession(cartId: string, input: CheckoutFormValues) {
-    const activeCart = await this.cart.getActiveCartOrThrow(cartId);
+  async createSession(cartId: string, input: CheckoutFormValues, callerId: string | null) {
+    const activeCart = await this.cart.getActiveCartOrThrow(cartId, callerId);
     const lines = await this.prisma.cartLine.findMany({
       where: { cartId: activeCart.id, deletedAt: null },
     });
@@ -72,6 +72,9 @@ export class CheckoutService {
     return this.prisma.checkoutSession.create({
       data: {
         cartId: activeCart.id,
+        // The cart's owner (null for a guest cart). Orders uses this to ensure only the
+        // owner can turn the session into an order.
+        userId: activeCart.userId,
         addressLine: input.addressLine,
         city: input.city,
         district: input.district,

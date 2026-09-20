@@ -79,6 +79,8 @@ export class AuthController {
   }
 
   @Post("otp/verify")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(5, 60) // A 6-digit code is guessable without an attempt limit (same policy as requesting one).
   @HttpCode(HttpStatus.OK)
   async verifyOtp(@Body(new ZodValidationPipe(otpVerifySchema)) body: OtpVerifyInput) {
     await this.otp.verifyOtp(body.destination, body.code);

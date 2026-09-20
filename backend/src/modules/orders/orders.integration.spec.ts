@@ -40,7 +40,10 @@ describe("Orders (integration) — including idempotent checkout orchestration",
   });
 
   /** Full setup: seller + product + cart + line + checkout session, ready for POST /v1/orders. */
-  async function setUpCheckoutSession(stockQuantity = 100, quantity = 2) {
+  async function setUpCheckoutSession(stockQuantity = 100, quantity = 2, ownerToken?: string) {
+    // When an owner is given, the cart (and so the checkout session) belongs to that user.
+    const asOwner = (req: request.Test) =>
+      ownerToken ? req.set("Authorization", `Bearer ${ownerToken}`) : req;
     const suffix = randomUUID().slice(0, 8);
     const sellerEmail = `order-seller-${suffix}@example.test`;
     const seller = await request(app.getHttpServer())
@@ -83,15 +86,15 @@ describe("Orders (integration) — including idempotent checkout orchestration",
       });
     const variantId = product.body.data.variants[0].id;
 
-    const cart = await request(app.getHttpServer()).post("/v1/cart").expect(201);
+    const cart = await asOwner(request(app.getHttpServer()).post("/v1/cart")).expect(201);
     const cartId = cart.body.data.cartId;
-    await request(app.getHttpServer())
-      .post(`/v1/cart/${cartId}/lines`)
+    await asOwner(request(app.getHttpServer()).post(`/v1/cart/${cartId}/lines`))
       .send({ variantId, quantity })
       .expect(201);
 
-    const session = await request(app.getHttpServer())
-      .post(`/v1/carts/${cartId}/checkout/session`)
+    const session = await asOwner(
+      request(app.getHttpServer()).post(`/v1/carts/${cartId}/checkout/session`),
+    )
       .send({
         addressLine: "1 Siaka Stevens St",
         city: "Freetown",
@@ -117,6 +120,42 @@ describe("Orders (integration) — including idempotent checkout orchestration",
       .send({ checkoutSessionId })
       .expect(401);
     expect(response.body.error.code).toBe("MISSING_BEARER_TOKEN");
+  });
+
+  it("only the owner of a checkout session can turn it into an order", async () => {
+    const { checkoutSessionId } = await setUpCheckoutSession(100, 1, buyerToken);
+    const suffix = randomUUID().slice(0, 8);
+    const intruder = await request(app.getHttpServer())
+      .post("/v1/auth/signup")
+      .send({
+        firstName: "Intruder",
+        lastName: "Test",
+        email: `intruder-${suffix}@example.test`,
+        phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
+        password: "correct-horse-battery-staple",
+        confirmPassword: "correct-horse-battery-staple",
+      });
+
+    const denied = await request(app.getHttpServer())
+      .post("/v1/orders")
+      .set("Authorization", `Bearer ${intruder.body.data.accessToken}`)
+      .set("Idempotency-Key", randomUUID())
+      .send({ checkoutSessionId })
+      .expect(403);
+    expect(denied.body.error.code).toBe("CHECKOUT_SESSION_ACCESS_DENIED");
+
+    // Nothing was consumed or created for the victim by the failed attempt...
+    const session = await prisma.checkoutSession.findUnique({ where: { id: checkoutSessionId } });
+    expect(session?.status).toBe("pending");
+    expect(await prisma.order.count({ where: { userId: intruder.body.data.user.id } })).toBe(0);
+
+    // ...and the real owner can still place the order.
+    await request(app.getHttpServer())
+      .post("/v1/orders")
+      .set("Authorization", `Bearer ${buyerToken}`)
+      .set("Idempotency-Key", randomUUID())
+      .send({ checkoutSessionId })
+      .expect(201);
   });
 
   it("requires the Idempotency-Key header", async () => {

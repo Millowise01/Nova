@@ -13,6 +13,7 @@ import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 import { ApiExceptionFilter } from "./common/filters/api-exception.filter";
 import { MoneySerializationInterceptor } from "./common/interceptors/money-serialization.interceptor";
+import { applySecurityHeaders } from "./common/security/security-headers";
 import { AppConfigService } from "./config/config.service";
 import { mergeZodRequestBodies } from "./openapi/zod-openapi";
 
@@ -45,6 +46,9 @@ async function bootstrap() {
   // real logger is wired is lost, it's just flushed through Pino once it is.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
+
+  // Registered before any route so every response — including errors — carries the headers.
+  applySecurityHeaders(app);
 
   // O-3 — "metrics" excluded so PrometheusModule's endpoint (backend/src/
   // common/metrics/) sits at the conventional root /metrics path scrapers

@@ -69,6 +69,36 @@ Service-to-service identities — the backend calling itself in CI, background j
 
 The token is a secret like any other (see Secrets handling above): it belongs in the secrets manager, never in source control. Network-level restriction (allow-listing the scraper) is still worth adding at the edge once infrastructure exists; the token is the application-layer control.
 
+## Security headers
+
+Every backend response — success, 401, 404 and error responses alike — carries the headers set by `applySecurityHeaders` (`backend/src/common/security/security-headers.ts`, using `helmet`). `main.ts` and `test-utils/create-test-app.ts` both call it, so the integration tests exercise the policy production runs.
+
+- **API policy (every path except the Swagger UI):** `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `X-Content-Type-Options: nosniff`, `Strict-Transport-Security: max-age=31536000; includeSubDomains`, `Cross-Origin-Opener-Policy` and `Cross-Origin-Resource-Policy: same-origin`. `X-Powered-By` is removed.
+- **Swagger UI (`/docs` and paths under it):** the one relaxed policy. It allows same-origin scripts, inline styles and `data:` images, and still forbids framing and inline scripts. `/docs-json` is not a UI path and keeps the strict policy. Verified in a real browser: the UI renders with no CSP violations.
+- **HSTS** is only honoured by browsers over HTTPS; TLS terminates at the edge. `includeSubDomains` commits every subdomain of the API host to HTTPS.
+- **CORS is unchanged** (explicit allowed origins, credentials on) and still works alongside the headers; a test covers this.
+- **Next.js apps (web, seller, admin)** share `packages/config/security-headers.cjs`: `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Content-Security-Policy: frame-ancestors 'none'`, `Referrer-Policy: strict-origin-when-cross-origin` and HSTS, plus `poweredByHeader: false`. Each app has a test on its `next.config`.
+- **Not set on the Next apps, deliberately:** a full CSP (Next needs a per-request nonce strategy, a design decision of its own), `Permissions-Policy` and `Cross-Origin-Opener-Policy` (either could break camera capture for seller photos or payment pop-ups, which are not settled).
+
+## Ownership checks and abuse controls (authorization audit, 2026-09-20)
+
+Fixed, each with tests that failed before the change:
+
+- **KYC** — `POST /v1/trust-safety/kyc` requires `subjectId` to equal the authenticated caller (`403 KYC_SUBJECT_MUST_BE_CALLER`), for sellers, riders and admins alike. Nothing is persisted on rejection.
+- **Cart and checkout session** — a guest cart (no owner) is capability-based: its unguessable UUID is the credential. A cart that has an owner is usable only by that owner across `GET /cart/:id`, `POST /cart/:id/lines` and `POST /carts/:id/checkout/session` (no token: `401 AUTHENTICATION_REQUIRED`; another user: `403 CART_ACCESS_DENIED`). The checkout session now records the cart's owner, and `POST /v1/orders` rejects anyone else (`403 CHECKOUT_SESSION_ACCESS_DENIED`). Previously any authenticated user holding a session ID could turn it into an order.
+- **OTP verification** — `POST /v1/auth/otp/verify` is limited to 5 attempts per 60 seconds, the same policy as requesting a code. A 6-digit code is otherwise guessable within its 10-minute life. Nothing consumes a verified OTP yet, so this closes the gap before it matters.
+
+Reviewed and correct: every route with only `JwtAuthGuard` enforces ownership in its service through the central policy engine (orders, wishlist, notifications, delivery jobs, disputes, wallet balance); `sellerId` on product creation comes from the token; `PATCH /me` accepts only `name` and `locale`; registration always assigns `["customer"]` and no code path grants `seller`, `rider` or `admin`.
+
+**Open findings, not fixed** (each needs a decision or a larger change):
+
+- `POST /trust-safety/disputes` does not check that the `orderId` or `reviewId` exists or belongs to the opener. Nothing leaks (only the opener and admins can read a dispute), but any user can file disputes against arbitrary IDs. Who may dispute what is part of the seller-disputes design.
+- The idempotency store is keyed by `(key, endpoint)`, not by user, so a different user replaying another user's key with an identical body would receive the stored response. It needs the key and the exact body, and a schema change to scope it.
+- `trust proxy` is not configured. Behind a reverse proxy, rate limiting keyed by `req.ip` would see the proxy's address. Depends on the deployment topology.
+- Swagger UI (`/docs`) is served in every environment, production included.
+- `POST /auth/refresh` has no rate limit.
+- KYC approval does not grant the `seller` role, and no path grants it at all; how a user becomes a seller is not specified.
+
 ## Explicitly deferred — not applicable to Phase 1
 
 The following Volume 3 requirements are real, correctly specified, and **not being skipped** — they apply once the bounded contexts they govern actually enter the build order (see [00-bounded-contexts.md](00-bounded-contexts.md)'s phase table). Listing them here is intentional, so Phase 1 work doesn't get gold-plated with controls that have nothing to protect yet:

@@ -38,13 +38,10 @@ export function createTrustSafetyEndpoints(client: NovaHttpClient) {
     },
 
     /** POST /v1/trust-safety/kyc — seller-facing (backend/docs/10's disclosed
-     *  addition). Real, disclosed backend gap: the persisted `subjectId` comes
-     *  straight from the request body (kyc.service.ts's submit()), NOT from the
-     *  authenticated caller — nothing stops one seller from submitting a KYC
-     *  record naming a different subjectId. Not fixed here (backend work, out
-     *  of scope for apps/seller); apps/seller's own submission form never
-     *  exposes subjectId as an editable field for exactly this reason — it's
-     *  always the logged-in seller's own ID. */
+     *  addition). The server enforces that `subjectId` equals the authenticated
+     *  caller (kyc.service.ts's submit() throws 403 KYC_SUBJECT_MUST_BE_CALLER
+     *  otherwise), so callers must pass their own user ID. apps/seller's form
+     *  never exposes subjectId as an editable field. */
     async submitKyc(input: SubmitKycInput): Promise<KycSubmissionResponse> {
       const response = await client.post<ApiEnvelope>(
         "/trust-safety/kyc",
