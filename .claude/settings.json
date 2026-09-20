@@ -34,7 +34,6 @@
       "Bash(grep -iE '^\\\\.env$|\\\\.env\\\\.local$|\\\\.env\\\\.production|\\\\.env\\\\.development|secrets?\\\\.')",
       "PowerShell(cd C:\\\\Nova; pnpm run secretlint; Write-Host \"EXIT CODE: $LASTEXITCODE\")",
       "Bash(git commit *)",
-      "Bash(git reset *)",
       "Bash(pnpm view *)",
       "Bash(find /c/Users/admin/Desktop -maxdepth 3 -iname \"*nova*\" 2>/dev/null)",
       "Read(//c/Users/admin/Desktop/**)",
