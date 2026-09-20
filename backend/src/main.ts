@@ -46,7 +46,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(Logger));
 
-  app.setGlobalPrefix("v1");
+  // O-3 — "metrics" excluded so PrometheusModule's endpoint (backend/src/
+  // common/metrics/) sits at the conventional root /metrics path scrapers
+  // expect, instead of /v1/metrics.
+  app.setGlobalPrefix("v1", { exclude: ["metrics"] });
   app.useGlobalFilters(new ApiExceptionFilter());
   app.useGlobalInterceptors(new MoneySerializationInterceptor());
 

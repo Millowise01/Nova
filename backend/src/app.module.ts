@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 
 import { AuditModule } from "./common/audit/audit.module";
 import { LoggingModule } from "./common/logging/logging.module";
+import { MetricsModule } from "./common/metrics/metrics.module";
 import { CorrelationIdMiddleware } from "./common/middleware/correlation-id.middleware";
 import { OutboxModule } from "./common/outbox/outbox.module";
 import { PolicyModule } from "./common/policy/policy.module";
@@ -29,6 +30,7 @@ import { PrismaModule } from "./prisma/prisma.module";
   imports: [
     ConfigModule,
     LoggingModule,
+    MetricsModule,
     PrismaModule,
     RedisModule,
     PolicyModule,

@@ -1,6 +1,18 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/metrics": {
+      "get": {
+        "operationId": "PrometheusController_index",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["Prometheus"]
+      }
+    },
     "/v1/auth/signup": {
       "post": {
         "operationId": "AuthController_signup",
