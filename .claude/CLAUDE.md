@@ -155,6 +155,26 @@ Before installing a package:
 
 Use the existing Nova design system and brand direction. Do not introduce arbitrary visual patterns. Keep interfaces mobile-first and accessible.
 
+The system comes first, the component comes from the system, the feature uses the component, and the page composes the feature. Never design screen by screen. The rulebook is `docs/02-uiux-brand/NOVA_UI_UX_DESIGN_SYSTEM.md`; read it before changing UI.
+
+## Documentation system
+
+The `docs/` directory has 19 phase folders. **Most of their files are stubs.** Every stub starts with a `STATUS: STUB — NOT SOURCE OF TRUTH` notice. A stub is never authoritative: do not derive business, financial, marketplace, payment, security or architectural rules from one. A stub becomes authoritative only when its notice is removed because the area was implemented or reviewed and the document populated.
+
+Authoritative sources today:
+- UI/UX: `docs/02-uiux-brand/NOVA_UI_UX_DESIGN_SYSTEM.md` (canonical), `docs/frontend/00`–`07`
+- Backend design, API standards, DB conventions, security baseline, payments/logistics/finance design: `backend/docs/00`–`10`
+- Data model: `backend/prisma/schema.prisma`; API contract: `backend/openapi.json` (generated) and `backend/docs/02-api-standards.md`
+- The Nova Enterprise Blueprint (7 `.docx` volumes) is kept outside the repository; cite the Volume/Part when a rule comes from it.
+
+If the rule you need is only in a stub or in nothing, it is undecided: ask, do not invent it.
+
+Reading order before a major feature: product/business (01) → UI/UX (02) → architecture (03) → the real specs above → the domain phase for the area (07 marketplace, 08 seller, 09 logistics, 10 payments, 11 admin) → security (12) → quality (14). Where a phase folder holds only a stub, its notice points at the real spec.
+
+Workflow: inspect → plan → implement → test → review → update documentation. Architectural changes need an ADR in `docs/19-governance/NOVA_ARCHITECTURE_DECISION_RECORDS.md`. Keep business logic (pricing, payment, order, inventory, seller, delivery, commission, refund, negotiation) out of presentational components: UI → feature logic → domain/service logic → API → database.
+
+The documentation index is `docs/19-governance/NOVA_DOCUMENTATION_INDEX.md`. Other operating documents live at the repo root (`README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`); this file is the single authoritative CLAUDE.md.
+
 ## Documentation
 
 Update documentation when a change alters:

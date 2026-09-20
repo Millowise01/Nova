@@ -1,16 +1,22 @@
 # Nova Platform
 
-Nova is now structured as an enterprise Turborepo monorepo. This pass establishes the platform foundation only: workspace management, shared packages, app shells, and developer tooling.
+Nova is a Sierra Leone-origin e-commerce marketplace (B2C, B2B, C2C), built as a Turborepo monorepo with a NestJS + Prisma API.
+
+## Documentation
+
+Documentation lives in [docs/](docs/README.md). The engineering rules for humans and agents are in [.claude/CLAUDE.md](.claude/CLAUDE.md); see also [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), [AGENTS.md](AGENTS.md) and [CHANGELOG.md](CHANGELOG.md).
+
+Most files in the 19 phase folders under `docs/` are stubs marked `STATUS: STUB — NOT SOURCE OF TRUTH`. The authoritative documents today are the [UI/UX design system](docs/02-uiux-brand/NOVA_UI_UX_DESIGN_SYSTEM.md), [docs/frontend/](docs/frontend/) and [backend/docs/](backend/docs/). The map is [docs/19-governance/NOVA_DOCUMENTATION_INDEX.md](docs/19-governance/NOVA_DOCUMENTATION_INDEX.md).
 
 ## Workspace Layout
 
 ```text
 apps/
-  web/        Customer storefront shell
-  seller/     Seller portal shell
-  admin/      Admin portal shell
-  docs/       Platform documentation shell
-backend/      NestJS + Prisma API — Identity, Catalog, Cart & Checkout, Orders (Phase 1)
+  web/        Customer storefront
+  seller/     Seller portal (KYC, catalog, analytics)
+  admin/      Admin portal (seller, dispute and finance review queues)
+  docs/       Documentation app (placeholder)
+backend/      NestJS + Prisma API — Identity, Catalog, Cart & Checkout, Orders, Payments & Wallet, Logistics, Finance, Trust & Safety, Wishlist, Notifications
 packages/
   ui/              Shared UI primitives and Storybook
   design-system/    Shared tokens, fonts, and themes
@@ -28,7 +34,6 @@ packages/
   permissions/      Permission model
   feature-flags/    Feature flag contracts
   storage/          Typed storage adapters
-  i18n/             Locale and message primitives
   eslint-config/    Shared ESLint presets
   tailwind-config/   Shared Tailwind preset
   tsconfig/         Shared TypeScript base configs
@@ -108,7 +113,7 @@ This repo uses [Turborepo](https://turborepo.com) to run scripts (`build`, `lint
 
 ## Backend
 
-`backend/` is a real NestJS + Prisma + PostgreSQL API — the first working slice, covering Phase 1's four bounded contexts (Identity, Catalog, Cart & Checkout, Orders; see [backend/docs/00-bounded-contexts.md](backend/docs/00-bounded-contexts.md) for the full build order and what's still deferred). It's a separate pnpm workspace member (`backend`, not under `apps/` — see [pnpm-workspace.yaml](pnpm-workspace.yaml)) with its own CommonJS `tsconfig.json`, since NestJS's decorator/DI model isn't compatible with the rest of the repo's ESM/bundler TypeScript config.
+`backend/` is a real NestJS + Prisma + PostgreSQL API — covering ten bounded contexts (Identity, Catalog, Cart & Checkout, Orders, Payments & Wallet, Logistics, Finance, Trust & Safety, Wishlist, Notifications; see [backend/docs/00-bounded-contexts.md](backend/docs/00-bounded-contexts.md) for the build order and what's still deferred). The payment provider is still a stub. It's a separate pnpm workspace member (`backend`, not under `apps/` — see [pnpm-workspace.yaml](pnpm-workspace.yaml)) with its own CommonJS `tsconfig.json`, since NestJS's decorator/DI model isn't compatible with the rest of the repo's ESM/bundler TypeScript config.
 
 - `docker compose up -d` — starts local Postgres (port **5433**, not 5432 — see the comment in [docker-compose.yml](docker-compose.yml) about a native Postgres install already using the default port on some machines) and Redis.
 - `cp backend/.env.example backend/.env`, fill in the secrets (`PII_ENCRYPTION_KEY`, `JWT_ACCESS_PRIVATE_KEY`/`JWT_ACCESS_PUBLIC_KEY` — generation commands are in the file's comments).
