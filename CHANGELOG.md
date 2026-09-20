@@ -11,7 +11,7 @@
 
 ### Tests
 
-- Each backend integration test app now uses its own client IP, so parallel spec files no longer share rate-limit counters.
+- Documented how the backend integration tests run and two known intermittent failures (`backend/docs/06-testing-strategy.md`).
 
 ### CI
 

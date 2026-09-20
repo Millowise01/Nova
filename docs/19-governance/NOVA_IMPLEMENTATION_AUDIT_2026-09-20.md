@@ -31,7 +31,7 @@
 - Placeholder-style screens in `web`: AI assistant, settings, support, sustainability, offline. Search uses a shared layout wrapper but is wired to a query hook. **[V]**
 - `seller`: dashboard, analytics, catalog, KYC, login. `admin`: dashboard, disputes, finance, sellers, login. **[V]**
 - No rider app and no mobile app anywhere in the repository. **[V]**
-- Two component libraries: `@nova/ui` (59 imports) and `@nova/design-system/components` (13 imports). **[V]**
+- Component packages: `@nova/ui` re-exports the primitives from `@nova/design-system` (its `primitives`, `forms`, `feedback`, `data-display`, `navigation` and `typography` folders are barrel files) and adds commerce, dashboard, layout and utility components. That is one implementation with two import paths, used inconsistently: `web` imports every primitive through `@nova/ui` (54 import statements, none from `@nova/design-system`), while `seller` and `admin` import primitives straight from `@nova/design-system` and take only `DataTable` and `StatCard` from `@nova/ui`. An earlier draft of this audit called these two component libraries; that overstated it. **[V]**
 - Three packages are 5 lines or fewer (`storage`, `permissions`, `notifications`); `constants` is 2. `@nova/validation` is 802 lines in one file. **[V]**
 
 ## 3. Current backend
@@ -108,13 +108,13 @@
 
 ## 17. Technical debt
 
-- Duplication across web, seller and admin: `theme-provider` and `toast-provider` identical (66 and 77 lines ×3); `auth-provider` about 106 lines ×3 differing by 2 lines between seller and admin; `login-form` 55 lines in seller and admin; the test `query-client` ×3. **[V]**
+- Duplication across web, seller and admin (compared with content hashes and diffs): byte-identical in all three: `instrumentation.ts`, `instrumentation-client.ts`, `lib/sentry-before-send.ts`, `hooks/use-query-client.ts`. Identical between seller and admin only: `theme-provider` (66 lines), `toast-provider` (77), `providers/index.ts`, `app/login/page.tsx`, `app/error.tsx`. Near-identical: `auth-provider` (web 113 lines, seller and admin 106; seller and admin differ by one comment, web by cookie-key constants, the post-logout route and comments), `login-form` (seller and admin differ in two strings), `services/api.ts`, `services/auth.service.ts`, `features/auth/auth.mutations.ts`, `middleware.ts`, `lib/decode-jwt.ts`, `config/app.ts` and `test-utils/query-client.tsx`. Web's `theme-provider` differs from seller and admin only in hard-coding its cookie and storage key, and web's `toast-provider` only in importing `Toast` from `@nova/ui` instead of `@nova/design-system`. An earlier draft said the providers were identical across all three apps; that was wrong. **[V]**
 - Test timeouts under parallel load. **[V]**
 - `README.md` was stale (described "shells" and "Phase 1"). **[V]**
 
 ## 18. Duplications
 
-- See section 17, plus the two component libraries in section 2. **[V]**
+- See section 17, plus the two import paths in section 2. **[V]**
 
 ## 19. Missing features
 
@@ -169,9 +169,10 @@ Documentation and security fixes (done, section 23) → foundation (duplicated p
 - **Security headers:** Helmet on the backend (strict API policy, one relaxed policy for the Swagger UI, verified in a real browser); a shared header set on the three Next.js apps, verified on a running server. Details: `backend/docs/05-security-baseline.md`.
 - **Dependency added:** `helmet` (backend). Reason: nothing in the repository provided security headers, and it is the standard maintained Express middleware. The lockfile change is the 9 `helmet` lines only, validated with a real `pnpm install --frozen-lockfile`.
 
-**Test isolation**
+**Test isolation — correction**
 
-- The added tests exposed a latent flake: jest workers share one Redis and one client IP, so all suites drew from one signup budget (20 per 60 seconds) and unrelated tests failed with 429. Each test app now has its own client address (`backend/src/test-utils/create-test-app.ts`). **[V]** Two consecutive full backend runs showed no 429 outside the three deliberate ones in `rate-limit.integration.spec.ts`.
+- An earlier version of this log said the added tests exposed a rate-limit flake because parallel Jest workers shared one signup budget, and that a per-app client IP fixed it. That diagnosis was wrong. The backend runs Jest with `maxWorkers: 1`, so spec files run serially, and the only 429s in the logs are the rate-limit spec's own deliberate ones. The per-app IP change was committed in `02b6a3e` and then removed. **[V]** for the configuration and the counts.
+- What the failing run did show is one more signup 409 than the specs deliberately produce (3 against 2), and the failure was inside a helper's signup. That points to a colliding test phone number (see `backend/docs/06-testing-strategy.md`). This is inference, not a reproduction, and the cause is **not confirmed**.
 
 **Open findings, not fixed** (details in `backend/docs/05-security-baseline.md`)
 
@@ -204,3 +205,9 @@ Documentation and security fixes (done, section 23) → foundation (duplicated p
 **What this does not fix.** The backend test failures in that environment are not caused by Prisma: every failing suite stops at `new AppConfigService` because `DATABASE_URL` is not set, and `ci.yml` provides no Postgres or Redis. So once lint passes, the `test` step of `ci.yml` will still fail whenever the backend is among the selected packages. Fixing it means adding database and Redis services and the backend environment to `ci.yml`, as `e2e.yml` does for its jobs. That is a separate change and was not made here.
 
 **Not verified:** GitHub's own run of the workflow. Nothing has been pushed, so the workflow file itself, the Semgrep step (not installed locally) and `turbo run build` were not exercised. For a push to `main`, `--filter=...[HEAD^1]` looks only at the last commit, so a push whose last commit touches only `ci.yml` would select no packages and pass without running anything.
+
+**Post-commit validation (clean checkout of `42418e0`, whole-phase filter `...[527516d]`, all forced, no cache).** **[V]**
+
+- Install, `prisma generate` and secretlint pass. Lint passes 13 of 13 tasks, typecheck 18 of 18, and `format:check` passes.
+- Tests pass for the selected non-backend packages: api-client 38, web 56, admin 9, seller 7. The backend suite needs a database, so it was run in the main working tree against Docker Postgres and Redis, not in the clean checkout.
+- Builds: the turbo build in the clean checkout ended without a compile result for the Next apps (its log stops partway through the seller build although it recorded exit 0), so it is **not counted**. Seller, admin, web and backend were then built separately in the main working tree, which matches `42418e0` apart from the unrelated `.claude/settings.json`. All four succeed. Web compiles with warnings from the existing Sentry and OpenTelemetry integration, none from the security-header change.
