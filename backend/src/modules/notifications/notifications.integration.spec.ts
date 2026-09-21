@@ -8,6 +8,7 @@ import { AppModule } from "../../app.module";
 import { OutboxRelayService } from "../../common/outbox/outbox-relay.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
+import { drainOutbox as drainOutboxUntilEmpty } from "../../test-utils/drain-outbox";
 import { promoteRole } from "../../test-utils/promote-role";
 
 describe("Notifications (integration)", () => {
@@ -74,19 +75,10 @@ describe("Notifications (integration)", () => {
       .send({ checkoutSessionId: session.body.data.id });
   }
 
-  /** Drains the ENTIRE unpublished-events backlog, not just one batch — this test
-   *  suite runs against a shared dev Postgres instance that had accumulated a large
-   *  backlog of never-consumed OutboxEvent rows from every prior integration spec in
-   *  this session (no relay existed at all before this pass), so a single
-   *  processPendingEvents() call (batch size 20, oldest-first) doesn't reach an event
-   *  created moments ago in THIS test. Looping to exhaustion is also a more accurate
-   *  simulation of "the relay eventually catches up" than a single poll tick. */
-  async function drainOutbox(): Promise<void> {
-    let processed: number;
-    do {
-      processed = await relay.processPendingEvents(200);
-    } while (processed > 0);
-  }
+  /** Waits until every outbox event has been handled. See test-utils/drain-outbox.ts: the
+   *  completion condition is "no unpublished rows remain", not "a poll returned 0" — the
+   *  app's own background poll can hold rows in flight while a second call returns 0. */
+  const drainOutbox = () => drainOutboxUntilEmpty({ relay, prisma });
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
