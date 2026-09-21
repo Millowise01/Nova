@@ -649,6 +649,9 @@ importers:
 
   packages/app-shell:
     dependencies:
+      '@nova/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@nova/ui':
         specifier: workspace:*
         version: link:../ui

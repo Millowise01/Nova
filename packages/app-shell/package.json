@@ -14,6 +14,7 @@
     "clean": "rimraf dist coverage"
   },
   "dependencies": {
+    "@nova/auth": "workspace:*",
     "@nova/ui": "workspace:*",
     "@tanstack/react-query": "^5.85.0",
     "react": "^19.0.0"
