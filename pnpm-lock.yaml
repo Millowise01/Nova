@@ -649,12 +649,18 @@ importers:
 
   packages/app-shell:
     dependencies:
+      '@nova/api-client':
+        specifier: workspace:*
+        version: link:../api-client
       '@nova/auth':
         specifier: workspace:*
         version: link:../auth
       '@nova/ui':
         specifier: workspace:*
         version: link:../ui
+      '@nova/validation':
+        specifier: workspace:*
+        version: link:../validation
       '@tanstack/react-query':
         specifier: ^5.85.0
         version: 5.101.2(react@19.2.7)

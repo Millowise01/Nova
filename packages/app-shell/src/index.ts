@@ -13,3 +13,6 @@ export {
   readCookie,
   writeSessionCookie,
 } from "./session-cookie";
+export { AuthProvider, useAuth } from "./auth";
+export type { AuthProviderProps } from "./auth";
+export { createSessionService } from "./session-service";

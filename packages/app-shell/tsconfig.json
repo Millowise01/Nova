@@ -10,6 +10,11 @@
     "declarationMap": true
   },
   "include": ["src"],
-  "references": [{ "path": "../auth" }, { "path": "../ui" }],
+  "references": [
+    { "path": "../api-client" },
+    { "path": "../auth" },
+    { "path": "../ui" },
+    { "path": "../validation" }
+  ],
   "exclude": ["node_modules", "dist"]
 }
