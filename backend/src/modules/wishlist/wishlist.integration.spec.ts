@@ -8,6 +8,7 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { uniqueTestPhone } from "../../test-utils/users";
 
 describe("Wishlist (integration)", () => {
   let app: INestApplication;
@@ -22,7 +23,7 @@ describe("Wishlist (integration)", () => {
         firstName: "Wish",
         lastName: "Lister",
         email: `wishlist-${suffix}@example.test`,
-        phone: `+2327500${suffix.slice(0, 4)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       })
@@ -65,7 +66,7 @@ describe("Wishlist (integration)", () => {
         firstName: "Admin",
         lastName: "User",
         email: adminEmail,
-        phone: `+2327501${randomUUID().slice(0, 4)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       })

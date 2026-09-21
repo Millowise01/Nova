@@ -9,6 +9,7 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { uniqueTestPhone } from "../../test-utils/users";
 
 /**
  * Real integration test — a live NestJS app instance talking to the actual dockerized
@@ -37,7 +38,7 @@ describe("Identity — auth flow (e2e)", () => {
       firstName: "Test",
       lastName: "User",
       email: `test-${suffix}@example.test`,
-      phone: `+2327600${suffix.slice(0, 4)}`,
+      phone: uniqueTestPhone(),
       password: "correct-horse-battery-staple",
       confirmPassword: "correct-horse-battery-staple",
     };

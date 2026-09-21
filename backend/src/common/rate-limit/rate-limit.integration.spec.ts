@@ -6,6 +6,7 @@ import request from "supertest";
 
 import { AppModule } from "../../app.module";
 import { createTestApp } from "../../test-utils/create-test-app";
+import { uniqueTestPhone } from "../../test-utils/users";
 import { RedisService } from "../redis/redis.service";
 
 /**
@@ -81,7 +82,7 @@ describe("RateLimitGuard (integration)", () => {
         firstName: "Rate",
         lastName: "Limit",
         email: `unaffected-${suffix}@example.test`,
-        phone: `+2327400${suffix.slice(0, 4)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       })

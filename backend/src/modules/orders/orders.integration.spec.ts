@@ -8,6 +8,7 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { uniqueTestPhone } from "../../test-utils/users";
 
 describe("Orders (integration) — including idempotent checkout orchestration", () => {
   let app: INestApplication;
@@ -27,7 +28,7 @@ describe("Orders (integration) — including idempotent checkout orchestration",
         firstName: "Buyer",
         lastName: "Test",
         email: `buyer-${suffix}@example.test`,
-        phone: `+2327900${suffix.slice(0, 4)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       });
@@ -46,16 +47,14 @@ describe("Orders (integration) — including idempotent checkout orchestration",
       ownerToken ? req.set("Authorization", `Bearer ${ownerToken}`) : req;
     const suffix = randomUUID().slice(0, 8);
     const sellerEmail = `order-seller-${suffix}@example.test`;
-    const seller = await request(app.getHttpServer())
-      .post("/v1/auth/signup")
-      .send({
-        firstName: "Seller",
-        lastName: "Test",
-        email: sellerEmail,
-        phone: `+2327600${suffix.slice(0, 4)}`,
-        password: "correct-horse-battery-staple",
-        confirmPassword: "correct-horse-battery-staple",
-      });
+    const seller = await request(app.getHttpServer()).post("/v1/auth/signup").send({
+      firstName: "Seller",
+      lastName: "Test",
+      email: sellerEmail,
+      phone: uniqueTestPhone(),
+      password: "correct-horse-battery-staple",
+      confirmPassword: "correct-horse-battery-staple",
+    });
     await promoteRole(prisma, seller.body.data.user.id, ["customer", "seller", "admin"]);
     const sellerRelogin = await request(app.getHttpServer())
       .post("/v1/auth/login")
@@ -131,7 +130,7 @@ describe("Orders (integration) — including idempotent checkout orchestration",
         firstName: "Intruder",
         lastName: "Test",
         email: `intruder-${suffix}@example.test`,
-        phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       });
@@ -347,7 +346,7 @@ describe("Orders (integration) — including idempotent checkout orchestration",
           firstName: "Other",
           lastName: "Customer",
           email: `other-customer-${otherSuffix}@example.test`,
-          phone: `+2327500${otherSuffix.slice(0, 4)}`,
+          phone: uniqueTestPhone(),
           password: "correct-horse-battery-staple",
           confirmPassword: "correct-horse-battery-staple",
         });

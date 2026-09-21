@@ -8,27 +8,14 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { signUpTestUser } from "../../test-utils/users";
 
 describe("Logistics (integration)", () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string;
 
-  async function signUp(prefix: string) {
-    const suffix = randomUUID().slice(0, 8);
-    const email = `${prefix}-${suffix}@example.test`;
-    const signup = await request(app.getHttpServer())
-      .post("/v1/auth/signup")
-      .send({
-        firstName: prefix,
-        lastName: "Test",
-        email,
-        phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
-        password: "correct-horse-battery-staple",
-        confirmPassword: "correct-horse-battery-staple",
-      });
-    return { userId: signup.body.data.user.id, token: signup.body.data.accessToken, email };
-  }
+  const signUp = (prefix: string) => signUpTestUser(app, prefix);
 
   async function login(email: string) {
     const relogin = await request(app.getHttpServer())

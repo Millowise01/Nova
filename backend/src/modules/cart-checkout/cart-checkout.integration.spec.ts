@@ -8,6 +8,7 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { uniqueTestPhone } from "../../test-utils/users";
 
 describe("Cart & Checkout (integration)", () => {
   let app: INestApplication;
@@ -21,16 +22,14 @@ describe("Cart & Checkout (integration)", () => {
 
     const suffix = randomUUID().slice(0, 8);
     const sellerEmail = `cart-seller-${suffix}@example.test`;
-    const signup = await request(app.getHttpServer())
-      .post("/v1/auth/signup")
-      .send({
-        firstName: "Seller",
-        lastName: "Test",
-        email: sellerEmail,
-        phone: `+2327800${suffix.slice(0, 4)}`,
-        password: "correct-horse-battery-staple",
-        confirmPassword: "correct-horse-battery-staple",
-      });
+    const signup = await request(app.getHttpServer()).post("/v1/auth/signup").send({
+      firstName: "Seller",
+      lastName: "Test",
+      email: sellerEmail,
+      phone: uniqueTestPhone(),
+      password: "correct-horse-battery-staple",
+      confirmPassword: "correct-horse-battery-staple",
+    });
     await promoteRole(prisma, signup.body.data.user.id, ["customer", "seller", "admin"]);
     const relogin = await request(app.getHttpServer())
       .post("/v1/auth/login")
@@ -84,7 +83,7 @@ describe("Cart & Checkout (integration)", () => {
           firstName: prefix,
           lastName: "Test",
           email: `${prefix}-${suffix}@example.test`,
-          phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
+          phone: uniqueTestPhone(),
           password: "correct-horse-battery-staple",
           confirmPassword: "correct-horse-battery-staple",
         });

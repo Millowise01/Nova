@@ -9,7 +9,7 @@ import { OutboxRelayService } from "../../common/outbox/outbox-relay.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { drainOutbox as drainOutboxUntilEmpty } from "../../test-utils/drain-outbox";
-import { promoteRole } from "../../test-utils/promote-role";
+import { signUpAndPromote as signUpAndPromoteShared } from "../../test-utils/users";
 
 describe("Notifications (integration)", () => {
   let app: INestApplication;
@@ -18,34 +18,8 @@ describe("Notifications (integration)", () => {
   let sellerToken: string;
   let variantId: string;
 
-  async function signUpAndPromote(prefix: string, roles: string[]) {
-    const suffix = randomUUID().slice(0, 8);
-    const email = `${prefix}-${suffix}@example.test`;
-    const signup = await request(app.getHttpServer())
-      .post("/v1/auth/signup")
-      .send({
-        firstName: prefix,
-        lastName: "Test",
-        email,
-        phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
-        password: "correct-horse-battery-staple",
-        confirmPassword: "correct-horse-battery-staple",
-      });
-    if (roles.length > 0) {
-      await promoteRole(prisma, signup.body.data.user.id, ["customer", ...roles]);
-      const relogin = await request(app.getHttpServer())
-        .post("/v1/auth/login")
-        .send({ email, password: "correct-horse-battery-staple" });
-      return {
-        token: relogin.body.data.accessToken as string,
-        userId: signup.body.data.user.id as string,
-      };
-    }
-    return {
-      token: signup.body.data.accessToken as string,
-      userId: signup.body.data.user.id as string,
-    };
-  }
+  const signUpAndPromote = (prefix: string, roles: string[]) =>
+    signUpAndPromoteShared(app, prisma, prefix, roles);
 
   /** Places one order for `buyerToken`, returns the created order body. */
   async function placeOrder(buyerToken: string, method: "card" | "wallet", quantity = 1) {

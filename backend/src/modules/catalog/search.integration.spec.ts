@@ -8,6 +8,7 @@ import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
+import { uniqueTestPhone } from "../../test-utils/users";
 
 describe("Catalog full-text search (integration)", () => {
   let app: INestApplication;
@@ -25,7 +26,7 @@ describe("Catalog full-text search (integration)", () => {
         firstName: rolePrefix,
         lastName: "Test",
         email: `${rolePrefix}-${s}@example.test`,
-        phone: `+2327800${s.slice(0, 4)}`,
+        phone: uniqueTestPhone(),
         password: "correct-horse-battery-staple",
         confirmPassword: "correct-horse-battery-staple",
       });

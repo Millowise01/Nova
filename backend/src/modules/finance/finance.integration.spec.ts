@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import type { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import request from "supertest";
@@ -7,7 +5,7 @@ import request from "supertest";
 import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
-import { promoteRole } from "../../test-utils/promote-role";
+import { signUpAndPromote as signUpAndPromoteShared } from "../../test-utils/users";
 
 describe("Finance (integration)", () => {
   let app: INestApplication;
@@ -16,28 +14,8 @@ describe("Finance (integration)", () => {
   let adminBToken: string;
   let sellerId: string;
 
-  async function signUpAndPromote(prefix: string, roles: string[]) {
-    const suffix = randomUUID().slice(0, 8);
-    const email = `${prefix}-${suffix}@example.test`;
-    const signup = await request(app.getHttpServer())
-      .post("/v1/auth/signup")
-      .send({
-        firstName: prefix,
-        lastName: "Test",
-        email,
-        phone: `+2327${Math.floor(Math.random() * 900000 + 100000)}`,
-        password: "correct-horse-battery-staple",
-        confirmPassword: "correct-horse-battery-staple",
-      });
-    if (roles.length > 0) {
-      await promoteRole(prisma, signup.body.data.user.id, ["customer", ...roles]);
-      const relogin = await request(app.getHttpServer())
-        .post("/v1/auth/login")
-        .send({ email, password: "correct-horse-battery-staple" });
-      return { token: relogin.body.data.accessToken, userId: signup.body.data.user.id };
-    }
-    return { token: signup.body.data.accessToken, userId: signup.body.data.user.id };
-  }
+  const signUpAndPromote = (prefix: string, roles: string[]) =>
+    signUpAndPromoteShared(app, prisma, prefix, roles);
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
