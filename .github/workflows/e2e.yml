@@ -5,17 +5,23 @@ on:
     paths:
       - "apps/web/**"
       - "apps/seller/**"
+      - "apps/admin/**"
       - "backend/**"
       - "packages/**"
       - ".github/workflows/e2e.yml"
+      - ".github/actions/**"
   push:
     branches: [main]
     paths:
       - "apps/web/**"
       - "apps/seller/**"
+      - "apps/admin/**"
       - "backend/**"
       - "packages/**"
 
+# Each job runs one app's Playwright suite against a real backend (built and started by
+# .github/actions/e2e-backend) with throwaway Postgres and Redis service containers. The apps are
+# production builds served with `next start`, as their playwright.config.ts files require.
 jobs:
   purchase-journey:
     runs-on: ubuntu-latest
@@ -45,10 +51,8 @@ jobs:
           --health-retries 10
 
     env:
-      # Same ephemeral dev credentials as docker-compose.yml, kept as separate
-      # fields there for the same reason: a single postgresql://user:pass@host
-      # literal trips secretlint's connection-string rule even for a
-      # throwaway, job-scoped service container with no real data behind it.
+      # Same ephemeral dev credentials as docker-compose.yml, kept as separate fields for the
+      # reason given in .github/actions/backend-test-env/action.yml.
       POSTGRES_USER: nova
       POSTGRES_PASSWORD: nova_dev_password
       POSTGRES_DB: nova
@@ -63,72 +67,40 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
 
-      - name: Compose DATABASE_URL
-        run: echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> "$GITHUB_ENV"
-
-      # Ephemeral, generated fresh per run — same one-liners as
-      # backend/.env.example, never a stored secret (this job's Postgres/Redis
-      # are themselves ephemeral service containers, so there's nothing here
-      # worth persisting a real key for).
-      - name: Generate ephemeral backend secrets
-        working-directory: backend
-        run: |
-          node -e "
-          const { generateKeyPairSync } = require('crypto');
-          const { privateKey, publicKey } = generateKeyPairSync('rsa', {
-            modulusLength: 2048,
-            privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
-            publicKeyEncoding: { type: 'spki', format: 'pem' },
-          });
-          const fs = require('fs');
-          const lines = [
-            'JWT_ACCESS_PRIVATE_KEY=' + Buffer.from(privateKey).toString('base64'),
-            'JWT_ACCESS_PUBLIC_KEY=' + Buffer.from(publicKey).toString('base64'),
-            'PII_ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('base64'),
-          ];
-          fs.appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n');
-          "
-
-      - name: Apply database migrations
-        working-directory: backend
-        run: |
-          pnpm run prisma:generate
-          pnpm run prisma:migrate:deploy
-
-      - name: Build and start backend
-        run: |
-          pnpm --filter @nova/backend build
-          (cd backend && node dist/main.js &)
-          npx wait-on http://localhost:4000/v1/categories --timeout 60000
+      - uses: ./.github/actions/e2e-backend
 
       - name: Build web
-        run: pnpm --filter web build
+        run: pnpm --filter @nova/web build
 
       - name: Install Playwright browsers
         working-directory: apps/web
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run purchase-journey E2E test
+      - name: Run the web E2E suite
         working-directory: apps/web
         run: pnpm exec playwright test
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-web
           path: apps/web/playwright-report/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-log-web
+          path: ${{ runner.temp }}/backend.log
           retention-days: 14
 
   seller-onboarding:
@@ -165,7 +137,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       PORT: 4000
       NODE_ENV: development
-      # Only apps/seller's own origin — this job never boots apps/web.
+      # Only this app's own origin — this job never boots the other apps.
       CORS_ALLOWED_ORIGINS: http://localhost:3001
       NEXT_PUBLIC_APP_NAME: Nova Seller
       NEXT_PUBLIC_APP_URL: http://localhost:3001
@@ -174,51 +146,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
 
-      - name: Compose DATABASE_URL
-        run: echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> "$GITHUB_ENV"
-
-      - name: Generate ephemeral backend secrets
-        working-directory: backend
-        run: |
-          node -e "
-          const { generateKeyPairSync } = require('crypto');
-          const { privateKey, publicKey } = generateKeyPairSync('rsa', {
-            modulusLength: 2048,
-            privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
-            publicKeyEncoding: { type: 'spki', format: 'pem' },
-          });
-          const fs = require('fs');
-          const lines = [
-            'JWT_ACCESS_PRIVATE_KEY=' + Buffer.from(privateKey).toString('base64'),
-            'JWT_ACCESS_PUBLIC_KEY=' + Buffer.from(publicKey).toString('base64'),
-            'PII_ENCRYPTION_KEY=' + require('crypto').randomBytes(32).toString('base64'),
-          ];
-          fs.appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n');
-          "
-
-      - name: Apply database migrations
-        working-directory: backend
-        run: |
-          pnpm run prisma:generate
-          pnpm run prisma:migrate:deploy
-
-      - name: Build and start backend
-        run: |
-          pnpm --filter @nova/backend build
-          (cd backend && node dist/main.js &)
-          npx wait-on http://localhost:4000/v1/categories --timeout 60000
+      - uses: ./.github/actions/e2e-backend
 
       - name: Build seller
         run: pnpm --filter @nova/seller build
@@ -227,11 +164,10 @@ jobs:
         working-directory: apps/seller
         run: pnpm exec playwright install --with-deps chromium
 
-      # global-setup.ts runs its own Prisma-based role/MFA promotion script
-      # with backend/ as its cwd (see that file's doc comment for why) — needs
-      # backend's node_modules, already installed above via the root
-      # `pnpm install`.
-      - name: Run seller-onboarding E2E test
+      # global-setup.ts creates its accounts through the API and promotes their roles with Prisma,
+      # run with backend/ as its cwd (see that file's doc comment); it needs DATABASE_URL, which
+      # the backend-test-env action exported for the whole job.
+      - name: Run the seller E2E suite
         working-directory: apps/seller
         run: pnpm exec playwright test
 
@@ -240,4 +176,89 @@ jobs:
         with:
           name: playwright-report-seller
           path: apps/seller/playwright-report/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-log-seller
+          path: ${{ runner.temp }}/backend.log
+          retention-days: 14
+
+  admin-auth:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nova
+          POSTGRES_PASSWORD: nova_dev_password
+          POSTGRES_DB: nova
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nova -d nova"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_dev_password
+      POSTGRES_DB: nova
+      REDIS_URL: redis://localhost:6379
+      PORT: 4000
+      NODE_ENV: development
+      CORS_ALLOWED_ORIGINS: http://localhost:3002
+      NEXT_PUBLIC_APP_NAME: Nova Admin
+      NEXT_PUBLIC_APP_URL: http://localhost:3002
+      NEXT_PUBLIC_DEFAULT_LOCALE: en
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/v1
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - uses: ./.github/actions/e2e-backend
+
+      - name: Build admin
+        run: pnpm --filter @nova/admin build
+
+      - name: Install Playwright browsers
+        working-directory: apps/admin
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run the admin E2E suite
+        working-directory: apps/admin
+        run: pnpm exec playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-admin
+          path: apps/admin/playwright-report/
+          retention-days: 14
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-log-admin
+          path: ${{ runner.temp }}/backend.log
           retention-days: 14

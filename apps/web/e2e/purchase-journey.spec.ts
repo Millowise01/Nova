@@ -18,7 +18,9 @@ test("customer can sign up, browse, add to cart, check out, and see a confirmed 
 }) => {
   const unique = `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
   const email = `e2e-${unique}@example.com`;
-  const phone = `+2327${unique.replace(/\D/g, "").slice(0, 8).padEnd(8, "0")}`;
+  // Random digits, not a slice of the timestamp: the leading digits of Date.now() only change every
+  // ~100 seconds, so two runs close together registered the same phone and the second got a 409.
+  const phone = `+232${Array.from({ length: 10 }, () => Math.floor(Math.random() * 10)).join("")}`;
 
   // ── Sign up ──────────────────────────────────────────────────────────
   await page.goto("/en/auth/register");
@@ -38,7 +40,9 @@ test("customer can sign up, browse, add to cart, check out, and see a confirmed 
   });
 
   // ── Browse ───────────────────────────────────────────────────────────
-  const firstProductLink = page.locator('a[href^="/product/"]').first();
+  // Each card links to the product twice: the image (whose text is only "No image") and the
+  // title. Take the title link, so the heading check below compares against the real title.
+  const firstProductLink = page.locator('a[href^="/product/"]:has(h3)').first();
   await expect(firstProductLink).toBeVisible();
   const productTitle = (await firstProductLink.textContent())?.trim();
   await firstProductLink.click();

@@ -23,6 +23,8 @@
     "middleware.ts",
     "vitest.config.ts",
     "vitest.setup.ts",
+    "playwright.config.ts",
+    "e2e/**/*.ts",
     ".next/types/**/*.ts"
   ],
   "references": [
