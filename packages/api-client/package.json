@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@nova/validation": "workspace:*",
-    "axios": "^1.11.0"
+    "axios": "^1.20.0"
   },
   "devDependencies": {
     "jsdom": "^25.0.1",
