@@ -11,7 +11,7 @@ import {
   SidebarHeader,
   SidebarItem,
   SidebarSection,
-} from "@nova/design-system";
+} from "@nova/ui";
 
 import { useAuth } from "@/providers/auth-provider";
 

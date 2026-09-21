@@ -3,7 +3,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
-import { Toast } from "@nova/design-system";
+import { Toast } from "@nova/ui";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 

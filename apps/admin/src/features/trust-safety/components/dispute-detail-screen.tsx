@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Badge, Button, Card, CardBody, Spinner, Textarea } from "@nova/design-system";
+import { Badge, Button, Card, CardBody, Spinner, Textarea } from "@nova/ui";
 
 import { useAddDisputeCommentMutation, useResolveDisputeMutation } from "../trust-safety.mutations";
 import { useDisputeDetailQuery } from "../trust-safety.queries";

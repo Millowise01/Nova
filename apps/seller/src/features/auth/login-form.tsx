@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
-import { Button, Input } from "@nova/design-system";
+import { Button, Input } from "@nova/ui";
 import { loginSchema, type LoginInput } from "@nova/validation";
 
 import { useLoginMutation } from "./auth.mutations";

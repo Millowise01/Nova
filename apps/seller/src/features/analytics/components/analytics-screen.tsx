@@ -1,4 +1,4 @@
-import { Badge, Card } from "@nova/design-system";
+import { Badge, Card } from "@nova/ui";
 
 // Analytics and Marketing are Phase 3+ bounded contexts (backend/docs/00-
 // bounded-contexts.md) — no backend exists for either yet. Honest "coming

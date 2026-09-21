@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Badge, Tabs, TabsList, TabsTrigger } from "@nova/design-system";
-import { DataTable, type DataTableColumn } from "@nova/ui";
+import { Badge, Tabs, TabsList, TabsTrigger, DataTable, type DataTableColumn } from "@nova/ui";
 import type { DisputeResponse } from "@nova/validation";
 
 import { useDisputesQueueQuery } from "../trust-safety.queries";

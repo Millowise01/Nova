@@ -20,8 +20,9 @@ import {
   TabsList,
   TabsTrigger,
   Textarea,
-} from "@nova/design-system";
-import { DataTable, type DataTableColumn } from "@nova/ui";
+  DataTable,
+  type DataTableColumn,
+} from "@nova/ui";
 import type { KycSubmissionResponse, SellerSuspensionRequestResponse } from "@nova/validation";
 
 import { useAuth } from "@/providers/auth-provider";

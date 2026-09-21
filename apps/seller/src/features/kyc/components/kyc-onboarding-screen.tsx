@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Alert, Button, Card, Input } from "@nova/design-system";
+import { Alert, Button, Card, Input } from "@nova/ui";
 
 import { useAuth } from "@/providers/auth-provider";
 

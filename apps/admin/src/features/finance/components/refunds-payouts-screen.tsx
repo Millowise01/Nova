@@ -11,8 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
   Textarea,
-} from "@nova/design-system";
-import { DataTable, type DataTableColumn } from "@nova/ui";
+  DataTable,
+  type DataTableColumn,
+} from "@nova/ui";
 
 import { useAuth } from "@/providers/auth-provider";
 

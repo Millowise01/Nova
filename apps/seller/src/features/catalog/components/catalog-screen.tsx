@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { Alert, Button, Card, Input, Select } from "@nova/design-system";
-import { DataTable, type DataTableColumn } from "@nova/ui";
+import { Alert, Button, Card, Input, Select, DataTable, type DataTableColumn } from "@nova/ui";
 import { formatMoney } from "@nova/utils";
 import type { ProductResponse } from "@nova/validation";
 
