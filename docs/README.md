@@ -16,3 +16,4 @@ The full map, with the authoritative sources, is [19-governance/NOVA_DOCUMENTATI
 | Frontend conventions                                         | [frontend/](frontend/) (`00`–`07`)                                                                             |
 | Backend design, API, database, security, payments, logistics | [../backend/docs/](../backend/docs/) (`00`–`10`)                                                               |
 | Implementation audit                                         | [19-governance/NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md](19-governance/NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md) |
+| Architecture decisions                                       | [19-governance/NOVA_ARCHITECTURE_DECISION_RECORDS.md](19-governance/NOVA_ARCHITECTURE_DECISION_RECORDS.md)     |

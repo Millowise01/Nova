@@ -9,6 +9,11 @@
 - `POST /v1/auth/otp/verify` is rate limited (5 per 60 seconds).
 - Added security headers to the backend (`helmet`) and to the web, seller and admin apps. New dependency: `helmet` (backend).
 
+### Frontend
+
+- `@nova/ui` is the application-facing component API (ADR-0001): `seller` and `admin` import components from it instead of `@nova/design-system`, and a lint rule enforces that for everything under `apps/`.
+- The chart components moved to `@nova/ui/charts`. `apps/web` had been loading the `recharts` library on 44 of 53 routes without rendering a chart; its median route dropped from 377 kB to 246 kB of JavaScript. `@nova/ui` and `@nova/design-system` declare `sideEffects`.
+
 ### Tests
 
 - Backend integration tests wait until the outbox is drained (`test-utils/drain-outbox.ts`) instead of until one poll returns 0, which fixed an intermittent notifications failure (test-only; production unchanged).

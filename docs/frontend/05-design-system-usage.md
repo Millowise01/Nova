@@ -4,10 +4,23 @@ Source: the actual implementation in `packages/design-system` and `packages/ui`,
 
 ## How the two packages relate
 
-- **`packages/design-system`** owns the tokens (`src/tokens/`), the light/dark theme objects (`src/themes/`), the CSS custom properties they compile to (`src/css/variables.css`), and a set of lower-level primitive components (`Button`, `Input`, `Card`, `Dialog`, `Badge`, `Text`, etc. — 34 components as of this doc).
-- **`packages/ui`** builds on top of `@nova/design-system` for higher-level, commerce/dashboard-specific components (`ProductCard`, `CartItem`, `PriceDisplay`, `DataTable`, `StatCard`, etc. — organized into `commerce/`, `dashboard/`, `layout/`, `navigation/`, `forms/`, `feedback/` folders) — it composes design-system primitives rather than reimplementing styling. `ProductCard` (`packages/ui/src/components/commerce/ProductCard.tsx`) is a representative example: it imports `Badge` from `@nova/design-system` and builds everything else from Tailwind classes that resolve to design-system CSS variables — never a raw color.
+The dependency direction is **application → `@nova/ui` → `@nova/design-system`** (decision of 2026-09-21, recorded in ADR-0001 in `docs/19-governance/NOVA_ARCHITECTURE_DECISION_RECORDS.md`).
 
-An app imports from **both**: `@nova/design-system` for tokens/theme wiring and primitives, `@nova/ui` for the higher-level commerce/dashboard components — `apps/web`'s existing code does exactly this today.
+- **`packages/design-system`** owns the tokens (`src/tokens/`), the light/dark theme objects (`src/themes/`), the CSS custom properties they compile to (`src/css/variables.css`), and the primitive components (`Button`, `Input`, `Card`, `Dialog`, `Badge`, `Text`, and so on). It is an implementation detail of `@nova/ui`.
+- **`packages/ui`** is the **application-facing component API**. Its `primitives`, `forms`, `feedback`, `data-display`, `navigation` and `typography` folders re-export every design-system component, and it adds the commerce, dashboard, layout and utility components (`ProductCard`, `CartItem`, `PriceDisplay`, `DataTable`, `StatCard`). There is one implementation of each component; `@nova/ui` never reimplements one.
+
+**Applications import components from `@nova/ui` only.** The design tokens reach an app through CSS (`@import "@nova/design-system/css/tokens.css"` in its `globals.css`), not through a JavaScript import. An ESLint rule (`no-restricted-imports` in `packages/eslint-config/next.mjs`, scoped to `apps/**`, tested in `next.test.mjs`) rejects any JavaScript import of `@nova/design-system` from application code; `packages/ui` is not restricted.
+
+### Entry points of `@nova/ui`
+
+| Entry             | Contents                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| `@nova/ui`        | Everything except the charts.                                                                          |
+| `@nova/ui/charts` | `BarChart`, `LineChart`, `PieChart`. They import `recharts`, so they sit behind their own entry point. |
+
+Both packages declare `sideEffects` in `package.json` (`@nova/ui`: `false`; `@nova/design-system`: its CSS files only), because neither has import-time side effects. `entry-points.test.ts` in `packages/ui` pins the boundary: the root entry must not export a chart component.
+
+**Why the charts are separate (measured, not assumed).** Before this change the root barrel re-exported the charts. On GitHub's builds, `apps/web` loaded 377 kB of JavaScript on the median route (222 kB shared base) and a 427 kB (uncompressed) chunk containing `recharts` was loaded by 44 of its 53 routes, although no app renders a chart. Declaring the packages side-effect free brought the median to 246 kB but left six routes heavy; moving the charts behind `@nova/ui/charts` brought the p90 from 395 to 276 kB and the maximum from 414 to 285 kB. Do not add a heavy dependency to the root entry: give it its own entry point.
 
 ## The hard rule
 
@@ -54,7 +67,11 @@ This one is easy to miss in review because it _looks_ like it might be a design-
 
 **What to look for in review:** any Tailwind color utility using a **raw palette name** (`slate`, `gray`, `blue`, `red`, etc.) rather than a **semantic name** (`primary`, `foreground`, `muted`, `success`, `error`, `border`) is the tell. The semantic names are what's wired to `variables.css`; the raw palette names are Tailwind's own defaults, coincidentally similar-looking but architecturally disconnected.
 
-## No automated enforcement exists yet
+## Enforcement
+
+**The import boundary is enforced automatically** (see above): a JavaScript import of `@nova/design-system` from any file under `apps/` fails lint, and therefore CI.
+
+**Hardcoded colours are not.**
 
 > **Proposed, not yet confirmed.** Both violations above currently rely entirely on code review catching them — there is no ESLint rule blocking a raw hex value or a raw Tailwind palette class today, which is exactly how 40+ instances of the second violation accumulated unnoticed. Proposed: an ESLint rule (e.g. a `no-restricted-syntax` pattern targeting `className` string literals matching `/\b(?:text|bg|border)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/` or `/\[#[0-9a-fA-F]{3,8}\]/`) added to `packages/eslint-config`, so this becomes a CI-blocking lint failure rather than something only caught if a reviewer happens to notice. Worth scoping carefully — it needs to allow the raw palette references that legitimately belong in `packages/design-system/src/tokens/colors.ts` and `tailwind.config.ts`'s own raw palette definitions themselves, since those files are where the palette _is_ defined, not where it's being bypassed.
 

@@ -1,118 +1,68 @@
-# Nova --- Architecture Decision Records
+# Nova Architecture Decision Records
 
-<!-- nova-stub-notice -->
+Architectural decisions are recorded here, newest last. A record states its status honestly: **Accepted, implemented** means the code matches it; **Accepted, not yet implemented** means the decision is made but the work is pending.
 
-> **STATUS: STUB — NOT SOURCE OF TRUTH**
->
-> This document is a placeholder. It contains no decided rules for this area and must not be used as a specification. Populate it when the area is implemented or reviewed, then remove this notice.
->
-> **Real specification:** none exists in the repository yet.
-
-**Phase:** `19-governance`\
-**Status:** Stub — not source of truth\
-**Owner:** Nova Product & Engineering\
-**Last Updated:** 2026-09-20
-
-## Purpose
-
-This document defines the requirements, rules, decisions, and acceptance
-criteria for **Architecture Decision Records**. It is part of Nova's
-professional source-of-truth documentation system.
-
-## Nova Context
-
-Nova is a Sierra Leone-origin e-commerce marketplace supporting B2C,
-B2B, and C2C commerce. Nova supports new, used, refurbished, upcycled,
-recycled, and custom-made products, with customer, seller,
-delivery/rider, and admin experiences. The architecture should support
-Sierra Leone first and future African expansion.
-
-## Core Principles
-
-1.  Prefer documented decisions over assumptions.
-2.  Reuse existing Nova components, services, utilities, types, and
-    patterns.
-3.  Do not duplicate business or domain logic.
-4.  Keep domain logic separate from presentation.
-5.  Protect customer, seller, payment, and operational data.
-6.  Design for accessibility, responsiveness, reliability,
-    observability, and maintainability.
-7.  Define loading, empty, success, error, and edge states for important
-    workflows.
-8.  Record material architectural decisions.
-
-## Requirements
-
-### Functional Requirements
-
-- Define primary workflows.
-- Define actors, roles, and permissions.
-- Define inputs and validation.
-- Define business rules and state transitions.
-- Define success, failure, loading, empty, and edge states.
-- Define audit requirements where applicable.
-
-### Non-Functional Requirements
-
-- Security and privacy
-- Performance and scalability
-- Reliability and recovery
-- WCAG 2.2 AA accessibility for user-facing interfaces
-- Type safety and maintainability
-- Localization/internationalization where applicable
-
-## Dependencies
-
-Consult the relevant documents under `01-product-business`,
-`02-uiux-brand`, `03-architecture`, `04-engineering-standards`,
-`05-database`, `06-api`, `07-marketplace`, `12-security`,
-`13-infrastructure-devops`, and `14-quality-testing`.
-
-## Decisions
+Each record has: status and date, context, decision, consequences, and evidence.
 
 ---
 
-ID Decision Rationale Status
+## ADR-0001: `@nova/ui` is the application-facing component API
+
+**Status:** Accepted, implemented (2026-09-21). **Decided by:** the repository owner.
+
+**Context.** `@nova/ui` re-exports every `@nova/design-system` component and adds commerce, dashboard, layout and utility components, so the two packages are layers, not independent implementations. In practice applications used both paths inconsistently: `apps/web` imported everything through `@nova/ui` (54 import statements, none from `@nova/design-system`), while `apps/seller` and `apps/admin` imported primitives straight from `@nova/design-system` (13 statements) and only `DataTable` and `StatCard` from `@nova/ui`. The frontend documentation described the reverse of what `web` did. Separately, the `@nova/ui` root barrel re-exported the `recharts`-based chart components, and neither package declared `sideEffects`.
+
+**Decision.**
+
+1. The dependency direction is application → `@nova/ui` → `@nova/design-system`. Applications import components from `@nova/ui` only; there is no second component implementation.
+2. Design tokens reach an app through CSS `@import`, not a JavaScript import.
+3. The rule is enforced: `no-restricted-imports` in `packages/eslint-config/next.mjs`, scoped to `apps/**` (so `packages/ui` may import the design system), with a test (`next.test.mjs`).
+4. Heavy optional dependencies get their own entry point instead of living in the root barrel. The chart components moved to `@nova/ui/charts`.
+5. `@nova/ui` declares `sideEffects: false`; `@nova/design-system` lists only its CSS files (neither has import-time side effects).
+
+**Consequences.** Applications have one import path. `recharts` cannot enter an app's bundle by importing `@nova/ui`; an app that wants a chart imports `@nova/ui/charts` deliberately. The design-system package stays an implementation detail, so its internals can change without touching applications. Anything new that is large and optional needs its own entry point.
+
+**Evidence (GitHub CI builds, per-route First Load JS).**
+
+| App      | Median before → after | p90          | Max          |
+| -------- | --------------------- | ------------ | ------------ |
+| `web`    | 377 → 246 kB          | 395 → 276 kB | 414 → 285 kB |
+| `seller` | 240 → 239 kB          | 263 → 250 kB | 263 → 250 kB |
+| `admin`  | 251 → 245 kB          | 255 → 251 kB | 255 → 251 kB |
+
+Before the change, a 427 kB (uncompressed) chunk containing `recharts` was loaded by 44 of 53 `web` routes although no app renders a chart. The `sideEffects` flags alone left six routes heavy; the separate entry point removed the rest. Migrating `seller` and `admin` (13 statements in 13 files) grew no `web` or `admin` route. One `seller` route, `/analytics`, went from 240 to 242 kB (+0.8%) although its only change is the import specifier; the cause was not isolated (webpack redistributing modules between shared and per-route chunks is the likely one). A tolerance of 3 kB (about 1%) per route is treated as chunk-splitting noise; a larger change would need investigation.
 
 ---
 
-DEC-001 This document is Provides a shared Active
-the baseline for implementation  
-Architecture reference.  
-Decision Records.
+## ADR-0002: A shared `@nova/app-shell` package
+
+**Status:** Accepted, not yet implemented (decided 2026-09-21; Phase 5 items B and C). **Decided by:** the repository owner.
+
+**Context.** `web`, `seller` and `admin` each carry their own copies of the application providers and the authentication infrastructure: `theme-provider` and `toast-provider` are identical between `seller` and `admin` (and differ in `web` only in a hard-coded cookie key and the package `Toast` is imported from), `auth-provider` is 106 to 113 lines in each, and the open-redirect sanitizer, the middleware role gate and the cookie handling are copied. The copies are already drifting.
+
+**Decision.** Create a new workspace package, `@nova/app-shell`, for shared application-shell concerns: shared providers, shared authentication infrastructure, application-level configuration, and role-specific configuration passed as parameters.
+
+- It contains **no** seller- or admin-specific business logic and no domain logic; domain and business logic stay outside it.
+- Each application supplies its own role, cookie configuration, login destination, permission configuration and application settings.
+- Cookie and storage key names stay application-specific (cookies are not port-isolated on `localhost`), so nothing changes for signed-in users.
+- Authentication is extracted after the providers, in small steps, with the security-sensitive pieces (redirect sanitizer, role gate) covered by tests first.
+
+**Consequences.** One implementation per concern, configured per app. A new package to maintain, and a `"use client"` and transpilation boundary to get right. Detail and risks: `NOVA_PHASE_5_FOUNDATION_PLAN.md`, items B and C.
 
 ---
 
-## Open Questions
+## ADR-0003: CI runs the backend against real services and states its scope explicitly
 
----
+**Status:** Accepted, implemented (2026-09-21).
 
-ID Question Owner Priority Status
+**Context.** The backend's tests are integration tests against real Postgres and Redis. CI provided neither, so the backend `test` step could not pass, and every step used `--filter=...[HEAD^1]`, which on a push looks only at the last commit: a last commit that touched only CI files selected no packages and the job reported green without running lint, typecheck, test or build.
 
----
+**Decision.**
 
-Q-001 What Product/Engineering High Open
-launch-specific  
-details still  
-require  
-confirmation?
+1. The CI job provides `postgres:16-alpine` and `redis:7-alpine` service containers, throwaway secrets (masked in logs) and applied migrations, through a composite action (`.github/actions/backend-test-env`). The backend tests are not skipped or mocked.
+2. `turbo.json` passes the backend environment through to `@nova/backend#test` and disables caching for it: Turbo's strict environment mode otherwise hides the variables, and a cache hit would replay a "pass" without touching the database.
+3. `.github/scripts/select-scope.sh` decides what runs and reports it in the job summary. It runs everything when a filter cannot be trusted (base unavailable, or CI or workspace configuration changed), filters otherwise, and says so when nothing is affected instead of passing silently.
 
----
+**Consequences.** CI takes longer and exercises the real stack. A run cannot pass merely because its checks were filtered out. The `filtered` and `none` branches and the `push` path of the scope script have not yet run on GitHub (only the `pull_request` path, in `all` mode); the E2E workflow still fails for an unrelated reason (the built backend loads raw TypeScript on Node 20) and should adopt the composite action when fixed.
 
-## Acceptance Criteria
-
-This document is implementation-ready when requirements are explicit,
-dependencies are identified, important edge cases are documented,
-security/privacy implications are addressed, testable acceptance
-criteria exist, and unresolved decisions are clearly marked.
-
-## Change Control
-
-Material changes must identify affected systems and update dependent
-documentation, tests, and implementation plans. Architectural or
-difficult-to-reverse decisions should be recorded in
-`../19-governance/NOVA_ARCHITECTURE_DECISION_RECORDS.md`.
-
-## Related Documents
-
-See `../19-governance/NOVA_DOCUMENTATION_INDEX.md`.
+**Evidence.** On pull request #21 GitHub ran the backend against live services: 16 suites and 137 tests green, later 18 suites and 149 tests, with lint, typecheck and build green; the intermediate failures and their causes are in the audit, section 25.

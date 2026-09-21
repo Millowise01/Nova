@@ -14,6 +14,7 @@ The documents that are authoritative today are:
 - [`NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md`](NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md) — repository audit
 - [`NOVA_PHASE_5_FOUNDATION_PLAN.md`](NOVA_PHASE_5_FOUNDATION_PLAN.md) — Phase 5 foundation plan, decisions and outcomes
 - [`NOVA_PACKAGE_STATUS.md`](NOVA_PACKAGE_STATUS.md) — status of every workspace package and application
+- [`NOVA_ARCHITECTURE_DECISION_RECORDS.md`](NOVA_ARCHITECTURE_DECISION_RECORDS.md) — architecture decisions (ADR-0001 to ADR-0003)
 - This index
 
 Operating documents are at the repository root (`README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`) and in `.claude/CLAUDE.md`.

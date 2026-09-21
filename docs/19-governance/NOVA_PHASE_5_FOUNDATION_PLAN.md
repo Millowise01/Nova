@@ -191,6 +191,26 @@ _Environmental failures seen while measuring_ (not test defects): the Docker con
 
 **Documentation to change.** `docs/frontend/05-design-system-usage.md` (correct the `web` claim and state the rule), the README workspace description, an ADR in `NOVA_ARCHITECTURE_DECISION_RECORDS.md`, `CHANGELOG.md`.
 
+**Outcome (2026-09-21): done.** The measurement was done first, as decided, and it changed the plan: the bundle problem was already present, before any migration.
+
+- _Inspected:_ `@nova/ui` ships as source (`main` is `src/index.ts`), had no `exports` map and no `sideEffects` flag, and its root barrel re-exported `BarChart`, `LineChart` and `PieChart`, the only files that import `recharts`. No app renders a chart. `@nova/design-system` has an `exports` map (`.` and its CSS) and no `sideEffects` flag. Neither package has import-time side effects (no bare imports, no top-level DOM access, CSS reached through CSS `@import`).
+- _Measured (GitHub CI builds, per-route First Load JS):_ `web` loaded a 427 kB (uncompressed) `recharts` chunk on 44 of 53 routes, a median route of 377 kB against a 222 kB shared base. `seller` and `admin` did not include it.
+
+| App                                 | Median    | p90       | Max       |
+| ----------------------------------- | --------- | --------- | --------- |
+| `web`, baseline                     | 377       | 395       | 414       |
+| `web`, after `sideEffects` flags    | 246       | 388       | 393       |
+| `web`, after charts entry point     | 246       | 276       | 285       |
+| `web`, after seller/admin migration | 246       | 276       | 285       |
+| `seller`, baseline → final          | 240 → 240 | 263 → 250 | 263 → 250 |
+| `admin`, baseline → final           | 251 → 245 | 255 → 251 | 255 → 251 |
+
+- _What was done:_ (1) `sideEffects` flags, which fixed 29 of 40 `web` routes but left six heavy, so they were not enough on their own; (2) the chart components moved behind `@nova/ui/charts` (an `exports` map and a `tsconfig.base.json` alias), which removed `recharts` from the root entry by construction instead of depending on tree-shaking, and fixed the remaining routes; (3) the 13 `seller` and `admin` import statements swapped to `@nova/ui`; (4) a `no-restricted-imports` rule scoped to `apps/**`, with a `node:test` suite (10 tests) and an end-to-end check that the real config rejects a planted violation.
+- _Growth:_ no `web` or `admin` route grew. One `seller` route, `/analytics`, grew from 240 to 242 kB (+0.8%) with an unchanged component list; the cause was not isolated. The tolerance applied is 3 kB (about 1%) per route, treated as chunk-splitting noise.
+- _Local checks:_ `ui` 12 tests, `seller` 7, `admin` 9; typecheck and lint clean for all affected packages. GitHub CI green on every commit of this step.
+- _Not done here:_ the design-system deviations from the spec (weights, radii, button height) remain a design-conformance task for the marketplace phase, as planned.
+- _Correction to the plan text above:_ the plan proposed measuring build size with local builds; local builds exhausted this machine's memory (a V8 out-of-memory abort, and Docker restarted twice during Phase 5), so all bundle numbers come from GitHub's builds, compared like for like.
+
 ---
 
 ## B. Shared providers
