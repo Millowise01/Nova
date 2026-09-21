@@ -18,6 +18,7 @@
       "@nova/analytics": ["packages/analytics/src/index.ts"],
       "@nova/api-client": ["packages/api-client/src/index.ts"],
       "@nova/app-shell": ["packages/app-shell/src/index.ts"],
+      "@nova/app-shell/middleware": ["packages/app-shell/src/middleware.ts"],
       "@nova/auth": ["packages/auth/src/index.ts"],
       "@nova/config": ["packages/config/src/index.ts"],
       "@nova/constants": ["packages/constants/src/index.ts"],
