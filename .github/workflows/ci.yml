@@ -46,8 +46,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Full history so turbo can diff against HEAD^1 to scope tasks to
-          # affected packages only; a shallow clone would break --filter=...[HEAD^1].
+          # Full history so the change since the base commit can be computed
+          # (.github/scripts/select-scope.sh); a shallow clone would break it.
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
@@ -77,10 +77,29 @@ jobs:
           # off"), which made this step fail outright on every run. A named
           # public registry ruleset needs no metrics/telemetry round-trip.
           semgrep scan backend/src --config=p/security-audit --error --metrics=off
-      - run: pnpm exec turbo run lint --filter=...[HEAD^1]
+      # Decides what lint, typecheck, test and build cover, and reports it in the job
+      # summary. Replaces `--filter=...[HEAD^1]`, which on a push looked only at the last
+      # commit, so a last commit touching only CI files selected no packages at all and the
+      # job reported green without checking anything.
+      - name: Select affected packages
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: bash .github/scripts/select-scope.sh
+      - name: Lint
+        if: steps.scope.outputs.mode != 'none'
+        run: pnpm exec turbo run lint ${{ steps.scope.outputs.args }}
       - run: pnpm format:check
-      - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]
+      - name: Typecheck
+        if: steps.scope.outputs.mode != 'none'
+        run: pnpm exec turbo run typecheck ${{ steps.scope.outputs.args }}
       - name: Prepare backend test environment
+        if: steps.scope.outputs.mode != 'none'
         uses: ./.github/actions/backend-test-env
-      - run: pnpm exec turbo run test --filter=...[HEAD^1]
-      - run: pnpm exec turbo run build --filter=...[HEAD^1]
+      - name: Test
+        if: steps.scope.outputs.mode != 'none'
+        run: pnpm exec turbo run test ${{ steps.scope.outputs.args }}
+      - name: Build
+        if: steps.scope.outputs.mode != 'none'
+        run: pnpm exec turbo run build ${{ steps.scope.outputs.args }}
