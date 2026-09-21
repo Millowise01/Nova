@@ -2,8 +2,11 @@ name: E2E backend
 description: >
   Builds the backend and the workspace packages it runs against, starts it, waits until it
   answers, and seeds the catalog fixtures the browser journeys need. The calling job must provide
-  the postgres and redis service containers and the POSTGRES_*, REDIS_URL, PORT, NODE_ENV and
-  CORS_ALLOWED_ORIGINS variables, and must have installed dependencies. The backend log is
+  the postgres and redis service containers and the POSTGRES_*, REDIS_URL, PORT and
+  CORS_ALLOWED_ORIGINS variables, and must have installed dependencies. It must NOT set NODE_ENV
+  for the job: the backend gets NODE_ENV=development on its own step below, and `next build`
+  fails ("<Html> should not be imported outside of pages/_document") when NODE_ENV is anything
+  but production. The backend log is
   written to $RUNNER_TEMP/backend.log; upload it as an artifact from the calling job.
 
 runs:
@@ -25,6 +28,8 @@ runs:
     - name: Start the backend
       shell: bash
       working-directory: backend
+      env:
+        NODE_ENV: development
       run: |
         nohup node dist/main.js > "$RUNNER_TEMP/backend.log" 2>&1 &
         pid=$!

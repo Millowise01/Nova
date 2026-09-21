@@ -58,7 +58,6 @@ jobs:
       POSTGRES_DB: nova
       REDIS_URL: redis://localhost:6379
       PORT: 4000
-      NODE_ENV: development
       CORS_ALLOWED_ORIGINS: http://localhost:3000
       NEXT_PUBLIC_APP_NAME: Nova
       NEXT_PUBLIC_APP_URL: http://localhost:3000
@@ -136,7 +135,6 @@ jobs:
       POSTGRES_DB: nova
       REDIS_URL: redis://localhost:6379
       PORT: 4000
-      NODE_ENV: development
       # Only this app's own origin — this job never boots the other apps.
       CORS_ALLOWED_ORIGINS: http://localhost:3001
       NEXT_PUBLIC_APP_NAME: Nova Seller
@@ -218,7 +216,6 @@ jobs:
       POSTGRES_DB: nova
       REDIS_URL: redis://localhost:6379
       PORT: 4000
-      NODE_ENV: development
       CORS_ALLOWED_ORIGINS: http://localhost:3002
       NEXT_PUBLIC_APP_NAME: Nova Admin
       NEXT_PUBLIC_APP_URL: http://localhost:3002
