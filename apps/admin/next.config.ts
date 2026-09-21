@@ -9,7 +9,13 @@ const nextConfig: NextConfig = {
   headers() {
     return Promise.resolve(securityHeaderRules);
   },
-  transpilePackages: ["@nova/ui", "@nova/design-system", "@nova/utils", "@nova/tailwind-config"],
+  transpilePackages: [
+    "@nova/ui",
+    "@nova/app-shell",
+    "@nova/design-system",
+    "@nova/utils",
+    "@nova/tailwind-config",
+  ],
 };
 
 export default nextConfig;

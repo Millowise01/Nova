@@ -73,6 +73,7 @@ export default [
             // vitest.config.ts sits at the package root, outside "src/**", so
             // it has no other project coverage either.
             "packages/api-client/vitest.config.ts",
+            "packages/app-shell/vitest.config.ts",
             "packages/design-system/vitest.config.ts",
             "packages/design-system/vitest.setup.ts",
             "packages/*/.storybook/*.ts",

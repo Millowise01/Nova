@@ -5,6 +5,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
     "@nova/api-client": "workspace:*",
+    "@nova/app-shell": "workspace:*",
     "@nova/auth": "workspace:*",
     "@nova/config": "workspace:*",
     "@nova/design-system": "workspace:*",

@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
   // typedRoutes: true,
   transpilePackages: [
     "@nova/ui",
+    "@nova/app-shell",
     "@nova/design-system",
     "@nova/utils",
     "@nova/constants",

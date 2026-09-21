@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "composite": true,
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "declarationMap": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "../ui" }],
+  "exclude": ["node_modules", "dist"]
+}

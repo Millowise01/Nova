@@ -31,6 +31,7 @@
     { "path": "../../packages/validation" },
     { "path": "../../packages/auth" },
     { "path": "../../packages/api-client" },
+    { "path": "../../packages/app-shell" },
     { "path": "../../packages/feature-flags" },
     { "path": "../../packages/design-system" },
     { "path": "../../packages/ui" }

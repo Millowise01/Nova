@@ -10,6 +10,7 @@
     { "path": "packages/design-system/tsconfig.json" },
     { "path": "packages/auth/tsconfig.json" },
     { "path": "packages/api-client/tsconfig.json" },
+    { "path": "packages/app-shell/tsconfig.json" },
     { "path": "packages/validation/tsconfig.json" },
     { "path": "packages/hooks/tsconfig.json" },
     { "path": "packages/types/tsconfig.json" },
