@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "pnpm --filter @nova/validation build && nest start --watch",
     "build": "nest build",
     "start": "node dist/main.js",
     "lint": "eslint .",
