@@ -26,6 +26,18 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
+    "@nova/backend#test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "cache": false,
+      "passThroughEnv": [
+        "DATABASE_URL",
+        "REDIS_URL",
+        "JWT_ACCESS_PRIVATE_KEY",
+        "JWT_ACCESS_PUBLIC_KEY",
+        "PII_ENCRYPTION_KEY"
+      ]
+    },
     "test:e2e": {
       "dependsOn": ["build"],
       "outputs": ["playwright-report/**", "test-results/**"]
