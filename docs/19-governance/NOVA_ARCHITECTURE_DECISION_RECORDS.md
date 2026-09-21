@@ -36,9 +36,9 @@ Before the change, a 427 kB (uncompressed) chunk containing `recharts` was loade
 
 ## ADR-0002: A shared `@nova/app-shell` package
 
-**Status:** Accepted, not yet implemented (decided 2026-09-21; Phase 5 items B and C). **Decided by:** the repository owner.
+**Status:** Accepted. Providers implemented (2026-09-21, Phase 5 item B); shared authentication not yet implemented (item C). **Decided by:** the repository owner.
 
-**Context.** `web`, `seller` and `admin` each carry their own copies of the application providers and the authentication infrastructure: `theme-provider` and `toast-provider` are identical between `seller` and `admin` (and differ in `web` only in a hard-coded cookie key and the package `Toast` is imported from), `auth-provider` is 106 to 113 lines in each, and the open-redirect sanitizer, the middleware role gate and the cookie handling are copied. The copies are already drifting.
+**Context.** `web`, `seller` and `admin` each carry their own copies of the application providers and the authentication infrastructure: `theme-provider`, `toast-provider` and the query-client hook were the same code in all three (the theme provider differed in `web` only by a hard-coded storage key), `auth-provider` is 106 to 113 lines in each, and the open-redirect sanitizer, the middleware role gate and the cookie handling are copied. The copies are already drifting.
 
 **Decision.** Create a new workspace package, `@nova/app-shell`, for shared application-shell concerns: shared providers, shared authentication infrastructure, application-level configuration, and role-specific configuration passed as parameters.
 
@@ -46,6 +46,8 @@ Before the change, a 427 kB (uncompressed) chunk containing `recharts` was loade
 - Each application supplies its own role, cookie configuration, login destination, permission configuration and application settings.
 - Cookie and storage key names stay application-specific (cookies are not port-isolated on `localhost`), so nothing changes for signed-in users.
 - Authentication is extracted after the providers, in small steps, with the security-sensitive pieces (redirect sanitizer, role gate) covered by tests first.
+
+**Implemented so far (item B).** `@nova/app-shell` exports `ThemeProvider` (required `storageKey`), `ToastProvider`/`useToast`, and `createQueryClient`/`useQueryClientInstance` (required `staleTime`). Each app keeps thin wrapper files at the old paths that bind its own key and stale time, so no call site changed. Settings that differ by app are required parameters with no default, so an app cannot silently share another's cookie. The package is source-only and side-effect free, like `@nova/ui`.
 
 **Consequences.** One implementation per concern, configured per app. A new package to maintain, and a `"use client"` and transpilation boundary to get right. Detail and risks: `NOVA_PHASE_5_FOUNDATION_PLAN.md`, items B and C.
 

@@ -22,6 +22,7 @@ packages/
   design-system/    Shared tokens, fonts, and themes
   auth/             Shared auth contracts and helpers
   api-client/       API client foundation
+  app-shell/        Shared app providers (theme, toast, query client), parameterized per app
   validation/       Zod schemas and form contracts
   hooks/            Shared React hooks
   types/            Shared domain types

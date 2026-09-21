@@ -30,17 +30,17 @@
 
 ## Progress
 
-| Item                             | State                           | Evidence                                                                                                    |
-| -------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| A notifications race             | **Done** (`e6234be`)            | Reproduced, explained, fixed test-only; 40 of 40 runs pass against 2 of 14 failing before; GitHub CI green. |
-| E test reliability, backend      | **Done** (`9b56505`)            | Shared user helper and collision-proof phone numbers; details below.                                        |
-| E test reliability, frontend     | **Measured; no change needed**  | See item E.                                                                                                 |
-| F1 CI backend infrastructure     | **Done, verified on GitHub**    | Backend runs 137 tests against live Postgres and Redis in CI.                                               |
-| F2 CI scope                      | **Done, verified on GitHub**    | `select-scope.sh` reports its decision in the job summary.                                                  |
-| D component boundary             | Not started                     |                                                                                                             |
-| B shared app-shell and providers | Not started                     |                                                                                                             |
-| C shared authentication          | Not started                     |                                                                                                             |
-| F4 E2E workflow                  | Cause verified; fix not started | See item F.                                                                                                 |
+| Item                             | State                           | Evidence                                                                                                                              |
+| -------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| A notifications race             | **Done** (`e6234be`)            | Reproduced, explained, fixed test-only; 40 of 40 runs pass against 2 of 14 failing before; GitHub CI green.                           |
+| E test reliability, backend      | **Done** (`9b56505`)            | Shared user helper and collision-proof phone numbers; details below.                                                                  |
+| E test reliability, frontend     | **Measured; no change needed**  | See item E.                                                                                                                           |
+| F1 CI backend infrastructure     | **Done, verified on GitHub**    | Backend runs 137 tests against live Postgres and Redis in CI.                                                                         |
+| F2 CI scope                      | **Done, verified on GitHub**    | `select-scope.sh` reports its decision in the job summary.                                                                            |
+| D component boundary             | **Done, verified on GitHub**    | Charts behind `@nova/ui/charts`, `sideEffects` flags, 13 imports moved, rule enforced; bundle effect in ADR-0001.                     |
+| B shared app-shell and providers | **Done** (providers)            | `@nova/app-shell` with theme, toast and query-client; 16 package tests; three apps wired through thin wrappers; app suites unchanged. |
+| C shared authentication          | Not started                     |                                                                                                                                       |
+| F4 E2E workflow                  | Cause verified; fix not started | See item F.                                                                                                                           |
 
 ## Recommended order
 
@@ -246,6 +246,18 @@ Alternatives considered: `@nova/hooks` (a 14-line stub) is the wrong shape for R
 **Tests required.** Characterization first: the existing app tests must pass unchanged. New package tests for theme persistence under a given key, toast behaviour and query-client defaults. Builds of all three apps. A browser check of theme toggling and toasts in each app.
 
 **Documentation to change.** `docs/frontend/04-state-management.md`, `docs/frontend/05-design-system-usage.md`, the README workspace layout and "Adding a New Package" section, an ADR for the new package, `CHANGELOG.md`.
+
+**Outcome (2026-09-21): done for the providers; authentication is item C.**
+
+- _Re-measured before writing code:_ the toast provider (77 lines) and the query-client hook (23 lines) are byte-identical in `web`, `seller` and `admin` (the "package `Toast` is imported from" difference in the table above was removed by step D). The theme provider (66 lines) is identical in `seller` and `admin`, and `web` differs only in hard-coding `"nova_theme"`, which equals its `COOKIE_KEYS.theme`. The three apps' `QUERY_STALE_TIME.short` is the same 30 000 ms. So this was triplicated code, not near-duplicated code.
+- _What was built:_ `packages/app-shell` (`@nova/app-shell`, source-only like `@nova/ui`, `sideEffects: false`, depends on `@nova/ui`, `@tanstack/react-query` and `react`). `ThemeProvider` takes a required `storageKey` (the cookie and `localStorage` name); `ToastProvider` and `useToast` are unchanged; `createQueryClient` and `useQueryClientInstance` take a required `staleTime`. It contains no seller, admin or domain logic.
+- _How the apps use it:_ each app keeps its three files (`providers/theme-provider.tsx`, `providers/toast-provider.tsx`, `hooks/use-query-client.ts`) as thin wrappers that bind the app's own setting (`COOKIE_KEYS.theme`, `QUERY_STALE_TIME.short`) or re-export. Every existing import path is unchanged, so no call site moved. About 380 lines net were removed. Cookie and storage keys are unchanged, so nobody is signed out or loses a preference.
+- _Tests first:_ 16 tests in the package (theme: default, persistence under the given key in both cookie and `localStorage`, two keys not leaking into each other, saved value winning over the initial one, following the OS only in system mode; toast: helpers, the 4 s default, explicit and zero durations, dismissing one of several, unique ids; query client: defaults, independence, stability across renders). Two mutations (a hard-coded key, and no listener cleanup) were introduced on purpose and each was caught by the tests.
+- _One behaviour change, deliberate:_ the three original providers registered the OS colour-scheme listener once and never removed it when the user chose an explicit theme, so a later OS change replaced the user's explicit choice with the system one. The shared provider keys the listener on the current theme, so it is dropped when an explicit theme is chosen. The tests pin it. This is a bug fix in a place that had to be rewritten to be shared; it is recorded here so it is not mistaken for a pure move.
+- _Wiring:_ `transpilePackages` in the three `next.config.ts` files, the workspace dependency in each app's `package.json`, `tsconfig.base.json` path alias, tsconfig references, and one entry in the ESLint default-project list for the package's Vitest config. The lockfile gained only workspace links and the new importer (37 lines added, none changed), and was validated with a real `pnpm install --frozen-lockfile`.
+- _Local checks:_ package 16 tests, typecheck and lint clean; `web` 56 tests, `admin` 9, `seller` 7 (unchanged counts); typecheck and lint clean for all three apps. **Not verified locally:** a production build of any app (this machine cannot run them); that and the bundle effect come from the GitHub build. A browser check of theme toggling and toasts in each app has not been done.
+- _One test flake seen:_ in the first full `seller` run after the install, `CatalogScreen > creates a product...` timed out at 5.19 s (the 5 s default). Alone it takes 0.8 to 1.4 s, and two further full runs passed. This is the load-related slowness already measured under item E (a cold run on a machine short of memory), not a result of this change; it is one more data point that a cold first run can sit close to the limit. No timeout change was made.
+- _Not done here:_ the Sentry files and `test-utils/query-client.tsx` stay per-app (the plan called the Sentry step optional and last), and the shared test render helper was not extracted.
 
 ---
 
