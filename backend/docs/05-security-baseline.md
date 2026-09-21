@@ -99,6 +99,15 @@ Reviewed and correct: every route with only `JwtAuthGuard` enforces ownership in
 - `POST /auth/refresh` has no rate limit.
 - KYC approval does not grant the `seller` role, and no path grants it at all; how a user becomes a seller is not specified.
 
+## The frontend session cookie is not an authorization input
+
+The web, seller and admin apps keep a session summary (`userId`, `roles`, `expiresAt`) in a cookie their own JavaScript writes. Next.js middleware reads it to decide which screens to show and where to redirect (`@nova/app-shell/middleware`). It is not `HttpOnly`, so it can be created or edited by anyone; treat it as a hint about which shell to render.
+
+- The backend never reads it. Every request is authorized from the access token through the RBAC and ABAC policy engine (above), so a forged cookie shows an empty shell and nothing else.
+- Nothing server-side, including Next.js server components and route handlers, may use it to authorize or to select data.
+- **Not done, proposed:** `Secure` on HTTPS and moving the summary out of a script-written cookie. Both change behaviour for signed-in users and need their own task.
+- The post-login `redirect` parameter is user-controlled input. `sanitizeRedirect` in `@nova/app-shell` accepts same-origin paths only (backslash and tab/newline forms included); use it rather than writing a new check.
+
 ## Explicitly deferred — not applicable to Phase 1
 
 The following Volume 3 requirements are real, correctly specified, and **not being skipped** — they apply once the bounded contexts they govern actually enter the build order (see [00-bounded-contexts.md](00-bounded-contexts.md)'s phase table). Listing them here is intentional, so Phase 1 work doesn't get gold-plated with controls that have nothing to protect yet:

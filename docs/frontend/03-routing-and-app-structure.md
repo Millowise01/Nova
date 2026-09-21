@@ -27,6 +27,10 @@ Route groups (the `(name)` folders) are a Next.js App Router feature — they do
 
 These aren't redundant — middleware only sees the cookie (fast, but can't know if a token has since been revoked server-side or if client auth state is still hydrating); `AuthGuard` handles the client-side session-resolution window middleware can't see into. Both are needed: middleware for the first-paint redirect, `AuthGuard` for correctness once the client takes over.
 
+**Where the code lives (Phase 5).** The guard logic is shared. `apps/seller/src/middleware.ts` and `apps/admin/src/middleware.ts` each call `createRoleGuard({ sessionCookieKey, requiredRole })` from `@nova/app-shell/middleware` and export their own `config.matcher`, which Next.js requires to be a literal in that file. Every route needs a session with the app's role except `/login` and `/forbidden`, matched as whole path segments. `apps/web/src/middleware.ts` keeps its locale routing and `PROTECTED_ROUTES` and only shares the session parser. The session provider, session service and redirect sanitizer are in `@nova/app-shell` too.
+
+**What these guards are not.** They are a navigation aid. The session cookie is written by the browser and carries the user id, roles and expiry, so it can be forged; forging it shows an app's shell and nothing more, because the backend authorizes every request from the access token. Never read that cookie to make a decision on the server. See `backend/docs/05-security-baseline.md`.
+
 ## A genuine inconsistency, flagged for your attention — not resolved silently
 
 `middleware.ts` contains role-based routing logic that guards paths which **do not exist anywhere in `apps/web`**:

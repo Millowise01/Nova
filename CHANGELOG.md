@@ -9,12 +9,14 @@
 - `POST /v1/auth/otp/verify` is rate limited (5 per 60 seconds).
 - Added security headers to the backend (`helmet`) and to the web, seller and admin apps. New dependency: `helmet` (backend).
 - The post-login redirect in `seller` and `admin` accepted `/\evil.com` and paths with an embedded tab, newline or carriage return, which a browser resolves to another origin. `sanitizeRedirect` now lives in `@nova/app-shell`, refuses them, and is covered by tests (the original implementation fails 8 of them). `web` never reads the `redirect` parameter, so it was not affected.
+- The role guard in `seller` and `admin` no longer treats every path that merely starts with `/login` or `/forbidden` as public; it matches whole path segments.
 
 ### Frontend
 
 - `@nova/ui` is the application-facing component API (ADR-0001): `seller` and `admin` import components from it instead of `@nova/design-system`, and a lint rule enforces that for everything under `apps/`.
 - The chart components moved to `@nova/ui/charts`. `apps/web` had been loading the `recharts` library on 44 of 53 routes without rendering a chart; its median route dropped from 377 kB to 246 kB of JavaScript. `@nova/ui` and `@nova/design-system` declare `sideEffects`.
 - New package `@nova/app-shell` (ADR-0002) holds the theme provider, toast provider and query-client hook that `web`, `seller` and `admin` each carried a copy of. Each app keeps a thin wrapper at the old path and supplies its own cookie key and stale time. One fix comes with it: choosing an explicit theme now stops the theme following the operating system, which previously kept overriding the choice.
+- `@nova/app-shell` now also holds the shared authentication code: `AuthProvider`, the session service, `sanitizeRedirect`, JWT and session-cookie helpers, and the role guard (`@nova/app-shell/middleware`). `seller` and `admin` keep a short `middleware.ts` with their own role and matcher; cookie names and destinations are unchanged. The login mutation and login form remain in each app.
 
 ### Tests
 
