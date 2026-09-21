@@ -66,7 +66,24 @@ Before the change, a 427 kB (uncompressed) chunk containing `recharts` was loade
 1. The CI job provides `postgres:16-alpine` and `redis:7-alpine` service containers, throwaway secrets (masked in logs) and applied migrations, through a composite action (`.github/actions/backend-test-env`). The backend tests are not skipped or mocked.
 2. `turbo.json` passes the backend environment through to `@nova/backend#test` and disables caching for it: Turbo's strict environment mode otherwise hides the variables, and a cache hit would replay a "pass" without touching the database.
 3. `.github/scripts/select-scope.sh` decides what runs and reports it in the job summary. It runs everything when a filter cannot be trusted (base unavailable, or CI or workspace configuration changed), filters otherwise, and says so when nothing is affected instead of passing silently.
+4. The E2E workflow uses the same building blocks. `.github/actions/e2e-backend` builds the backend and its workspace dependencies, starts it, fails with its log if it exits or does not answer, and seeds the catalog; each of the three jobs (`purchase-journey`, `seller-onboarding`, `admin-auth`) runs one app's Playwright suite against it and uploads the backend log.
 
-**Consequences.** CI takes longer and exercises the real stack. A run cannot pass merely because its checks were filtered out. The `filtered` and `none` branches and the `push` path of the scope script have not yet run on GitHub (only the `pull_request` path, in `all` mode); the E2E workflow still fails for an unrelated reason (the built backend loads raw TypeScript on Node 20) and should adopt the composite action when fixed.
+**Consequences.** CI takes longer and exercises the real stack. A run cannot pass merely because its checks were filtered out. The scope script's `all`, `filtered` and `none` outcomes were exercised locally with the real script and `turbo` on real commits; on GitHub only `all` has run so far, because this branch's diff always touches CI files. The E2E workflow, which used to fail at backend start-up (ADR-0004), now adopts the composite actions.
 
 **Evidence.** On pull request #21 GitHub ran the backend against live services: 16 suites and 137 tests green, later 18 suites and 149 tests, with lint, typecheck and build green; the intermediate failures and their causes are in the audit, section 25.
+
+---
+
+## ADR-0004: Workspace packages the backend runs must ship JavaScript
+
+**Status:** Accepted, implemented (2026-09-21, Phase 5 item F4). **Decided by:** proposed and implemented by the F4 work, on the repository owner's instruction to fix the root cause; the owner has not yet reviewed this specific approach.
+
+**Context.** The backend compiles to CommonJS (`nest build`) and requires `@nova/validation`, whose entry is raw TypeScript ESM (`main: ./src/index.ts`, `"type": "module"`). Jest maps the module to source, and Node 24 strips types natively, so it worked on developer machines. On Node 20.20.2, inside the repository's declared `>=20.18`, `node dist/main.js` failed with `SyntaxError: Unexpected token 'export'` at `packages/validation/src/index.ts`, which is what kept the E2E workflow red for every run it ever had. Reproduced locally with the same trace.
+
+**Decision.** A workspace package that compiled backend code requires at runtime ships JavaScript for that consumer. `@nova/validation` builds a CommonJS copy to `dist/cjs` (with a `package.json` marking it `commonjs`, because the package is `"type": "module"`) and declares `exports`: `require` resolves to the compiled copy; `types` and `default` keep resolving to the source. Next.js, Vitest, `tsc` and Jest are unaffected. Running the compiled backend requires its workspace dependencies to be built: `pnpm --filter "@nova/backend..." build`; the backend `dev` script builds validation first.
+
+**Alternatives rejected.** Running E2E on Node 24: hides the defect, and depends on Node's experimental type stripping, which the declared minimum does not have and which only works for files outside `node_modules`. Converting the package to CommonJS or dual source: churn across every frontend consumer for a backend-only need. Bundling the backend: a larger change than the problem needs.
+
+**Consequences.** The compiled backend starts on Node 20. Anyone running `node dist/main.js` (CI, a deployment) must build the packages first. Any other workspace package the backend starts to import at runtime needs the same treatment, and `@nova/types` does not today (only Jest maps it).
+
+**Evidence.** Node 20.20.2 loads the built `env.schema.js` and the whole backend serves `/v1/categories` with a 200 against a fresh database; Node 24 still works. Browser suites for web, seller and admin pass against it (see the Phase 5 plan, item F4).

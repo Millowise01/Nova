@@ -13,13 +13,22 @@
 
 ### Frontend
 
+- Fixed: after a reload, a page that fetches data on mount could lose the session. The boot-time restore and the API client's 401 refresh each called `POST /auth/refresh`, and the refresh token is single-use, so the second call was rejected and the tokens were cleared. The restore now goes through the client's single-flight refresh (`refreshAccessToken` is exported from `@nova/api-client`).
+- Fixed: clicking Sign out while the boot-time session restore was still running was undone when it finished (it stored fresh tokens and signed the user back in). Both defects were in the three original per-app providers too.
+
 - `@nova/ui` is the application-facing component API (ADR-0001): `seller` and `admin` import components from it instead of `@nova/design-system`, and a lint rule enforces that for everything under `apps/`.
 - The chart components moved to `@nova/ui/charts`. `apps/web` had been loading the `recharts` library on 44 of 53 routes without rendering a chart; its median route dropped from 377 kB to 246 kB of JavaScript. `@nova/ui` and `@nova/design-system` declare `sideEffects`.
 - New package `@nova/app-shell` (ADR-0002) holds the theme provider, toast provider and query-client hook that `web`, `seller` and `admin` each carried a copy of. Each app keeps a thin wrapper at the old path and supplies its own cookie key and stale time. One fix comes with it: choosing an explicit theme now stops the theme following the operating system, which previously kept overriding the choice.
 - `@nova/app-shell` now also holds the shared authentication code: `AuthProvider`, the session service, `sanitizeRedirect`, JWT and session-cookie helpers, and the role guard (`@nova/app-shell/middleware`). `seller` and `admin` keep a short `middleware.ts` with their own role and matcher; cookie names and destinations are unchanged. The login mutation and login form remain in each app.
 
+### Build
+
+- `@nova/validation` now also builds a compiled CommonJS copy (`dist/cjs`, selected by the package `exports` for `require`), so the built backend starts on Node 20. It failed with `SyntaxError: Unexpected token 'export'` before, which is why the E2E workflow had never passed (ADR-0004). To run the compiled backend, build its packages first: `pnpm --filter "@nova/backend..." build`; the backend `dev` script does it for you.
+
 ### Tests
 
+- The E2E workflow works: `.github/actions/e2e-backend` builds, starts (failing with its log instead of timing out silently) and seeds the backend; `backend/scripts/e2e-seed.mjs` and `e2e-accounts.mjs` create fixtures through the real API. There is a new `admin-auth` job and an admin Playwright setup, and new browser specs for sign-in, session restoration, sign-out, garbage and forged cookies, wrong and right role, `/login-history` and hostile redirects in web, seller and admin (30 browser tests in total).
+- The web purchase journey no longer picks the image link as the product title, and no longer builds its phone number from the timestamp prefix (which collided across runs).
 - Backend integration tests wait until the outbox is drained (`test-utils/drain-outbox.ts`) instead of until one poll returns 0, which fixed an intermittent notifications failure (test-only; production unchanged).
 - One shared user helper (`test-utils/users.ts`) replaces the copied signup helpers and draws collision-proof phone numbers; signup failures now report their status and body.
 - Documented how the backend integration tests run and the evidence for both fixes (`backend/docs/06-testing-strategy.md`).

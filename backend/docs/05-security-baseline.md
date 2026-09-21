@@ -105,7 +105,7 @@ The web, seller and admin apps keep a session summary (`userId`, `roles`, `expir
 
 - The backend never reads it. Every request is authorized from the access token through the RBAC and ABAC policy engine (above), so a forged cookie shows an empty shell and nothing else.
 - Nothing server-side, including Next.js server components and route handlers, may use it to authorize or to select data.
-- **Not done, proposed:** `Secure` on HTTPS and moving the summary out of a script-written cookie. Both change behaviour for signed-in users and need their own task.
+- **Not done: scheduled as its own security task (item S1 in `docs/19-governance/NOVA_PHASE_5_FOUNDATION_PLAN.md`).** It covers `Secure`, `SameSite`, `HttpOnly` where appropriate, path and domain, expiration, the script-readable summary, and the server-rendering and client implications. Each changes behaviour for signed-in users, so none was changed as part of the E2E work. Note the refresh token is also script-readable (`localStorage`), and the backend has no logout endpoint, so sign-out only clears the client side.
 - The post-login `redirect` parameter is user-controlled input. `sanitizeRedirect` in `@nova/app-shell` accepts same-origin paths only (backslash and tab/newline forms included); use it rather than writing a new check.
 
 ## Explicitly deferred — not applicable to Phase 1

@@ -110,7 +110,7 @@ This repo uses [Turborepo](https://turborepo.com) to run scripts (`build`, `lint
 
 **Caching.** Each task run is hashed from its inputs — source files, `package.json`, lockfile entries, upstream task outputs. If nothing relevant changed since the last run, Turborepo skips re-running it and replays the previous result instantly. That's what `Cached: X/Y` in the terminal output means — it's why a second `pnpm build` after touching one file finishes in seconds, not minutes. Locally this cache lives in `.turbo/`. In CI ([.github/workflows/ci.yml](.github/workflows/ci.yml)) it's persisted between runs via `actions/cache`, so a PR that touches one package doesn't pay to rebuild all 24.
 
-**Filtering to what changed.** CI doesn't run every task against every package on every push — it uses `--filter=...[HEAD^1]`, meaning "only packages that changed since the previous commit, plus everything that depends on them." A change to a leaf package with no dependents (e.g. `packages/icons`) only triggers that one package; a change to something widely depended-on (e.g. `packages/types`) correctly cascades to everything downstream. You can reproduce this locally: `pnpm exec turbo run build --filter=...[HEAD^1]`.
+**Filtering to what changed.** CI does not run every task against every package on every change. `.github/scripts/select-scope.sh` decides what lint, typecheck, test and build cover and says so in the job summary: everything when the base commit is unavailable or CI or workspace configuration changed (`all`), only the packages affected since the base, plus their dependents (`filtered`), or nothing, stated explicitly, when no package is affected (`none`). A change to a leaf package with no dependents (e.g. `packages/icons`) triggers only that package; one to something widely depended on (e.g. `packages/types`) cascades. Reproduce the filter locally with `pnpm exec turbo run build --filter=...[<base-commit>]`.
 
 ## Backend
 
@@ -120,6 +120,7 @@ This repo uses [Turborepo](https://turborepo.com) to run scripts (`build`, `lint
 - `cp backend/.env.example backend/.env`, fill in the secrets (`PII_ENCRYPTION_KEY`, `JWT_ACCESS_PRIVATE_KEY`/`JWT_ACCESS_PUBLIC_KEY` — generation commands are in the file's comments).
 - `pnpm --filter @nova/backend prisma:generate` then `pnpm --filter @nova/backend prisma:migrate` — applies the schema to your local database.
 - `pnpm --filter @nova/backend dev` — runs the API on <http://localhost:4000/v1>, with live Swagger/OpenAPI docs at `/docs` and the spec written to `backend/openapi.json` on every boot.
+- The compiled API (`node backend/dist/main.js`, what CI and any deployment run) needs its workspace packages built first: `pnpm --filter "@nova/backend..." build`. Node 20 cannot load TypeScript, so `@nova/validation` ships a compiled CommonJS copy for the backend (ADR-0004). `pnpm --filter @nova/backend dev` builds it for you.
 - `pnpm --filter @nova/backend test` — the module test suites (unit + integration against the real dockerized Postgres, not mocks).
 
 Every request body is validated against a schema from `@nova/validation` — the same package the frontend forms use — never a locally redefined one; see `packages/validation/src/index.ts`.
