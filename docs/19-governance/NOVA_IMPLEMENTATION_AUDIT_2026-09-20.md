@@ -172,7 +172,7 @@ Documentation and security fixes (done, section 23) → foundation (duplicated p
 **Test isolation — correction**
 
 - An earlier version of this log said the added tests exposed a rate-limit flake because parallel Jest workers shared one signup budget, and that a per-app client IP fixed it. That diagnosis was wrong. The backend runs Jest with `maxWorkers: 1`, so spec files run serially, and the only 429s in the logs are the rate-limit spec's own deliberate ones. The per-app IP change was committed in `02b6a3e` and then removed. **[V]** for the configuration and the counts.
-- What the failing run did show is one more signup 409 than the specs deliberately produce (3 against 2), and the failure was inside a helper's signup. That points to a colliding test phone number (see `backend/docs/06-testing-strategy.md`). This is inference, not a reproduction, and the cause is **not confirmed**.
+- What the failing run did show is one more signup 409 than the specs deliberately produce (3 against 2), and the failure was inside a helper's signup. That pointed to a colliding test phone number. **Phase 5 update (2026-09-21):** a collision was then observed directly (`409 PHONE_ALREADY_REGISTERED` captured inside a helper, and a 409 in the identity spec), so collisions do happen and are now prevented (`9b56505`). It is still **not established** as the cause of the orders failure: that helper also failed once in CI on a brand-new database, where accumulated users cannot explain it.
 
 **Open findings, not fixed** (details in `backend/docs/05-security-baseline.md`)
 
@@ -211,3 +211,28 @@ Documentation and security fixes (done, section 23) → foundation (duplicated p
 - Install, `prisma generate` and secretlint pass. Lint passes 13 of 13 tasks, typecheck 18 of 18, and `format:check` passes.
 - Tests pass for the selected non-backend packages: api-client 38, web 56, admin 9, seller 7. The backend suite needs a database, so it was run in the main working tree against Docker Postgres and Redis, not in the clean checkout.
 - Builds: the turbo build in the clean checkout ended without a compile result for the Next apps (its log stops partway through the seller build although it recorded exit 0), so it is **not counted**. Seller, admin, web and backend were then built separately in the main working tree, which matches `42418e0` apart from the unrelated `.claude/settings.json`. All four succeed. Web compiles with warnings from the existing Sentry and OpenTelemetry integration, none from the security-header change.
+
+## 25. Phase 5 progress (2026-09-21)
+
+Working branch `phase-5/ci-gate`, pull request #21 (a **draft opened only to make GitHub run the workflows; do not merge**). Full detail is in `NOVA_PHASE_5_FOUNDATION_PLAN.md`; the record of corrected findings is there too.
+
+**GitHub CI, observed on the pull request. [V]**
+
+| Commit    | Result                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `82ee464` | Lint, typecheck and secretlint pass. Test step fails: 15 of 16 backend suites cannot start (no database, no environment).                   |
+| `1e38bd2` | Services and backend environment added. Same failure: the variables never reach Jest.                                                       |
+| `39eb431` | Turbo strict-mode fix. Backend passes except one orders test (a helper signup failure).                                                     |
+| `c68abc8` | **Green**, every step: backend 16 suites and 137 tests against live Postgres and Redis, build included. The scope step reported `mode=all`. |
+| `e6234be` | **Green**: backend 17 suites and 141 tests.                                                                                                 |
+| `9b56505` | **Green**: backend 18 suites and 149 tests, build included.                                                                                 |
+
+**Root cause of the intermediate failures.** Turbo 2 runs tasks in strict environment mode and passes only variables that `turbo.json` declares. It declared none, so `DATABASE_URL`, `REDIS_URL` and the key variables set by the job never reached the test process. That is invisible locally because `backend/.env` supplies them.
+
+**E2E workflow. [V]** 15 runs, 15 failures. Both jobs fail at "Build and start backend" with `SyntaxError: Unexpected token 'export'` at `packages/validation/src/index.ts`: `node dist/main.js` loads `@nova/validation`, whose `main` is raw TypeScript. It works locally only because Node 24 strips types; CI uses Node 20, which the repository's `engines` allows. So the built backend cannot start on the declared Node range. Not fixed yet (plan item F4).
+
+**Test reliability. [V]** The notifications race was reproduced, explained by instrumentation and fixed in test code only (40 of 40 runs, against 2 of 14 failing). Test phone numbers were replaced by a collision-proof generator. Frontend timeouts were measured and no change was made: the only observed timeouts came from machine load, and CI has large headroom. Details and the open items are in the plan (items A and E).
+
+**Package classification.** `NOVA_PACKAGE_STATUS.md` classifies every workspace package and application; five packages are PLACEHOLDER, none is DEPRECATED or REMOVE.
+
+**Limits of this verification.** GitHub has executed the `pull_request` path only. The scope script's `filtered` and `none` branches and the `push` path have not run on GitHub. The frontend load condition "three suites plus the backend at once" was not reproduced because it exhausted this machine's memory during measurement (Docker restarted once).

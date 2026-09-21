@@ -11,11 +11,15 @@
 
 ### Tests
 
-- Documented how the backend integration tests run and two known intermittent failures (`backend/docs/06-testing-strategy.md`).
+- Backend integration tests wait until the outbox is drained (`test-utils/drain-outbox.ts`) instead of until one poll returns 0, which fixed an intermittent notifications failure (test-only; production unchanged).
+- One shared user helper (`test-utils/users.ts`) replaces the copied signup helpers and draws collision-proof phone numbers; signup failures now report their status and body.
+- Documented how the backend integration tests run and the evidence for both fixes (`backend/docs/06-testing-strategy.md`).
 
 ### CI
 
-- `ci.yml` generates the Prisma client after install, so backend lint and typecheck can see the models. Backend tests still cannot run in CI (no database service); see the audit, section 24.
+- `ci.yml` generates the Prisma client after install, so backend lint and typecheck can see the models.
+- The backend tests now run in CI against Postgres 16 and Redis 7 service containers, with throwaway secrets and applied migrations (new composite action `.github/actions/backend-test-env`). `turbo.json` passes the backend environment through to the backend test task and disables caching for it: Turbo's strict environment mode had been hiding the variables from Jest.
+- `.github/scripts/select-scope.sh` replaces the `HEAD^1` filter. It runs everything when a filter cannot be trusted and states explicitly when nothing is affected, so a run cannot pass merely because its checks were filtered out.
 
 ### Documentation
 
@@ -23,4 +27,4 @@
 - Promoted `docs/02-uiux-brand/NOVA_UI_UX_DESIGN_SYSTEM.md` as the canonical UI/UX design system specification (moved from `docs/frontend/`).
 - Marked the placeholder documents `STATUS: STUB — NOT SOURCE OF TRUTH` and linked each to the real specification where one exists.
 - Added root `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md` and this changelog; merged the documentation-system rules into `.claude/CLAUDE.md`.
-- Added `docs/19-governance/NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md`.
+- Added `docs/19-governance/NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md`, `NOVA_PHASE_5_FOUNDATION_PLAN.md` and `NOVA_PACKAGE_STATUS.md` (workspace packages classified ACTIVE or PLACEHOLDER; none removed).

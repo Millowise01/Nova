@@ -12,6 +12,8 @@ The documents that are authoritative today are:
 - [`docs/frontend/`](../frontend/) — frontend conventions (`00`–`07`)
 - [`backend/docs/`](../../backend/docs/) — backend design, API standards, database conventions, security baseline, payments and logistics design (`00`–`10`)
 - [`NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md`](NOVA_IMPLEMENTATION_AUDIT_2026-09-20.md) — repository audit
+- [`NOVA_PHASE_5_FOUNDATION_PLAN.md`](NOVA_PHASE_5_FOUNDATION_PLAN.md) — Phase 5 foundation plan, decisions and outcomes
+- [`NOVA_PACKAGE_STATUS.md`](NOVA_PACKAGE_STATUS.md) — status of every workspace package and application
 - This index
 
 Operating documents are at the repository root (`README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `SECURITY.md`, `CHANGELOG.md`) and in `.claude/CLAUDE.md`.
