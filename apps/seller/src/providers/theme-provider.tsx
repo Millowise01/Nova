@@ -1,66 +1,26 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import type { ReactNode } from "react";
+
+import { ThemeProvider as SharedThemeProvider, useTheme } from "@nova/app-shell";
+import type { Theme } from "@nova/app-shell";
 
 import { COOKIE_KEYS } from "@/config/app";
 
-export type Theme = "light" | "dark" | "system";
+export { useTheme };
+export type { Theme };
 
-type ThemeContextType = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-};
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
+// The behaviour is shared (@nova/app-shell); this app only supplies its own storage key.
 export function ThemeProvider({
   children,
-  initialTheme = "system",
+  initialTheme,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   initialTheme?: Theme;
 }) {
-  const [theme, setThemeState] = useState<Theme>(initialTheme);
-
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    document.cookie = `${COOKIE_KEYS.theme}=${newTheme}; path=/; max-age=31536000; SameSite=Lax`;
-    localStorage.setItem(COOKIE_KEYS.theme, newTheme);
-    applyTheme(newTheme);
-  };
-
-  const applyTheme = (t: Theme) => {
-    if (typeof window === "undefined") return;
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-
-    let activeTheme = t;
-    if (t === "system") {
-      activeTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    }
-
-    root.classList.add(activeTheme);
-  };
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(COOKIE_KEYS.theme) as Theme | null;
-    const currentTheme = savedTheme || initialTheme;
-    setThemeState(currentTheme);
-    applyTheme(currentTheme);
-
-    if (currentTheme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const listener = () => applyTheme("system");
-      mediaQuery.addEventListener("change", listener);
-      return () => mediaQuery.removeEventListener("change", listener);
-    }
-  }, [initialTheme]);
-
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error("useTheme must be used within ThemeProvider");
-  return context;
+  return (
+    <SharedThemeProvider storageKey={COOKIE_KEYS.theme} initialTheme={initialTheme}>
+      {children}
+    </SharedThemeProvider>
+  );
 }
