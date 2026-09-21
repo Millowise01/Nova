@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 
-import { sessionSchema } from "@nova/auth";
+import { parseSessionCookieValue } from "@nova/app-shell/middleware";
 
 import { LOCALES, DEFAULT_LOCALE, COOKIE_KEYS, RTL_LOCALES } from "@/config/app";
 import { PROTECTED_ROUTES, ROUTES } from "@/config/routes";
@@ -20,15 +20,6 @@ function getLocaleFromPathname(pathname: string): string {
 
 function stripLocale(pathname: string): string {
   return pathname.replace(/^\/(en|fr|ar)/, "") || "/";
-}
-
-function parseSession(raw: string | undefined) {
-  if (!raw) return null;
-  try {
-    return sessionSchema.parse(JSON.parse(decodeURIComponent(raw)));
-  } catch {
-    return null;
-  }
 }
 
 /** Lives at src/middleware.ts, NOT apps/web/middleware.ts — a real, verified-live
@@ -53,7 +44,7 @@ export function middleware(request: NextRequest) {
 
   if (isProtected) {
     const rawSession = request.cookies.get(COOKIE_KEYS.session)?.value;
-    const session = parseSession(rawSession);
+    const session = parseSessionCookieValue(rawSession);
 
     if (!session) {
       const loginUrl = new URL(`/${locale}${ROUTES.login}`, request.url);
