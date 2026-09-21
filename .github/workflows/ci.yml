@@ -49,7 +49,7 @@ jobs:
           # Full history so the change since the base commit can be computed
           # (.github/scripts/select-scope.sh); a shallow clone would break it.
           fetch-depth: 0
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 9.15.4
       - uses: actions/setup-node@v4
