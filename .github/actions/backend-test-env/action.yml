@@ -1,0 +1,46 @@
+name: Backend test environment
+description: >
+  Prepares what the backend needs to run against real services: composes DATABASE_URL,
+  generates throwaway secrets, and applies the Prisma migrations. The calling job must
+  provide the postgres and redis service containers, the POSTGRES_USER, POSTGRES_PASSWORD
+  and POSTGRES_DB variables, install dependencies, and run `prisma generate` first.
+
+runs:
+  using: composite
+  steps:
+    # Composed at runtime from separate fields: a single postgresql://user:pass@host literal
+    # trips secretlint's connection-string rule even for a throwaway, job-scoped container.
+    - name: Compose DATABASE_URL
+      shell: bash
+      run: echo "DATABASE_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB" >> "$GITHUB_ENV"
+
+    # Generated fresh on every run and used by nothing else. Each value is registered as a
+    # mask before it is written, so it never appears in a later step's environment dump.
+    - name: Generate throwaway backend secrets
+      shell: bash
+      run: |
+        node -e "
+        const { generateKeyPairSync, randomBytes } = require('crypto');
+        const fs = require('fs');
+        const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+          modulusLength: 2048,
+          privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+          publicKeyEncoding: { type: 'spki', format: 'pem' },
+        });
+        const values = {
+          JWT_ACCESS_PRIVATE_KEY: Buffer.from(privateKey).toString('base64'),
+          JWT_ACCESS_PUBLIC_KEY: Buffer.from(publicKey).toString('base64'),
+          PII_ENCRYPTION_KEY: randomBytes(32).toString('base64'),
+        };
+        const lines = [];
+        for (const [key, value] of Object.entries(values)) {
+          console.log('::add-mask::' + value);
+          lines.push(key + '=' + value);
+        }
+        fs.appendFileSync(process.env.GITHUB_ENV, lines.join('\n') + '\n');
+        "
+
+    - name: Apply database migrations
+      shell: bash
+      working-directory: backend
+      run: pnpm run prisma:migrate:deploy

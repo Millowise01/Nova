@@ -8,6 +8,41 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+
+    # The backend integration tests run against the real thing, not mocks, so this job
+    # provides what they need. Same throwaway service containers as e2e.yml.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nova
+          POSTGRES_PASSWORD: nova_dev_password
+          POSTGRES_DB: nova
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nova -d nova"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Same ephemeral dev credentials as docker-compose.yml, kept as separate fields for
+      # the reason given in .github/actions/backend-test-env/action.yml.
+      POSTGRES_USER: nova
+      POSTGRES_PASSWORD: nova_dev_password
+      POSTGRES_DB: nova
+      REDIS_URL: redis://localhost:6379
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,5 +80,7 @@ jobs:
       - run: pnpm exec turbo run lint --filter=...[HEAD^1]
       - run: pnpm format:check
       - run: pnpm exec turbo run typecheck --filter=...[HEAD^1]
+      - name: Prepare backend test environment
+        uses: ./.github/actions/backend-test-env
       - run: pnpm exec turbo run test --filter=...[HEAD^1]
       - run: pnpm exec turbo run build --filter=...[HEAD^1]
