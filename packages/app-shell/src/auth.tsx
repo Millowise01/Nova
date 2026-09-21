@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useContext, useEffect, useState, useTransition } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useTransition } from "react";
 import type { ReactNode } from "react";
 
 import type { Session } from "@nova/auth";
@@ -49,6 +49,8 @@ export function AuthProvider({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  // Set when the user signs out, so a restore still running from boot cannot sign them back in.
+  const signedOut = useRef(false);
 
   const login = (newSession: Session) => {
     setIsLoading(true);
@@ -65,6 +67,7 @@ export function AuthProvider({
   };
 
   const logout = () => {
+    signedOut.current = true;
     setIsLoading(true);
     clearTokens();
     setSession(null);
@@ -88,7 +91,11 @@ export function AuthProvider({
     // refresh token for a fresh one whenever a page loads, whether or not the cookie parsed. That
     // also recovers from a stale or tampered cookie as long as the refresh token is still valid.
     void restoreSession().then((restored) => {
-      if (restored) {
+      if (signedOut.current) {
+        // Signed out while this was in flight. The restore has already stored fresh tokens on its
+        // way; drop them again rather than resurrecting the session.
+        clearTokens();
+      } else if (restored) {
         login(restored);
       } else if (rawSession) {
         // The cookie claimed a session the refresh token can no longer back; do not leave the UI

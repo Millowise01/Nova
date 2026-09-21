@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { tokenStore } from "@nova/api-client";
-import type { NovaApiClient } from "@nova/api-client";
+import { refreshAccessToken, tokenStore } from "@nova/api-client";
+import type { NovaApiClient, NovaHttpClient } from "@nova/api-client";
 
 import { createSessionService } from "./session-service";
 
@@ -14,8 +14,15 @@ const jwt = (payload: object) => `${base64url("{}")}.${base64url(JSON.stringify(
 const accessToken = jwt({ sub: "user-1", roles: ["seller"], exp: EXP });
 
 const login = vi.fn();
+// The refresh goes through @nova/api-client's shared single-flight function, which posts on the raw
+// HTTP client; `refresh` stands in for that POST.
 const refresh = vi.fn();
-const getApiClient = () => ({ auth: { login, refresh } }) as unknown as NovaApiClient;
+const rawClient = { post: refresh };
+const getApiClient = () => ({ auth: { login }, raw: rawClient }) as unknown as NovaApiClient;
+
+const refreshResponse = (access: string, next: string) => ({
+  data: { data: { accessToken: access, refreshToken: next } },
+});
 
 const service = createSessionService(getApiClient);
 
@@ -62,11 +69,11 @@ describe("session service: restoreSession", () => {
   it("trades the refresh token for a new pair and a session", async () => {
     tokenStore.setTokens("old-access", "old-refresh");
     const newAccess = jwt({ sub: "user-2", roles: ["admin"], exp: EXP });
-    refresh.mockResolvedValue({ accessToken: newAccess, refreshToken: "new-refresh" });
+    refresh.mockResolvedValue(refreshResponse(newAccess, "new-refresh"));
 
     const session = await service.restoreSession();
 
-    expect(refresh).toHaveBeenCalledWith("old-refresh");
+    expect(refresh).toHaveBeenCalledWith("/auth/refresh", { refreshToken: "old-refresh" });
     expect(session).toEqual({
       userId: "user-2",
       roles: ["admin"],
@@ -84,9 +91,25 @@ describe("session service: restoreSession", () => {
     expect(tokenStore.getAccessToken()).toBeNull();
   });
 
+  it("joins a refresh that is already in flight instead of making a second, doomed one", async () => {
+    // The refresh token is single-use. After a reload the page may hit a 401 and refresh at the same
+    // moment the session is restored; two separate calls made the second fail and cleared the tokens.
+    tokenStore.setTokens("old-access", "old-refresh");
+    let respond: (value: unknown) => void = () => undefined;
+    refresh.mockReturnValue(new Promise((resolve) => (respond = resolve)));
+
+    const fromInterceptor = refreshAccessToken(rawClient as unknown as NovaHttpClient);
+    const restoring = service.restoreSession();
+    respond(refreshResponse(jwt({ sub: "user-3", roles: [], exp: EXP }), "new-refresh"));
+
+    expect((await restoring)?.userId).toBe("user-3");
+    await fromInterceptor;
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
   it("treats a token that cannot be decoded as a failed restore", async () => {
     tokenStore.setTokens("old-access", "old-refresh");
-    refresh.mockResolvedValue({ accessToken: "not-a-jwt", refreshToken: "new-refresh" });
+    refresh.mockResolvedValue(refreshResponse("not-a-jwt", "new-refresh"));
 
     expect(await service.restoreSession()).toBeNull();
     expect(tokenStore.getRefreshToken()).toBeNull();

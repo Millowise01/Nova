@@ -1,8 +1,8 @@
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import { createApiClient } from "./http-client";
+import { createApiClient, refreshAccessToken } from "./http-client";
 import { tokenStore } from "./token-store";
 
 // Regression tests for two real, previously-invisible bugs found during the
@@ -73,6 +73,50 @@ describe("single-flight token refresh", () => {
     expect(refreshCallCount).toBe(1);
     expect(tokenStore.getAccessToken()).toBe("fresh-token");
     expect(tokenStore.getRefreshToken()).toBe("next-refresh-token");
+  });
+});
+
+describe("a refresh requested directly (session restore on page load)", () => {
+  // Found by a browser test: after a reload, the app restores the session on boot while a page
+  // request may hit a 401 and refresh too. The refresh token is single-use, so two separate
+  // POST /auth/refresh calls made the second one fail and cleared the tokens.
+  function refreshHandler(counter: { calls: number }) {
+    return http.post(`${BASE_URL}/auth/refresh`, async () => {
+      counter.calls += 1;
+      await delay(80);
+      return HttpResponse.json({
+        data: { accessToken: "fresh-token", refreshToken: "next-refresh-token" },
+      });
+    });
+  }
+
+  it("joins a refresh that a 401 already started", async () => {
+    tokenStore.setTokens("stale-token", "valid-refresh-token");
+    const counter = { calls: 0 };
+    server.use(protectedHandler("/resource-a", "fresh-token"), refreshHandler(counter));
+    const client = createApiClient(BASE_URL);
+
+    const request = client.get("/resource-a");
+    await delay(30); // the 401 has come back and its refresh is in flight
+    const accessToken = await refreshAccessToken(client);
+    await request;
+
+    expect(accessToken).toBe("fresh-token");
+    expect(counter.calls).toBe(1);
+  });
+
+  it("is joined by a 401 that arrives while it is in flight", async () => {
+    tokenStore.setTokens("stale-token", "valid-refresh-token");
+    const counter = { calls: 0 };
+    server.use(protectedHandler("/resource-a", "fresh-token"), refreshHandler(counter));
+    const client = createApiClient(BASE_URL);
+
+    const restore = refreshAccessToken(client);
+    const response = await client.get("/resource-a");
+    await restore;
+
+    expect(response.data).toEqual({ data: { path: "/resource-a" } });
+    expect(counter.calls).toBe(1);
   });
 });
 

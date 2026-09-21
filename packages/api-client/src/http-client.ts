@@ -17,10 +17,13 @@ function isExemptFromRefresh(url: string | undefined): boolean {
 }
 
 /** Only one refresh call is ever in flight — concurrent 401s all await this same
- *  promise instead of each firing their own POST /auth/refresh. */
+ *  promise instead of each firing their own POST /auth/refresh. Anything else that needs to
+ *  refresh (the session restore on page load) must go through this function too: the refresh token
+ *  is single-use, so a second, separate call fails and clears the tokens. Resolves to the new
+ *  access token; on failure it clears the token store and rejects. */
 let inFlightRefresh: Promise<string> | null = null;
 
-async function refreshAccessToken(client: AxiosInstance): Promise<string> {
+export async function refreshAccessToken(client: AxiosInstance): Promise<string> {
   if (inFlightRefresh) return inFlightRefresh;
 
   const refreshToken = tokenStore.getRefreshToken();

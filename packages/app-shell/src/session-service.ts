@@ -1,4 +1,4 @@
-import { tokenStore } from "@nova/api-client";
+import { refreshAccessToken, tokenStore } from "@nova/api-client";
 import type { NovaApiClient } from "@nova/api-client";
 import { type Session, sessionSchema } from "@nova/auth";
 import type { AuthResponse, LoginInput } from "@nova/validation";
@@ -36,9 +36,12 @@ export function createSessionService(getApiClient: () => NovaApiClient) {
     if (!refreshToken) return null;
 
     try {
-      const tokens = await getApiClient().auth.refresh(refreshToken);
-      tokenStore.setTokens(tokens.accessToken, tokens.refreshToken);
-      const { sub, roles, exp } = decodeJwtPayload(tokens.accessToken);
+      // Through the client's shared single-flight refresh, not `auth.refresh` directly: a page that
+      // fetches on mount can hit a 401 and refresh at the same moment, and the refresh token is
+      // single-use, so a second, separate call fails and clears the tokens. This also stores the
+      // new tokens and clears them if the refresh fails.
+      const accessToken = await refreshAccessToken(getApiClient().raw);
+      const { sub, roles, exp } = decodeJwtPayload(accessToken);
       return sessionSchema.parse({
         userId: sub,
         roles,

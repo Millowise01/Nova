@@ -158,6 +158,34 @@ describe("AuthProvider", () => {
     expect(router.push).not.toHaveBeenCalled();
   });
 
+  it("a sign-out while the boot-time restore is still running is not undone when it finishes", async () => {
+    // Found by a browser test: after a reload the page renders signed in straight away while the
+    // refresh runs in the background, so "Sign out" can be clicked before it returns. The restore
+    // then stored fresh tokens and signed the user back in.
+    document.cookie = `${KEY}=${encoded(session)}; path=/`;
+    let finishRestore: (restored: Session | null) => void = () => undefined;
+    const restoreSession = vi.fn(
+      () =>
+        new Promise<Session | null>((resolve) => {
+          finishRestore = resolve;
+        }),
+    );
+    const { clearTokens } = renderAuth({ restoreSession });
+
+    act(() => screen.getByText("logout").click());
+    expect(clearTokens).toHaveBeenCalledTimes(1);
+
+    await act(() => {
+      finishRestore({ ...session, expiresAt: "2031-01-01T00:00:00.000Z" });
+      return Promise.resolve();
+    });
+
+    expect(screen.getByTestId("auth")).toHaveTextContent("false");
+    expect(readCookie(KEY)).toBeNull();
+    // The tokens the restore stored on its way are dropped again.
+    expect(clearTokens).toHaveBeenCalledTimes(2);
+  });
+
   it("only reads and writes the cookie it was given", () => {
     document.cookie = `nova_admin_session=${encoded({ ...session, userId: "someone-else" })}; path=/`;
     renderAuth();

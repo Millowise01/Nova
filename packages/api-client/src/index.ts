@@ -11,7 +11,7 @@ import { createApiClient as createHttpClient, type NovaHttpClient } from "./http
 
 export { ApiError, toApiError, type ApiErrorShape } from "./errors";
 export { tokenStore } from "./token-store";
-export { createApiClient } from "./http-client";
+export { createApiClient, refreshAccessToken } from "./http-client";
 export type { NovaHttpClient } from "./http-client";
 export type { ListProductsParams } from "./endpoints/catalog";
 export type { ListNotificationsParams } from "./endpoints/notifications";
