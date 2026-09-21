@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import type { ReactNode } from "react";
 
-import { sessionSchema, type Session } from "@nova/auth";
+import { parseSessionCookieValue } from "@nova/app-shell";
 
 import { LOCALES, COOKIE_KEYS } from "@/config/app";
 import { AppProviders } from "@/providers";
@@ -27,15 +27,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   const rawSession = cookieStore.get(COOKIE_KEYS.session)?.value;
   const rawTheme = cookieStore.get(COOKIE_KEYS.theme)?.value as Theme | undefined;
 
-  let initialSession: Session | null = null;
-
-  if (rawSession) {
-    try {
-      initialSession = sessionSchema.parse(JSON.parse(decodeURIComponent(rawSession)));
-    } catch {
-      initialSession = null;
-    }
-  }
+  const initialSession = parseSessionCookieValue(rawSession);
 
   return (
     <NextIntlClientProvider messages={messages} locale={locale}>

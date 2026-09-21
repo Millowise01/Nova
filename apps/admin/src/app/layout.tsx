@@ -3,7 +3,7 @@ import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { type Session, sessionSchema } from "@nova/auth";
+import { parseSessionCookieValue } from "@nova/app-shell";
 
 import { COOKIE_KEYS } from "@/config/app";
 import { AppProviders } from "@/providers";
@@ -21,14 +21,7 @@ export default async function AdminLayout({ children }: Readonly<{ children: Rea
   const rawSession = cookieStore.get(COOKIE_KEYS.session)?.value;
   const rawTheme = cookieStore.get(COOKIE_KEYS.theme)?.value as Theme | undefined;
 
-  let initialSession: Session | null = null;
-  if (rawSession) {
-    try {
-      initialSession = sessionSchema.parse(JSON.parse(decodeURIComponent(rawSession)));
-    } catch {
-      initialSession = null;
-    }
-  }
+  const initialSession = parseSessionCookieValue(rawSession);
 
   return (
     <html lang="en">
