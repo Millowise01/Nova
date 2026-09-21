@@ -8,6 +8,7 @@
 - Carts and checkout sessions that have an owner are usable only by that owner; `POST /v1/orders` rejects a checkout session that belongs to someone else (`403 CHECKOUT_SESSION_ACCESS_DENIED`).
 - `POST /v1/auth/otp/verify` is rate limited (5 per 60 seconds).
 - Added security headers to the backend (`helmet`) and to the web, seller and admin apps. New dependency: `helmet` (backend).
+- The post-login redirect in `seller` and `admin` accepted `/\evil.com` and paths with an embedded tab, newline or carriage return, which a browser resolves to another origin. `sanitizeRedirect` now lives in `@nova/app-shell`, refuses them, and is covered by tests (the original implementation fails 8 of them). `web` never reads the `redirect` parameter, so it was not affected.
 
 ### Frontend
 

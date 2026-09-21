@@ -1,8 +1,7 @@
 import { tokenStore } from "@nova/api-client";
+import { decodeJwtPayload } from "@nova/app-shell";
 import { type Session, sessionSchema } from "@nova/auth";
 import type { AuthResponse, LoginInput } from "@nova/validation";
-
-import { decodeJwtPayload } from "@/lib/decode-jwt";
 
 import { getApiClient } from "./api";
 

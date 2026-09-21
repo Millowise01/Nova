@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
 import { ApiError } from "@nova/api-client";
+import { sanitizeRedirect } from "@nova/app-shell";
 import type { LoginInput } from "@nova/validation";
 
 import { useAuth } from "@/providers/auth-provider";
@@ -32,14 +33,6 @@ function useApiErrorHandler<T extends FieldValues>(setError: UseFormSetError<T>)
 
     toast.error(error.message);
   };
-}
-
-/** Only a same-origin, root-relative path is honored — "/disputes/abc123" but
- *  not "//evil.com" or "https://evil.com" — since `redirect` comes from a URL
- *  query param an attacker can craft the login link with. */
-function sanitizeRedirect(redirect: string | null): string {
-  if (!redirect || !redirect.startsWith("/") || redirect.startsWith("//")) return "/";
-  return redirect;
 }
 
 /** No client-side admin-role check here — a non-admin who logs in successfully
