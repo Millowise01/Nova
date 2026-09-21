@@ -44,7 +44,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Full history so the change since the base commit can be computed
           # (.github/scripts/select-scope.sh); a shallow clone would break it.
