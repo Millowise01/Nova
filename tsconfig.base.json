@@ -30,6 +30,7 @@
       "@nova/storage": ["packages/storage/src/index.ts"],
       "@nova/types": ["packages/types/src/index.ts"],
       "@nova/ui": ["packages/ui/src/index.ts"],
+      "@nova/ui/charts": ["packages/ui/src/charts.ts"],
       "@nova/utils": ["packages/utils/src/index.ts"],
       "@nova/validation": ["packages/validation/src/index.ts"]
     }
