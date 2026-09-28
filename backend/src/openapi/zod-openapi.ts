@@ -9,6 +9,7 @@ import { z } from "zod";
 
 import {
   addCartLineSchema,
+  aiAssistantMessageSchema,
   cancelOrderSchema,
   checkoutSchema,
   createBrandSchema,
@@ -162,6 +163,13 @@ const routes: RouteConfig[] = [
     tags: ["payments-wallet"],
     request: { body: body(rejectRefundSchema) },
     responses: okResponse(200, "Refund rejected"),
+  },
+  {
+    method: "post",
+    path: "/v1/ai/assistant/message",
+    tags: ["ai-assistant"],
+    request: { body: body(aiAssistantMessageSchema) },
+    responses: okResponse(200, "Assistant reply"),
   },
 ];
 

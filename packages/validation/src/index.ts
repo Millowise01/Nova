@@ -814,3 +814,33 @@ export const disputeDetailSchema = disputeSchema.extend({
   events: z.array(disputeEventSchema),
 });
 export type DisputeDetailResponse = z.infer<typeof disputeDetailSchema>;
+
+// ════════════════════════════════════════════════════════════
+// AI Shopping Assistant (Tier 2, Volume 4 Part B1 — ADR-0005).
+// Customer-facing only: natural-language product discovery, side-by-side
+// comparison, and policy/order Q&A, all grounded in real Catalog data and a
+// small real policy knowledge base — never open-ended generation. Anything
+// the assistant can't answer confidently, or that touches a sensitive action
+// (refund, account change), is a handoff, not a guess.
+// ════════════════════════════════════════════════════════════
+
+export const aiAssistantMessageSchema = z.object({
+  message: z.string().trim().min(1).max(1000),
+});
+export type AiAssistantMessageInput = z.infer<typeof aiAssistantMessageSchema>;
+
+export const aiAssistantCitationSchema = z.object({
+  source: z.string(),
+});
+export type AiAssistantCitation = z.infer<typeof aiAssistantCitationSchema>;
+
+export const aiAssistantResponseSchema = z.object({
+  reply: z.string(),
+  citations: z.array(aiAssistantCitationSchema),
+  /** true when the assistant is not answering itself and is pointing the caller at
+   *  human support instead — either because it wasn't confident enough, or because
+   *  the request touches something sensitive (refunds, account changes) that this
+   *  assistant never resolves on its own (Volume 4, Part B1's hard handoff rule). */
+  handoff: z.boolean(),
+});
+export type AiAssistantResponse = z.infer<typeof aiAssistantResponseSchema>;

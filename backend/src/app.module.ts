@@ -8,6 +8,7 @@ import { OutboxModule } from "./common/outbox/outbox.module";
 import { PolicyModule } from "./common/policy/policy.module";
 import { RedisModule } from "./common/redis/redis.module";
 import { ConfigModule } from "./config/config.module";
+import { AiAssistantModule } from "./modules/ai-assistant";
 import { CartCheckoutModule } from "./modules/cart-checkout";
 import { CatalogModule } from "./modules/catalog";
 import { FinanceModule } from "./modules/finance";
@@ -46,6 +47,11 @@ import { PrismaModule } from "./prisma/prisma.module";
     OrdersModule,
     WishlistModule,
     NotificationsModule,
+    // Tier 2, ADR-0005 — customer-facing AI shopping assistant. Deliberately owns no
+    // schema of its own (Stage 0, Volume 4 Part A2): it's a stateless read-and-generate
+    // feature over Catalog's real data and a small static policy knowledge base, not a
+    // new bounded context with persisted entities.
+    AiAssistantModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -2,11 +2,15 @@ import { Badge } from "@nova/ui";
 
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
-// None of these have a backend yet — plans, not shipped features. The badge
-// and subtitle exist so this page doesn't read as a finished capability.
+import { AiChat } from "./ai-chat";
+
+// Chat Assistant is real now (Tier 2, ADR-0005) — product discovery, comparison, and
+// policy questions all go through it, so "Product Comparison" is folded into the chat
+// rather than kept as a separate placeholder. The rest genuinely have no backend yet
+// (Volume 4's own staged-maturity model puts a trained recommendation/ranking model,
+// gift-finding, and multi-item coordination well past this Stage 0 pass) and stay
+// honestly labeled as plans, not shipped features.
 const aiModules = [
-  { title: "Chat Assistant", description: "Conversational storefront assistant shell." },
-  { title: "Product Comparison", description: "Side-by-side product intelligence interface." },
   { title: "Smart Recommendations", description: "Intent-aware recommendation UI." },
   { title: "Gift Finder", description: "Occasion and budget-guided suggestion flow." },
   { title: "Shopping Lists", description: "AI-assisted list generation and optimization." },
@@ -16,11 +20,19 @@ const aiModules = [
 export function AIScreen() {
   return (
     <ModuleShell
-      actions={<Badge tone="info">Coming soon</Badge>}
-      subtitle="We're planning AI shopping features for Nova — none of this is built yet."
+      subtitle="Ask the assistant about products, comparisons, shipping, returns, or payment. The rest of Nova's AI shopping features are still being planned."
       title="AI Shopping Assistant"
     >
-      <FeatureGrid items={aiModules} />
+      <div className="space-y-6">
+        <AiChat />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-slate-700">More AI features</h2>
+            <Badge tone="info">Coming soon</Badge>
+          </div>
+          <FeatureGrid items={aiModules} />
+        </div>
+      </div>
     </ModuleShell>
   );
 }

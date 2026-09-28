@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 
 import { NotFoundError } from "../../../common/errors/api-error";
 import { PrismaService } from "../../../prisma/prisma.service";
+import { CatalogService } from "../domain/catalog.service";
 
 export interface VariantSnapshot {
   variantId: string;
@@ -23,7 +24,10 @@ export interface ProductSummary {
  *  stock before creating an order"). No cross-module Prisma query anywhere else. */
 @Injectable()
 export class CatalogPublicService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly catalog: CatalogService,
+  ) {}
 
   async confirmPriceAndStock(variantId: string, quantity: number): Promise<VariantSnapshot> {
     const variant = await this.prisma.variant.findFirst({
@@ -57,4 +61,42 @@ export class CatalogPublicService {
     if (!product) return null;
     return { id: product.id, title: product.title, slug: product.slug };
   }
+
+  /** Used by the AI Shopping Assistant (Tier 2, ADR-0005) for natural-language product
+   *  discovery and comparison. Delegates to CatalogService.listProducts — the SAME
+   *  real, published-only, full-text search every customer already uses via
+   *  GET /v1/products — so the assistant can never see or describe a product a shopper
+   *  couldn't already find themselves. Real attributes only, reduced to what the
+   *  assistant is allowed to state as fact: no field here is invented. */
+  async searchPublished(query: { q?: string; limit?: number }): Promise<ProductSearchResult[]> {
+    const { data } = await this.catalog.listProducts({ q: query.q, limit: query.limit ?? 5 });
+    return data.map((product) => {
+      const variants = product.variants;
+      const inStock = variants.some((variant) => variant.stockQuantity > 0);
+      const cheapest = variants.reduce<(typeof variants)[number] | null>(
+        (min, variant) =>
+          !min || Number(variant.priceAmount) < Number(min.priceAmount) ? variant : min,
+        null,
+      );
+      return {
+        id: product.id,
+        title: product.title,
+        slug: product.slug,
+        description: product.description,
+        priceAmount: cheapest?.priceAmount.toFixed(2) ?? null,
+        priceCurrency: cheapest?.priceCurrency ?? null,
+        inStock,
+      };
+    });
+  }
+}
+
+export interface ProductSearchResult {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  priceAmount: string | null;
+  priceCurrency: string | null;
+  inStock: boolean;
 }

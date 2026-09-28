@@ -1,2 +1,6 @@
 export { CatalogModule } from "./catalog.module";
-export { CatalogPublicService, type VariantSnapshot } from "./public/catalog.public-service";
+export {
+  CatalogPublicService,
+  type ProductSearchResult,
+  type VariantSnapshot,
+} from "./public/catalog.public-service";

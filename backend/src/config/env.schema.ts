@@ -39,6 +39,16 @@ export const envSchema = z.object({
     (value) => (value === "" ? undefined : value),
     z.string().min(32).optional(),
   ),
+  // Tier 2, ADR-0005 — the AI Shopping Assistant's LLM provider (Claude, chosen by the
+  // repository owner). Optional, same reasoning as SENTRY_DSN above: unset means the
+  // provider throws AiProviderUnavailableError on the first call, which
+  // AiAssistantService treats as an automatic handoff, not a crash — a deployment
+  // without a key just always hands off, a real and supported "off" state.
+  ANTHROPIC_API_KEY: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().min(1).optional(),
+  ),
+  ANTHROPIC_MODEL: z.string().default("claude-sonnet-5"),
 });
 
 export type Env = z.infer<typeof envSchema>;

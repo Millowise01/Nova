@@ -1,3 +1,4 @@
+import { createAiAssistantEndpoints } from "./endpoints/ai-assistant";
 import { createAuthEndpoints } from "./endpoints/auth";
 import { createCartCheckoutEndpoints } from "./endpoints/cart-checkout";
 import { createCatalogEndpoints } from "./endpoints/catalog";
@@ -27,6 +28,7 @@ export interface NovaApiClient {
   notifications: ReturnType<typeof createNotificationsEndpoints>;
   finance: ReturnType<typeof createFinanceEndpoints>;
   trustSafety: ReturnType<typeof createTrustSafetyEndpoints>;
+  aiAssistant: ReturnType<typeof createAiAssistantEndpoints>;
 }
 
 /** The single, typed, Zod-validated client for the whole app — every response
@@ -46,5 +48,6 @@ export function createNovaApiClient(baseURL: string): NovaApiClient {
     notifications: createNotificationsEndpoints(raw),
     finance: createFinanceEndpoints(raw),
     trustSafety: createTrustSafetyEndpoints(raw),
+    aiAssistant: createAiAssistantEndpoints(raw),
   };
 }

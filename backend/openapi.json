@@ -1451,6 +1451,35 @@
         },
         "tags": ["notifications"]
       }
+    },
+    "/v1/ai/assistant/message": {
+      "post": {
+        "operationId": "AiAssistantController_sendMessage",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["ai-assistant"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 1000
+                  }
+                },
+                "required": ["message"]
+              }
+            }
+          }
+        }
+      }
     }
   },
   "info": {
@@ -1486,6 +1515,10 @@
     },
     {
       "name": "wishlist",
+      "description": ""
+    },
+    {
+      "name": "ai-assistant",
       "description": ""
     }
   ],
