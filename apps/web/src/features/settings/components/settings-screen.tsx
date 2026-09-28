@@ -1,15 +1,17 @@
-import { Badge } from "@nova/ui";
+import { Badge, Card, CardBody } from "@nova/ui";
 
 import { ProfileCard } from "@/features/account/components/profile-card";
 import { FeatureGrid, ModuleShell } from "@/features/shared/components";
 
-// "Profile" is now real (below) — removed from the placeholder grid. The rest
-// genuinely have no backend yet (currency display, dark mode persistence,
-// privacy controls, MFA/session management, notification routing, connected
-// devices, account deletion) and stay as placeholders.
+import { DarkModeToggle } from "./dark-mode-toggle";
+
+// "Profile" is real (below), and so is Dark Mode now (W-13, via the DarkModeToggle
+// card) — removed from the placeholder grid. Re-checked against the live route table
+// before assuming the rest still need backend work (W-14): they genuinely do
+// (currency display, privacy controls, MFA/session management, notification routing,
+// connected devices, account deletion) and stay as placeholders.
 const settingsModules = [
   { title: "Currency", description: "Regional pricing display options." },
-  { title: "Dark Mode", description: "Theme mode preferences and persistence." },
   { title: "Privacy", description: "Data visibility and profile privacy controls." },
   { title: "Security", description: "Password, MFA, and session controls." },
   { title: "Notification Preferences", description: "Message channel preference routing." },
@@ -25,6 +27,11 @@ export function SettingsScreen() {
     >
       <div className="space-y-6">
         <ProfileCard />
+        <Card>
+          <CardBody>
+            <DarkModeToggle />
+          </CardBody>
+        </Card>
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-semibold text-slate-700">More settings</h2>
