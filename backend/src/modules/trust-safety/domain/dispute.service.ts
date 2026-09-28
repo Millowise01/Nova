@@ -35,6 +35,20 @@ export class DisputeService {
     });
   }
 
+  /** GET /v1/trust-safety/disputes/mine — a customer's or seller's own disputes
+   *  (W-12). No separate ability check needed: every row this returns is scoped to
+   *  `openedBy: requesterId`, which is exactly the condition ability.factory.ts already
+   *  grants every authenticated user a "read" rule on ("their own disputes") — same
+   *  "inherently self-scoped, no ability check needed" reasoning as Wishlist/Order
+   *  creation above. This is a mechanical extension of that existing rule into a list
+   *  query, not a new permission. */
+  async listMine(requesterId: string) {
+    return this.prisma.dispute.findMany({
+      where: { openedBy: requesterId },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   async open(input: OpenDisputeInput, openedBy: string, ctx: RequestContext) {
     if (!input.orderId && !input.reviewId) {
       throw new BadRequestError(

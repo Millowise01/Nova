@@ -1192,6 +1192,18 @@
         "tags": ["trust-safety"]
       }
     },
+    "/v1/trust-safety/disputes/mine": {
+      "get": {
+        "operationId": "TrustSafetyController_listMyDisputes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": ["trust-safety"]
+      }
+    },
     "/v1/trust-safety/disputes/{id}": {
       "get": {
         "operationId": "TrustSafetyController_getDispute",

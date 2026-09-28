@@ -414,5 +414,34 @@ describe("Trust & Safety (integration)", () => {
         }
       },
     );
+
+    it("GET /trust-safety/disputes/mine — a caller's own disputes only (W-12)", async () => {
+      const buyer = await signUpAndPromote("ts-dispute-mine-buyer", []);
+      const other = await signUpAndPromote("ts-dispute-mine-other", []);
+
+      const ownDispute = await request(app.getHttpServer())
+        .post("/v1/trust-safety/disputes")
+        .set("Authorization", `Bearer ${buyer.token}`)
+        .send({ orderId: randomUUID(), reason: "My own dispute" })
+        .expect(201);
+
+      const othersDispute = await request(app.getHttpServer())
+        .post("/v1/trust-safety/disputes")
+        .set("Authorization", `Bearer ${other.token}`)
+        .send({ orderId: randomUUID(), reason: "Someone else's dispute" })
+        .expect(201);
+
+      // .expect(200) here is also the route-ordering regression check: GET disputes/:id
+      // sits right after this route, and if "mine" were ever captured as that :id,
+      // getForRequester("mine", ...) would 404 with DISPUTE_NOT_FOUND, not return a list.
+      const mine = await request(app.getHttpServer())
+        .get("/v1/trust-safety/disputes/mine")
+        .set("Authorization", `Bearer ${buyer.token}`)
+        .expect(200);
+
+      const ids = (mine.body.data as { id: string }[]).map((d) => d.id);
+      expect(ids).toContain(ownDispute.body.data.id);
+      expect(ids).not.toContain(othersDispute.body.data.id);
+    });
   });
 });

@@ -22,14 +22,20 @@ import {
 
 import type { ApiEnvelope, NovaHttpClient } from "../http-client";
 
-/** KYC review queues, seller-suspension dual-authorization, and dispute
- *  resolution (backend/docs/10) are apps/admin-only. submitKyc below is the one
- *  seller-facing exception — apps/seller's S-3 KYC onboarding. There is
- *  deliberately NO listMyKyc/getMyKycStatus here: GET /v1/trust-safety/kyc is
- *  admin-only at both the route (RequirePermission("read", "KYCSubmission"))
- *  and ability-policy level (ability.factory.ts grants no KYCSubmission rule to
- *  "seller" at all) — confirmed by reading both directly, not assumed. Logged
- *  as a backend follow-up in backend/docs/10, not built around with a guess. */
+/** KYC review queues and seller-suspension dual-authorization (backend/docs/10) are
+ *  apps/admin-only. submitKyc below is the one seller-facing exception — apps/seller's
+ *  S-3 KYC onboarding. There is deliberately NO listMyKyc/getMyKycStatus here: GET
+ *  /v1/trust-safety/kyc is admin-only at both the route
+ *  (RequirePermission("read", "KYCSubmission")) and ability-policy level
+ *  (ability.factory.ts grants no KYCSubmission rule to "seller" at all) — confirmed by
+ *  reading both directly, not assumed. Logged as a backend follow-up in
+ *  backend/docs/10, not built around with a guess.
+ *
+ *  Disputes are the one place a plain customer/seller caller (not just admin) has a real
+ *  use for this module: listMyDisputes/getDispute/addDisputeComment back apps/web's
+ *  Dispute Center (W-12) using the same "read/comment on disputes you opened" ability
+ *  every authenticated user already has (ability.factory.ts). resolveDispute stays
+ *  admin-only — that ability is never granted to a plain caller. */
 export function createTrustSafetyEndpoints(client: NovaHttpClient) {
   return {
     async listKyc(params: ListKycQuery = {}): Promise<KycSubmissionResponse[]> {
@@ -116,6 +122,14 @@ export function createTrustSafetyEndpoints(client: NovaHttpClient) {
 
     async listDisputes(params: ListDisputesQuery = {}): Promise<DisputeResponse[]> {
       const response = await client.get<ApiEnvelope>("/trust-safety/disputes", { params });
+      return z.array(disputeSchema).parse(response.data.data);
+    },
+
+    /** GET /v1/trust-safety/disputes/mine — the caller's own disputes (W-12). Must be
+     *  requested as a literal path segment, never templated with an id — the route only
+     *  exists at "mine" exactly, ahead of GET /trust-safety/disputes/:id at the backend. */
+    async listMyDisputes(): Promise<DisputeResponse[]> {
+      const response = await client.get<ApiEnvelope>("/trust-safety/disputes/mine");
       return z.array(disputeSchema).parse(response.data.data);
     },
 

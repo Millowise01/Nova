@@ -211,6 +211,16 @@ export class TrustSafetyController {
     return { data: dispute };
   }
 
+  // A caller's own disputes (W-12) — must be declared BEFORE GET disputes/:id or Express
+  // would match "mine" as the :id param. No RequirePermission/PolicyGuard needed: every
+  // row returned is scoped to openedBy: caller by construction (see DisputeService.listMine).
+  @Get("disputes/mine")
+  @UseGuards(JwtAuthGuard)
+  async listMyDisputes(@Req() req: AuthenticatedRequest) {
+    const disputes = await this.disputes.listMine(req.user.sub);
+    return { data: disputes };
+  }
+
   @Get("disputes/:id")
   @UseGuards(JwtAuthGuard)
   async getDispute(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
