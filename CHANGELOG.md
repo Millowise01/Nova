@@ -20,6 +20,11 @@
 - The chart components moved to `@nova/ui/charts`. `apps/web` had been loading the `recharts` library on 44 of 53 routes without rendering a chart; its median route dropped from 377 kB to 246 kB of JavaScript. `@nova/ui` and `@nova/design-system` declare `sideEffects`.
 - New package `@nova/app-shell` (ADR-0002) holds the theme provider, toast provider and query-client hook that `web`, `seller` and `admin` each carried a copy of. Each app keeps a thin wrapper at the old path and supplies its own cookie key and stale time. One fix comes with it: choosing an explicit theme now stops the theme following the operating system, which previously kept overriding the choice.
 - `@nova/app-shell` now also holds the shared authentication code: `AuthProvider`, the session service, `sanitizeRedirect`, JWT and session-cookie helpers, and the role guard (`@nova/app-shell/middleware`). `seller` and `admin` keep a short `middleware.ts` with their own role and matcher; cookie names and destinations are unchanged. The login mutation and login form remain in each app.
+- W-10: `apps/web`'s forgot-password and reset-password forms are real (phone + OTP, reusing the existing OTP infrastructure and its rate limiting) instead of a TODO/`console.log`. New backend endpoints `POST /v1/auth/password/forgot` and `POST /v1/auth/password/reset`.
+- W-11: removed `apps/web/src/features/docs/module-map.ts` — 103 lines nothing imported or rendered.
+- W-12: `apps/web`'s Support screen gets a real, customer-scoped Dispute Center (`/support/disputes`) — a caller's own disputes, their timeline, and commenting while open. New backend route `GET /v1/trust-safety/disputes/mine`.
+- W-13: Settings' "Dark Mode" card is a real toggle now, wired to the theme infrastructure `@nova/app-shell` already provides — no new backend or package needed.
+- W-14: re-confirmed against the live route table that Settings' Currency/Privacy/Security/Notification Preferences/Connected Devices/Delete Account cards and Wallet's top-up/withdraw/history cards still have no backend behind them; logged as disclosed gaps with what each would need (`backend/docs/05-security-baseline.md`).
 
 ### Build
 
