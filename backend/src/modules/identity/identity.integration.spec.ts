@@ -6,6 +6,7 @@ import { Test } from "@nestjs/testing";
 import request from "supertest";
 
 import { AppModule } from "../../app.module";
+import { RedisService } from "../../common/redis/redis.service";
 import { PrismaService } from "../../prisma/prisma.service";
 import { createTestApp } from "../../test-utils/create-test-app";
 import { promoteRole } from "../../test-utils/promote-role";
@@ -194,6 +195,144 @@ describe("Identity — auth flow (e2e)", () => {
       .send({ destination, code })
       .expect(400);
     expect(replay.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
+  });
+
+  describe("Password reset (W-10)", () => {
+    // This block makes 6+ real calls to /auth/password/forgot and /auth/password/reset,
+    // both rate-limited 5/60s per IP (RateLimitGuard keys by req.ip for unauthenticated
+    // endpoints — every request in this test file comes from 127.0.0.1). Without this,
+    // the block would spuriously trip its own limit partway through, the same concern
+    // rate-limit.integration.spec.ts's beforeEach already documents and solves the same
+    // way. Scoped to just this describe block: nothing later in the file depends on Redis
+    // state carrying over from here.
+    beforeEach(async () => {
+      await app.get(RedisService).client.flushdb();
+    });
+
+    /** Recovers the code the OTP stub only ever logs (no real SMS provider exists yet —
+     *  see otp.service.ts), the same technique the OTP test above uses, so this proves
+     *  the real Redis-backed round trip, not just that a 202/200 was returned. */
+    function recoverLoggedCode(destination: string, debugSpy: jest.SpyInstance) {
+      const loggedLine = debugSpy.mock.calls
+        .map((call) => String(call[0]))
+        .find((line) => line.includes(destination));
+      const code = loggedLine?.match(/code for .*: (\d{6})/)?.[1];
+      expect(code).toBeDefined();
+      return code as string;
+    }
+
+    it("resets a real user's password via phone + OTP, and the old password stops working", async () => {
+      const payload = uniqueUser();
+      await request(app.getHttpServer()).post("/v1/auth/signup").send(payload).expect(201);
+
+      const debugSpy = jest.spyOn(Logger.prototype, "debug");
+      const forgot = await request(app.getHttpServer())
+        .post("/v1/auth/password/forgot")
+        .send({ phone: payload.phone })
+        .expect(202);
+      expect(JSON.stringify(forgot.body)).not.toMatch(/\d{6}/); // never echoes the code
+      expect(forgot.body.data.status).toBe("sent");
+
+      const code = recoverLoggedCode(payload.phone, debugSpy);
+      debugSpy.mockRestore();
+
+      const newPassword = "a-brand-new-password-123";
+      const reset = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({ phone: payload.phone, code, password: newPassword, confirmPassword: newPassword })
+        .expect(200);
+      expect(reset.body.data.status).toBe("reset");
+
+      // The OLD password must no longer work...
+      await request(app.getHttpServer())
+        .post("/v1/auth/login")
+        .send({ email: payload.email, password: payload.password })
+        .expect(401);
+
+      // ...and the NEW one must.
+      const loginOk = await request(app.getHttpServer())
+        .post("/v1/auth/login")
+        .send({ email: payload.email, password: newPassword })
+        .expect(200);
+      expect(loginOk.body.data.accessToken).toEqual(expect.any(String));
+
+      // Single-use: the same code cannot be replayed for a second reset.
+      const replay = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({
+          phone: payload.phone,
+          code,
+          password: "yet-another-password",
+          confirmPassword: "yet-another-password",
+        })
+        .expect(400);
+      expect(replay.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
+    });
+
+    it("rejects a wrong or expired OTP code with the same error the OTP endpoint uses", async () => {
+      const payload = uniqueUser();
+      await request(app.getHttpServer()).post("/v1/auth/signup").send(payload).expect(201);
+      await request(app.getHttpServer())
+        .post("/v1/auth/password/forgot")
+        .send({ phone: payload.phone })
+        .expect(202);
+
+      const response = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({
+          phone: payload.phone,
+          code: "000000",
+          password: "irrelevant-password",
+          confirmPassword: "irrelevant-password",
+        })
+        .expect(400);
+      expect(response.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
+    });
+
+    it("verifies the OTP before revealing whether an account exists for the phone", async () => {
+      const phone = uniqueTestPhone(); // never signed up
+
+      // A wrong code for a phone with NO account fails with the identical OTP error,
+      // not some different "no account" error — nothing is revealed before the code checks out.
+      const wrongCode = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({
+          phone,
+          code: "000000",
+          password: "irrelevant-password-1",
+          confirmPassword: "irrelevant-password-1",
+        })
+        .expect(400);
+      expect(wrongCode.body.error.code).toBe("OTP_INVALID_OR_EXPIRED");
+
+      // Only once the (real) code checks out does the "no account" case surface, as 404.
+      const debugSpy = jest.spyOn(Logger.prototype, "debug");
+      await request(app.getHttpServer())
+        .post("/v1/auth/password/forgot")
+        .send({ phone })
+        .expect(202);
+      const code = recoverLoggedCode(phone, debugSpy);
+      debugSpy.mockRestore();
+
+      const response = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({
+          phone,
+          code,
+          password: "irrelevant-password-2",
+          confirmPassword: "irrelevant-password-2",
+        })
+        .expect(404);
+      expect(response.body.error.code).toBe("USER_NOT_FOUND");
+    });
+
+    it("rejects a malformed reset body via the shared @nova/validation schema", async () => {
+      const response = await request(app.getHttpServer())
+        .post("/v1/auth/password/reset")
+        .send({ phone: "not-a-phone", code: "1", password: "short", confirmPassword: "different" })
+        .expect(400);
+      expect(response.body.error.code).toBe("VALIDATION_FAILED");
+    });
   });
 
   it("writes an audit log entry for both successful and failed login attempts", async () => {

@@ -2,11 +2,13 @@ import {
   authResponseSchema,
   meSchema,
   otpStatusResponseSchema,
+  passwordResetResponseSchema,
   refreshResponseSchema,
   type AuthResponse,
   type LoginInput,
   type MeResponse,
   type OtpStatusResponse,
+  type PasswordResetResponse,
   type RefreshResponse,
   type RegisterInput,
   type UpdateMeInput,
@@ -54,6 +56,30 @@ export function createAuthEndpoints(client: NovaHttpClient) {
     async verifyOtp(destination: string, code: string): Promise<OtpStatusResponse> {
       const response = await client.post<ApiEnvelope>("/auth/otp/verify", { destination, code });
       return otpStatusResponseSchema.parse(response.data.data);
+    },
+
+    /** POST /v1/auth/password/forgot — sends an OTP to `phone` via the same mechanism as
+     *  requestOtp above; never reveals whether an account exists for that phone. */
+    async forgotPassword(phone: string): Promise<OtpStatusResponse> {
+      const response = await client.post<ApiEnvelope>("/auth/password/forgot", { phone });
+      return otpStatusResponseSchema.parse(response.data.data);
+    },
+
+    /** POST /v1/auth/password/reset — verifies the OTP the same way verifyOtp does, then
+     *  updates the account's password. Doesn't issue a session; the caller logs in fresh. */
+    async resetPassword(
+      phone: string,
+      code: string,
+      password: string,
+      confirmPassword: string,
+    ): Promise<PasswordResetResponse> {
+      const response = await client.post<ApiEnvelope>("/auth/password/reset", {
+        phone,
+        code,
+        password,
+        confirmPassword,
+      });
+      return passwordResetResponseSchema.parse(response.data.data);
     },
   };
 }

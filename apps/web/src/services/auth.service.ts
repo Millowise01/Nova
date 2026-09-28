@@ -31,3 +31,18 @@ export function updateMe(input: UpdateMeInput) {
 export function verifyOtp(destination: string, code: string) {
   return getApiClient().auth.verifyOtp(destination, code);
 }
+
+/** Sends a password-reset OTP to `phone` (same mechanism as requestOtp). */
+export function forgotPassword(phone: string) {
+  return getApiClient().auth.forgotPassword(phone);
+}
+
+/** Verifies the OTP and updates the password. Doesn't log the caller in. */
+export function resetPassword(
+  phone: string,
+  code: string,
+  password: string,
+  confirmPassword: string,
+) {
+  return getApiClient().auth.resetPassword(phone, code, password, confirmPassword);
+}

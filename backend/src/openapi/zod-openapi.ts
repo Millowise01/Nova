@@ -15,6 +15,7 @@ import {
   createCategorySchema,
   createOrderSchema,
   createProductSchema,
+  forgotPasswordSchema,
   loginSchema,
   otpRequestSchema,
   otpVerifySchema,
@@ -22,6 +23,7 @@ import {
   refreshTokenSchema,
   registerSchema,
   rejectRefundSchema,
+  resetPasswordSchema,
 } from "@nova/validation";
 
 extendZodWithOpenApi(z);
@@ -80,6 +82,20 @@ const routes: RouteConfig[] = [
     tags: ["auth"],
     request: { body: body(otpVerifySchema) },
     responses: okResponse(200, "OTP verified"),
+  },
+  {
+    method: "post",
+    path: "/v1/auth/password/forgot",
+    tags: ["auth"],
+    request: { body: body(forgotPasswordSchema) },
+    responses: okResponse(202, "Reset code dispatched"),
+  },
+  {
+    method: "post",
+    path: "/v1/auth/password/reset",
+    tags: ["auth"],
+    request: { body: body(resetPasswordSchema) },
+    responses: okResponse(200, "Password reset"),
   },
   {
     method: "post",

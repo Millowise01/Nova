@@ -7,11 +7,15 @@ import {
   otpRequestSchema,
   otpVerifySchema,
   refreshTokenSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   type LoginInput,
   type RegisterInput,
   type OtpRequestInput,
   type OtpVerifyInput,
   type RefreshTokenInput,
+  type ForgotPasswordInput,
+  type ResetPasswordInput,
 } from "@nova/validation";
 
 import type { RequestWithCorrelationId } from "../../../common/middleware/correlation-id.middleware";
@@ -85,5 +89,32 @@ export class AuthController {
   async verifyOtp(@Body(new ZodValidationPipe(otpVerifySchema)) body: OtpVerifyInput) {
     await this.otp.verifyOtp(body.destination, body.code);
     return { data: { status: "verified" } };
+  }
+
+  @Post("password/forgot")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(5, 60) // Same posture as /auth/otp — it sends a code through the same mechanism.
+  @HttpCode(HttpStatus.ACCEPTED)
+  async forgotPassword(
+    @Body(new ZodValidationPipe(forgotPasswordSchema)) body: ForgotPasswordInput,
+  ) {
+    await this.auth.requestPasswordReset(body.phone);
+    // Same "never reveal whether the account exists" response as /auth/otp — always "sent".
+    return { data: { status: "sent" } };
+  }
+
+  @Post("password/reset")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(5, 60) // Inherits /auth/otp/verify's abuse posture — a 6-digit code is guessable.
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Req() req: RequestWithCorrelationId,
+    @Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput,
+  ) {
+    await this.auth.resetPassword(body.phone, body.code, body.password, {
+      ipAddress: req.ip,
+      correlationId: req.correlationId,
+    });
+    return { data: { status: "reset" } };
   }
 }

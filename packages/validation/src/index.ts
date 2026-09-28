@@ -47,13 +47,22 @@ export const otpSchema = z.object({
 });
 export type OtpInput = z.infer<typeof otpSchema>;
 
+/** POST /v1/auth/password/forgot. Phone, not email: Nova authenticates by phone + OTP
+ *  (see otpRequestSchema below), and there is no evidence email delivery exists
+ *  anywhere in this codebase — introducing one just for this flow would be a new
+ *  channel, not a reuse of an existing one. */
 export const forgotPasswordSchema = z.object({
-  email: emailSchema,
+  phone: phoneSchema,
 });
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
+/** POST /v1/auth/password/reset. Carries the OTP `code` alongside the new password —
+ *  this is the whole point of phone+OTP password reset: the code IS the proof of
+ *  ownership, verified the same way POST /v1/auth/otp/verify verifies one. */
 export const resetPasswordSchema = z
   .object({
+    phone: phoneSchema,
+    code: z.string().length(6),
     password: z.string().min(8),
     confirmPassword: z.string().min(8),
   })
@@ -62,6 +71,11 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
+export const passwordResetResponseSchema = z.object({
+  status: z.literal("reset"),
+});
+export type PasswordResetResponse = z.infer<typeof passwordResetResponseSchema>;
 
 /** Backend API contract only — no frontend form collects a destination + code in one step. */
 export const otpRequestSchema = z.object({

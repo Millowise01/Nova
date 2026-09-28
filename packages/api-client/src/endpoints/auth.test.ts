@@ -109,3 +109,43 @@ describe("OTP — requestOtp / verifyOtp", () => {
     expect(result).toEqual({ status: "verified" });
   });
 });
+
+describe("password reset — forgotPassword / resetPassword (W-10)", () => {
+  it("forgotPassword posts { phone } and parses the sent status, same shape as requestOtp", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/password/forgot`, async ({ request }) => {
+        expect(await request.json()).toEqual({ phone: "+23276000000" });
+        return HttpResponse.json({ data: { status: "sent" } }, { status: 202 });
+      }),
+    );
+
+    const endpoints = createAuthEndpoints(createApiClient(BASE_URL));
+    const result = await endpoints.forgotPassword("+23276000000");
+
+    expect(result).toEqual({ status: "sent" });
+  });
+
+  it("resetPassword posts { phone, code, password, confirmPassword } and parses the reset status", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/password/reset`, async ({ request }) => {
+        expect(await request.json()).toEqual({
+          phone: "+23276000000",
+          code: "123456",
+          password: "new-password-1",
+          confirmPassword: "new-password-1",
+        });
+        return HttpResponse.json({ data: { status: "reset" } });
+      }),
+    );
+
+    const endpoints = createAuthEndpoints(createApiClient(BASE_URL));
+    const result = await endpoints.resetPassword(
+      "+23276000000",
+      "123456",
+      "new-password-1",
+      "new-password-1",
+    );
+
+    expect(result).toEqual({ status: "reset" });
+  });
+});

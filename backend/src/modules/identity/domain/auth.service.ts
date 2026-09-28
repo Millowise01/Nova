@@ -3,11 +3,17 @@ import { Injectable } from "@nestjs/common";
 import type { LoginInput, RegisterInput } from "@nova/validation";
 
 import { AuditLogger, type RequestContext } from "../../../common/audit/audit-logger.service";
-import { ConflictError, ForbiddenError, UnauthorizedError } from "../../../common/errors/api-error";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../../../common/errors/api-error";
 import { PrismaService } from "../../../prisma/prisma.service";
 
 import { PasswordService } from "./crypto/password.service";
 import { PiiCryptoService } from "./crypto/pii-crypto.service";
+import { OtpService } from "./otp.service";
 import { TokenService } from "./token.service";
 
 export interface AuthTokens {
@@ -31,6 +37,7 @@ export class AuthService {
     private readonly password: PasswordService,
     private readonly tokens: TokenService,
     private readonly audit: AuditLogger,
+    private readonly otp: OtpService,
   ) {}
 
   async register(
@@ -183,6 +190,60 @@ export class AuthService {
 
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: session.userId } });
     return this.issueTokens(user.id, user.roles);
+  }
+
+  /** POST /v1/auth/password/forgot. Same mechanism as POST /v1/auth/otp — just sends a
+   *  code — and deliberately never reveals whether an account exists for this phone: the
+   *  caller always sees "sent", identical to what a real registered owner would see. */
+  async requestPasswordReset(phone: string): Promise<void> {
+    await this.otp.requestOtp(phone);
+  }
+
+  /** POST /v1/auth/password/reset. The OTP is verified FIRST, before any account lookup
+   *  (via the same OtpService.verifyOtp used by POST /v1/auth/otp/verify, so this inherits
+   *  its exact rate limiting posture at the route — see AuthController). Only once the
+   *  caller has proven phone control does this look the account up at all: a guess with no
+   *  valid code learns nothing about whether an account exists for that phone. */
+  async resetPassword(
+    phone: string,
+    code: string,
+    newPassword: string,
+    ctx: RequestContext,
+  ): Promise<void> {
+    await this.otp.verifyOtp(phone, code);
+
+    const phoneHash = this.pii.hash(phone);
+    const user = await this.prisma.user.findUnique({
+      where: { phoneHash },
+      include: { authFactors: { where: { type: "password", deletedAt: null } } },
+    });
+    if (!user) {
+      throw new NotFoundError("USER_NOT_FOUND", "No account was found for this phone number.");
+    }
+
+    const passwordHash = await this.password.hash(newPassword);
+    const passwordFactor = user.authFactors[0];
+    if (passwordFactor) {
+      await this.prisma.authFactor.update({
+        where: { id: passwordFactor.id },
+        data: { passwordHash },
+      });
+    } else {
+      // Every user gets a password factor at registration, so this shouldn't normally
+      // happen — handled rather than silently doing nothing if it ever does.
+      await this.prisma.authFactor.create({
+        data: { userId: user.id, type: "password", passwordHash },
+      });
+    }
+
+    await this.audit.record({
+      actorId: user.id,
+      action: "user.password.reset",
+      targetType: "User",
+      targetId: user.id,
+      ipAddress: ctx.ipAddress,
+      correlationId: ctx.correlationId,
+    });
   }
 
   private async issueTokens(userId: string, roles: string[]): Promise<AuthTokens> {

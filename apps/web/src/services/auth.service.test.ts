@@ -4,7 +4,14 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import { tokenStore } from "@nova/api-client";
 
-import { login, logout, restoreSession, signup } from "./auth.service";
+import {
+  forgotPassword,
+  login,
+  logout,
+  resetPassword,
+  restoreSession,
+  signup,
+} from "./auth.service";
 
 const BASE_URL = "http://localhost:4000/v1";
 const USER_ID = "11111111-1111-1111-1111-111111111111";
@@ -123,6 +130,55 @@ describe("restoreSession (silent refresh on app boot)", () => {
     const session = await restoreSession();
 
     expect(session).toBeNull();
+    expect(tokenStore.getAccessToken()).toBeNull();
+    expect(tokenStore.getRefreshToken()).toBeNull();
+  });
+});
+
+describe("forgotPassword / resetPassword (W-10)", () => {
+  it("forgotPassword posts the phone to POST /auth/password/forgot and never touches tokenStore", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/password/forgot`, async ({ request }) => {
+        const body = (await request.json()) as { phone: string };
+        expect(body.phone).toBe("+23276000000");
+        return HttpResponse.json({ data: { status: "sent" } }, { status: 202 });
+      }),
+    );
+
+    const result = await forgotPassword("+23276000000");
+
+    expect(result.status).toBe("sent");
+    expect(tokenStore.getAccessToken()).toBeNull();
+  });
+
+  it("resetPassword posts phone+code+password to POST /auth/password/reset and doesn't set a session", async () => {
+    server.use(
+      http.post(`${BASE_URL}/auth/password/reset`, async ({ request }) => {
+        const body = (await request.json()) as {
+          phone: string;
+          code: string;
+          password: string;
+          confirmPassword: string;
+        };
+        expect(body).toEqual({
+          phone: "+23276000000",
+          code: "123456",
+          password: "new-password-1",
+          confirmPassword: "new-password-1",
+        });
+        return HttpResponse.json({ data: { status: "reset" } });
+      }),
+    );
+
+    const result = await resetPassword(
+      "+23276000000",
+      "123456",
+      "new-password-1",
+      "new-password-1",
+    );
+
+    expect(result.status).toBe("reset");
+    // resetPassword doesn't issue a session — the caller logs in fresh with the new password.
     expect(tokenStore.getAccessToken()).toBeNull();
     expect(tokenStore.getRefreshToken()).toBeNull();
   });

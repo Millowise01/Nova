@@ -6,12 +6,14 @@ import { useState } from "react";
 import type { FieldValues, Path, UseFormSetError } from "react-hook-form";
 
 import { ApiError } from "@nova/api-client";
-import type { LoginInput, RegisterInput } from "@nova/validation";
+import type { LoginInput, RegisterInput, ResetPasswordInput } from "@nova/validation";
 
 import { useAuth } from "@/providers/auth-provider";
 import { useToast } from "@/providers/toast-provider";
 import {
+  forgotPassword as forgotPasswordRequest,
   login as loginRequest,
+  resetPassword as resetPasswordRequest,
   signup as signupRequest,
   verifyOtp as verifyOtpRequest,
 } from "@/services/auth.service";
@@ -78,6 +80,52 @@ export function useVerifyOtpMutation(destination: string) {
     onError: (error: unknown) => {
       toast.error(error instanceof ApiError ? error.message : "Verification failed. Try again.");
     },
+  });
+
+  return { ...mutation, isRedirecting: redirecting };
+}
+
+/** POST /v1/auth/password/forgot — sends an OTP to the given phone, then hands the
+ *  caller off to the reset-password screen carrying the phone as a query param, the
+ *  same `?destination=`-style handoff the OTP screen already uses (see OtpForm). It
+ *  always succeeds from the caller's point of view (the backend never reveals whether
+ *  an account exists for that phone), so there is no field-error case here to map. */
+export function useForgotPasswordMutation() {
+  const router = useRouter();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: (phone: string) => forgotPasswordRequest(phone),
+    onSuccess: (_data, phone) => {
+      toast.success("If that phone number has an account, a reset code was sent.");
+      router.push(`/auth/reset-password?phone=${encodeURIComponent(phone)}`);
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof ApiError ? error.message : "Something went wrong. Try again.");
+    },
+  });
+}
+
+/** POST /v1/auth/password/reset — verifies the OTP and updates the password; doesn't
+ *  issue a session (see @nova/api-client's resetPassword), so success routes to login
+ *  the same way useVerifyOtpMutation does. A wrong/expired code and a rate limit both
+ *  come back as a plain ApiError with no field target, so they surface as a toast next
+ *  to the form rather than under a specific input — there's no single field to blame. */
+export function useResetPasswordMutation(setError: UseFormSetError<ResetPasswordInput>) {
+  const router = useRouter();
+  const handleError = useApiErrorHandler(setError);
+  const { toast } = useToast();
+  const [redirecting, setRedirecting] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: (input: ResetPasswordInput) =>
+      resetPasswordRequest(input.phone, input.code, input.password, input.confirmPassword),
+    onSuccess: () => {
+      toast.success("Password updated. Log in with your new password.");
+      setRedirecting(true);
+      router.push("/auth/login");
+    },
+    onError: handleError,
   });
 
   return { ...mutation, isRedirecting: redirecting };
